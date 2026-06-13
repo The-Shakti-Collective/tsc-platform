@@ -1,19 +1,11 @@
 [phases.setup]
-nixPkgs = ["nodejs_20", "pnpm"]
+nixPkgs = ["nodejs_20","pnpm"]
 
 [phases.install]
 cmds = ["pnpm install --frozen-lockfile"]
 
 [phases.build]
-cmds = [
-"pnpm --filter @tsc/types build",
-"pnpm --filter @tsc/contracts build",
-"pnpm --filter @tsc/constants build",
-"pnpm --filter @tsc/permissions build",
-"pnpm --filter @tsc/database build",
-"pnpm --filter @tsc/analytics build",
-"pnpm --filter @tsc/api build"
-]
+cmds = ["pnpm db:generate", "pnpm build", "pnpm verify:dist"]
 
 [start]
 cmd = "pnpm --filter @tsc/api start:prod"

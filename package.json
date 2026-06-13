@@ -7,7 +7,9 @@
                        "packages/*"
                    ],
     "scripts":  {
-                    "build":  "pnpm -r run build",
+                    "build":  "turbo run build --filter=@tsc/api...",
+                    "verify:dist":  "node scripts/verify-workspace-dist.mjs",
+                    "build:all":  "pnpm -r run build",
                     "dev":  "turbo run dev --parallel --filter=@tsc/api --filter=@tsc/community",
                     "lint":  "turbo run lint",
                     "typecheck":  "turbo run typecheck",
