@@ -1,9 +1,17 @@
 {
   "$schema": "https://railway.com/railway.schema.json",
-  "$comment": "Reference mirror — canonical config lives at monorepo root: /railway.json + /nixpacks.toml",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "pnpm install --frozen-lockfile && pnpm --filter @tsc/api... build"
+    "watchPatterns": [
+      "apps/api/**",
+      "packages/**",
+      "pnpm-lock.yaml",
+      "pnpm-workspace.yaml",
+      "package.json",
+      "turbo.json",
+      "nixpacks.toml",
+      "railway.json"
+    ]
   },
   "deploy": {
     "startCommand": "pnpm --filter @tsc/api start:prod",

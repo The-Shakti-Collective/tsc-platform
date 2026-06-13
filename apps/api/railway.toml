@@ -1,13 +1,17 @@
-# TSC API — Railway deploy config (monorepo)
-# Set Railway service Root Directory to repository root (not apps/api).
-# Health path includes API_GLOBAL_PREFIX (default: api).
+# TSC API — Railway reference (canonical config: /railway.json + /nixpacks.toml at monorepo root)
+#
+# Railway dashboard → Service → Settings:
+#   Root Directory:  (empty / repository root) — NOT apps/api
+#   Config file:     railway.json at repo root (absolute path /railway.json if prompted)
+#
+# Install/build/start are defined in /nixpacks.toml to force pnpm (not npm).
 
 [build]
 builder = "NIXPACKS"
-buildCommand = "pnpm install && pnpm build"
+buildCommand = "pnpm install --frozen-lockfile && pnpm --filter @tsc/api... build"
 
 [deploy]
-startCommand = "pnpm start:prod"
+startCommand = "pnpm --filter @tsc/api start:prod"
 healthcheckPath = "/api/health/ready"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"

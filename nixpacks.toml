@@ -1,0 +1,25 @@
+# TSC Platform — Nixpacks plan for @tsc/api on Railway
+#
+# CRITICAL: Railway service Root Directory MUST be the monorepo root
+# (where pnpm-lock.yaml and pnpm-workspace.yaml live).
+# If Root Directory is apps/api, Nixpacks falls back to npm install and
+# fails with: Unsupported URL Type "workspace:".
+
+[variables]
+NIXPACKS_NODE_VERSION = "20"
+CI = "true"
+
+[phases.setup]
+cmds = [
+  "corepack enable",
+  "corepack prepare pnpm@9.15.0 --activate"
+]
+
+[phases.install]
+cmds = ["pnpm install --frozen-lockfile"]
+
+[phases.build]
+cmds = ["pnpm --filter @tsc/api... build"]
+
+[start]
+cmd = "pnpm --filter @tsc/api start:prod"
