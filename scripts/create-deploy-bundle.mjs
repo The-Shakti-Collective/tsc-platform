@@ -126,12 +126,14 @@ function isGeneratedPrismaClient(clientDir) {
 }
 
 function syncPrismaClientToModuleRoots(sourceClientDir) {
+  const source = resolve(sourceClientDir);
   for (const modRoot of prismaModuleRoots(deployDir)) {
     const target = join(modRoot, '.prisma/client');
+    if (resolve(target) === source) continue;
     console.warn(`[deploy:bundle] Syncing .prisma/client into ${target}`);
     rmSync(target, { recursive: true, force: true });
     mkdirSync(join(modRoot, '.prisma'), { recursive: true });
-    cpSync(sourceClientDir, target, { recursive: true });
+    cpSync(source, target, { recursive: true });
   }
 }
 
