@@ -37,7 +37,7 @@ export interface DealSummary {
   updatedAt: string;
 }
 
-export interface DealDetail extends DealSummary {}
+export type DealDetail = DealSummary;
 
 export interface DealListPayload {
   items: DealSummary[];

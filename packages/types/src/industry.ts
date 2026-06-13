@@ -122,7 +122,7 @@ export interface AgencySummary {
   updatedAt: string;
 }
 
-export interface AgencyDetail extends AgencySummary {}
+export type AgencyDetail = AgencySummary;
 
 export interface AgencyListPayload {
   items: AgencySummary[];
@@ -156,7 +156,7 @@ export interface LabelSummary {
   updatedAt: string;
 }
 
-export interface LabelDetail extends LabelSummary {}
+export type LabelDetail = LabelSummary;
 
 export interface LabelListPayload {
   items: LabelSummary[];
