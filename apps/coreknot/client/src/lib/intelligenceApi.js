@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch, apiDelete, resolveApiPath } from './apiClient';
+import { apiGet, apiPost, resolveApiPath } from './apiClient';
 
 function intelligencePath(segment = '') {
   return resolveApiPath('/api/intelligence', segment);

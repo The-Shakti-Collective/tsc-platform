@@ -10,7 +10,6 @@ import {
   MapPin,
   Megaphone,
   Rocket,
-  Send,
   Target,
   TrendingDown,
   TrendingUp,

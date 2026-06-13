@@ -64,11 +64,6 @@ export function projectRateMetric(
   return round2(baselineRate);
 }
 
-function growthPercent(current: number, previous: number): number {
-  if (previous > 0) return round2(((current - previous) / previous) * 100);
-  return current > 0 ? 100 : 0;
-}
-
 /** Membership churn stub: cancellations / (active + cancelled) in window. */
 export function computeMembershipChurnRateStub(
   cancellations: number,

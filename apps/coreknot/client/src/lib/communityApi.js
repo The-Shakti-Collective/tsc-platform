@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch, apiDelete, resolveApiPath } from './apiClient';
+import { apiGet, apiPost, apiPatch, resolveApiPath } from './apiClient';
 
 export const TSC_UNDERGROUND_ID = 'com-tsc-underground';
 

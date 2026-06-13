@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, CheckCircle2, MapPin } from 'lucide-react';
 import { Spinner } from '../../components/ui/Spinner';
-import { BUDGET_RANGE_LABELS, BRAND_STATUS_LABELS } from '../../lib/brandApi';
+import { BUDGET_RANGE_LABELS } from '../../lib/brandApi';
 import { useBrands } from '../../hooks/queries/brand';
 
 function BrandCard({ brand }) {

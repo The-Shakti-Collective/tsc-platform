@@ -40,6 +40,7 @@ export function IdentityBadgeBar({
 
   return (
     <div
+      data-person-id={personId ?? undefined}
       className={`flex flex-wrap items-center gap-2 ${compact ? 'text-xs' : 'text-sm'} ${className}`}
     >
       {visibleBadges.map((entry) => (

@@ -367,8 +367,8 @@ export function findPathsInMemory(
     for (const row of relationships) {
       let nextType: GraphEntityType | null = null;
       let nextId: string | null = null;
-      let directionAnchor = current.type;
-      let directionId = current.id;
+      const directionAnchor = current.type;
+      const directionId = current.id;
 
       if (
         row.sourceEntityType === current.type &&

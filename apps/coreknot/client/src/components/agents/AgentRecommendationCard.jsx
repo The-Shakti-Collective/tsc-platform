@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { Sparkles } from 'lucide-react';
 import { useApplyToOpportunity } from '../../hooks/queries/opportunity';
 import { formatAgentRecommendationCurrency } from '../../lib/agentsApi';

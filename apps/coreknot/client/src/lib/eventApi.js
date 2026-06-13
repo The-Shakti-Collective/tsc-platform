@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch, resolveApiPath } from './apiClient';
+import { apiGet, apiPost, resolveApiPath } from './apiClient';
 
 function eventPath(segment = '') {
   return resolveApiPath('/api/events', segment);

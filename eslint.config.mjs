@@ -46,6 +46,8 @@ export default tseslint.config(
         clearInterval: "readonly",
         requestAnimationFrame: "readonly",
         cancelAnimationFrame: "readonly",
+        Headers: "readonly",
+        IntersectionObserver: "readonly",
         alert: "readonly",
         confirm: "readonly",
         prompt: "readonly",
