@@ -102,12 +102,7 @@ function resolvePrismaCli() {
 
 function prismaModuleRoots(baseDir) {
   const roots = [];
-  const top = join(baseDir, 'node_modules');
-  if (existsSync(join(top, '@prisma/client'))) {
-    roots.push(top);
-  }
-
-  const pnpmDir = join(top, '.pnpm');
+  const pnpmDir = join(baseDir, 'node_modules/.pnpm');
   if (existsSync(pnpmDir)) {
     for (const entry of readdirSync(pnpmDir)) {
       if (!entry.startsWith('@prisma+client@')) continue;
@@ -235,7 +230,6 @@ ensureWorkspaceDist();
 ensurePrismaClient();
 
 process.env.RAILWAY_DEPLOY_DIR = deployDir;
-writeFileSync(join(root, '.deploy-active'), deployDir);
 run('node', ['scripts/verify-deploy-bundle.mjs'], { cwd: root });
 
 console.log('[deploy:bundle] OK');
