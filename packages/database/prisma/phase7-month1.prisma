@@ -1,0 +1,96 @@
+// Phase 7 Month 1 — Creator Economy Infrastructure (merge into schema.prisma)
+
+// Extend GraphEntityType enum with:
+//   Agency
+//   Label
+//
+// Extend RelationshipType enum with:
+//   SIGNED_TO
+//
+// Extend ActivityAction enum with:
+//   created_brand
+//   created_agency
+//   created_label
+//
+// Extend Opportunity model with:
+//   brandId   String?
+//   agencyId  String?
+//   brand     Brand?   @relation(fields: [brandId], references: [id], onDelete: SetNull)
+//   agency    Agency?  @relation(fields: [agencyId], references: [id], onDelete: SetNull)
+//   @@index([brandId])
+//   @@index([agencyId])
+//
+// Extend Person model with:
+//   brandsOwned   Brand[]  @relation("BrandOwner")
+//   agenciesLed     Agency[] @relation("AgencyContact")
+
+enum BrandStatus {
+  active
+  pending
+  archived
+}
+
+enum BrandBudgetRange {
+  under_5l
+  five_to_25l
+  twenty_five_to_1cr
+  over_1cr
+  undisclosed
+}
+
+model Brand {
+  id           String            @id @default(cuid())
+  name         String
+  industry     String?
+  website      String?
+  city         String?
+  country      String?
+  logo         String?
+  description  String?
+  budgetRange  BrandBudgetRange?
+  categories   String[]          @default([])
+  verified     Boolean           @default(false)
+  status       BrandStatus       @default(active)
+  trustScore   Float?            // placeholder — computed Month 4
+  personId     String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  owner         Person?        @relation("BrandOwner", fields: [personId], references: [id], onDelete: SetNull)
+  opportunities Opportunity[]
+
+  @@index([status, verified])
+  @@index([industry])
+  @@index([city])
+  @@index([personId])
+}
+
+model Agency {
+  id        String   @id @default(cuid())
+  name      String
+  website   String?
+  city      String?
+  teamSize  Int?
+  personId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contact       Person?        @relation("AgencyContact", fields: [personId], references: [id], onDelete: SetNull)
+  opportunities Opportunity[]
+
+  @@index([city])
+  @@index([personId])
+}
+
+model Label {
+  id        String   @id @default(cuid())
+  name      String
+  genre     String?
+  website   String?
+  city      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([genre])
+  @@index([city])
+}

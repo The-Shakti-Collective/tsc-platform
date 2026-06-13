@@ -1,0 +1,28 @@
+# Dev logs (start-stack API tee)
+logs/
+
+# Dependencies & build artifacts
+node_modules/
+.turbo/
+dist/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+
+# Agent-generated reports (templates live under .specify/)
+.agents/reports/
+
+# Local provider metadata
+.neon
+
+# Environment files — never commit secrets
+.env
+.env.local
+.env.*
+!.env.example
+**/.env
+apps/**/.env
+apps/**/.env.local
+packages/**/.env
+node_modules

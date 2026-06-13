@@ -1,0 +1,201 @@
+openapi: 3.1.0
+info:
+  title: TSC Public API
+  version: 1.0.0
+  description: Read-only public API for external platforms and partners (Phase 10.4 stub).
+servers:
+  - url: /api/public/v1
+    description: TSC API (global prefix `/api`)
+security:
+  - ApiKeyAuth: []
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-TSC-Api-Key
+  schemas:
+    PaginationMeta:
+      type: object
+      properties:
+        page: { type: integer }
+        limit: { type: integer }
+        total: { type: integer }
+        hasMore: { type: boolean }
+    ArtistSummary:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        slug: { type: string }
+        displayName: { type: string, nullable: true }
+        city: { type: string, nullable: true }
+        genres:
+          type: array
+          items: { type: string }
+        photoUrl: { type: string, nullable: true }
+paths:
+  /artists:
+    get:
+      summary: List artists
+      tags: [Artists]
+      security: [{ ApiKeyAuth: [] }]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20 }
+        - in: query
+          name: city
+          schema: { type: string }
+        - in: query
+          name: genre
+          schema: { type: string }
+      responses:
+        '200':
+          description: Paginated artist list
+        '401':
+          description: Missing or invalid API key
+        '429':
+          description: Rate limit exceeded (100 req/min per key stub)
+  /artists/{id}:
+    get:
+      summary: Get artist by ID
+      tags: [Artists]
+      security: [{ ApiKeyAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Artist detail
+        '404':
+          description: Not found
+  /communities:
+    get:
+      summary: List communities
+      tags: [Communities]
+      security: [{ ApiKeyAuth: [] }]
+      responses:
+        '200':
+          description: Paginated community list
+  /opportunities:
+    get:
+      summary: List public marketplace opportunities
+      tags: [Opportunities]
+      security: [{ ApiKeyAuth: [] }]
+      responses:
+        '200':
+          description: Paginated opportunity list
+  /events:
+    get:
+      summary: List events
+      tags: [Events]
+      security: [{ ApiKeyAuth: [] }]
+      responses:
+        '200':
+          description: Paginated event list
+  /venues:
+    get:
+      summary: List venues (stub from event venues)
+      tags: [Venues]
+      security: [{ ApiKeyAuth: [] }]
+      responses:
+        '200':
+          description: Paginated venue list with event counts
+  /analytics/summary:
+    get:
+      summary: Platform rollup counts
+      tags: [Analytics]
+      security: [{ ApiKeyAuth: [] }]
+      responses:
+        '200':
+          description: Count-only platform summary stub
+  /identity/{namespace}/{slug}:
+    get:
+      summary: Resolve public TSC identity
+      tags: [Identity]
+      security: [{ ApiKeyAuth: [] }]
+      parameters:
+        - in: path
+          name: namespace
+          required: true
+          schema: { type: string }
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Public identity payload
+  /export/artists:
+    get:
+      summary: Bulk artist export (JSON or CSV)
+      tags: [Export]
+      security: [{ ApiKeyAuth: [] }]
+      parameters:
+        - in: query
+          name: format
+          schema: { type: string, enum: [json, csv], default: json }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 100 }
+      responses:
+        '200':
+          description: Paginated artist bulk export
+  /export/relationships:
+    get:
+      summary: Relationship graph export for entity
+      tags: [Export]
+      security: [{ ApiKeyAuth: [] }]
+      parameters:
+        - in: query
+          name: entityType
+          required: true
+          schema: { type: string }
+        - in: query
+          name: entityId
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Entity relationship export stub
+  /export/analytics:
+    get:
+      summary: Anonymized analytics rollup export
+      tags: [Export]
+      security: [{ ApiKeyAuth: [] }]
+      parameters:
+        - in: query
+          name: period
+          schema: { type: string, example: '2026-06' }
+      responses:
+        '200':
+          description: Count-only anonymized rollup
+  /graph/export/{entityType}/{entityId}:
+    get:
+      summary: Industry subgraph as JSON-LD stub
+      tags: [Graph]
+      security: [{ ApiKeyAuth: [] }]
+      parameters:
+        - in: path
+          name: entityType
+          required: true
+          schema: { type: string }
+        - in: path
+          name: entityId
+          required: true
+          schema: { type: string }
+        - in: query
+          name: depth
+          schema: { type: integer, default: 2, maximum: 3 }
+      responses:
+        '200':
+          description: JSON-LD subgraph export

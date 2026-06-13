@@ -1,0 +1,148 @@
+{
+    "name":  "@tsc/contracts",
+    "version":  "0.0.0",
+    "private":  true,
+    "type":  "module",
+    "main":  "./dist/index.js",
+    "types":  "./dist/index.d.ts",
+    "exports":  {
+                    ".":  {
+                              "types":  "./dist/index.d.ts",
+                              "default":  "./dist/index.js"
+                          },
+                    "./relationship":  {
+                                           "types":  "./dist/relationship/index.d.ts",
+                                           "default":  "./dist/relationship/index.js"
+                                       },
+                    "./industry":  {
+                                       "types":  "./dist/industry/index.d.ts",
+                                       "default":  "./dist/industry/index.js"
+                                   },
+                    "./industry/schemas":  {
+                                               "types":  "./dist/industry/schemas.d.ts",
+                                               "default":  "./dist/industry/schemas.js"
+                                           },
+                    "./identity":  {
+                                       "types":  "./dist/identity/index.d.ts",
+                                       "default":  "./dist/identity/index.js"
+                                   },
+                    "./profile":  {
+                                      "types":  "./dist/profile/index.d.ts",
+                                      "default":  "./dist/profile/index.js"
+                                  },
+                    "./membership":  {
+                                         "types":  "./dist/membership/index.d.ts",
+                                         "default":  "./dist/membership/index.js"
+                                     },
+                    "./participation":  {
+                                            "types":  "./dist/participation/index.d.ts",
+                                            "default":  "./dist/participation/index.js"
+                                        },
+                    "./passport":  {
+                                       "types":  "./dist/passport/index.d.ts",
+                                       "default":  "./dist/passport/index.js"
+                                   },
+                    "./activity":  {
+                                       "types":  "./dist/activity/index.d.ts",
+                                       "default":  "./dist/activity/index.js"
+                                   },
+                    "./follow":  {
+                                     "types":  "./dist/follow/index.d.ts",
+                                     "default":  "./dist/follow/index.js"
+                                 },
+                    "./collaboration":  {
+                                            "types":  "./dist/collaboration/index.d.ts",
+                                            "default":  "./dist/collaboration/index.js"
+                                        },
+                    "./reputation":  {
+                                         "types":  "./dist/reputation/index.d.ts",
+                                         "default":  "./dist/reputation/index.js"
+                                     },
+                    "./credits":  {
+                                      "types":  "./dist/credits/index.d.ts",
+                                      "default":  "./dist/credits/index.js"
+                                  },
+                    "./audience":  {
+                                       "types":  "./dist/audience/index.d.ts",
+                                       "default":  "./dist/audience/index.js"
+                                   },
+                    "./fan":  {
+                                  "types":  "./dist/fan/index.d.ts",
+                                  "default":  "./dist/fan/index.js"
+                              },
+                    "./rewards":  {
+                                      "types":  "./dist/rewards/index.d.ts",
+                                      "default":  "./dist/rewards/index.js"
+                                  },
+                    "./support-action":  {
+                                             "types":  "./dist/support-action/index.d.ts",
+                                             "default":  "./dist/support-action/index.js"
+                                         },
+                    "./event-intelligence":  {
+                                                 "types":  "./dist/event-intelligence/index.d.ts",
+                                                 "default":  "./dist/event-intelligence/index.js"
+                                             },
+                    "./membership-program":  {
+                                                 "types":  "./dist/membership-program/index.d.ts",
+                                                 "default":  "./dist/membership-program/index.js"
+                                             },
+                    "./discovery":  {
+                                        "types":  "./dist/discovery/index.d.ts",
+                                        "default":  "./dist/discovery/index.js"
+                                    },
+                    "./marketplace":  {
+                                          "types":  "./dist/marketplace/index.d.ts",
+                                          "default":  "./dist/marketplace/index.js"
+                                      },
+                    "./marketplace/listing":  {
+                                                  "types":  "./dist/marketplace/listing.d.ts",
+                                                  "default":  "./dist/marketplace/listing.js"
+                                              },
+                    "./deal":  {
+                                   "types":  "./dist/deal/index.d.ts",
+                                   "default":  "./dist/deal/index.js"
+                               },
+                    "./trust":  {
+                                    "types":  "./dist/trust/index.d.ts",
+                                    "default":  "./dist/trust/index.js"
+                                },
+                    "./agents":  {
+                                     "types":  "./dist/agents/index.d.ts",
+                                     "default":  "./dist/agents/index.js"
+                                 },
+                    "./tsc-identity":  {
+                                           "types":  "./dist/tsc-identity/index.d.ts",
+                                           "default":  "./dist/tsc-identity/index.js"
+                                       },
+                    "./deal/schemas":  {
+                                           "types":  "./dist/deal/schemas.d.ts",
+                                           "default":  "./dist/deal/schemas.js"
+                                       },
+                    "./sync":  {
+                                   "types":  "./dist/sync/index.d.ts",
+                                   "default":  "./dist/sync/index.js"
+                               },
+                    "./opportunity-generation":  {
+                                                     "types":  "./dist/opportunity-generation/index.d.ts",
+                                                     "default":  "./dist/opportunity-generation/index.js"
+                                                 },
+                    "./commerce":  {
+                                       "types":  "./dist/commerce/index.d.ts",
+                                       "default":  "./dist/commerce/index.js"
+                                   }
+                },
+    "scripts":  {
+                    "build":  "tsc",
+                    "lint":  "eslint src --max-warnings 0",
+                    "typecheck":  "tsc --noEmit -p tsconfig.json",
+                    "test":  "vitest run --passWithNoTests"
+                },
+    "dependencies": {
+                         "zod":  "^3.24.0",
+                         "@tsc/constants": "workspace:*",
+                         "@tsc/database":  "workspace:*"
+                     },
+    "devDependencies":  {
+                            "typescript":  "^5.7.0"
+                        }
+}

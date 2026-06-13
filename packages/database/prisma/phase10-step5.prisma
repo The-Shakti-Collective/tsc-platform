@@ -1,0 +1,66 @@
+// Phase 10.5 — Industry Data Exchange (Music Data Network) — merge into schema.prisma
+
+enum WebhookDeliveryStatus {
+  pending
+  delivered
+  failed
+}
+
+enum DataExchangeSyncDirection {
+  inbound
+  outbound
+  bidirectional
+}
+
+model WebhookSubscription {
+  id        String   @id @default(cuid())
+  apiKeyId  String
+  url       String
+  events    String[] @default([])
+  secret    String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  apiKey     ApiKey            @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+  deliveries WebhookDelivery[]
+
+  @@index([apiKeyId, isActive])
+}
+
+model WebhookDelivery {
+  id             String                @id @default(cuid())
+  subscriptionId String
+  eventType      String
+  payload        Json
+  status         WebhookDeliveryStatus @default(pending)
+  attempts       Int                   @default(0)
+  deliveredAt    DateTime?
+  responseCode   Int?
+  createdAt      DateTime              @default(now())
+
+  subscription WebhookSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId, status])
+  @@index([createdAt])
+}
+
+model DataExchangePartner {
+  id            String                    @id @default(cuid())
+  name          String
+  slug          String                    @unique
+  apiKeyId      String                    @unique
+  allowedScopes String[]                  @default([])
+  syncDirection DataExchangeSyncDirection
+  config        Json                      @default("{}")
+  isActive      Boolean                   @default(true)
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+
+  apiKey ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  @@index([isActive])
+}
+
+// Extend ApiKey model with:
+//   webhookSubscriptions WebhookSubscription[]
+//   dataExchangePartner  DataExchangePartner?

@@ -1,0 +1,129 @@
+// Phase 8 Step 8 — Fan Commerce (Module 9) — merge into schema.prisma
+
+enum CommerceCatalogStatus {
+  active
+  inactive
+  sold_out
+}
+
+enum CommerceProductType {
+  physical_merch
+  sample_pack
+  digital_download
+}
+
+enum CommerceExperienceType {
+  vip_meet_greet
+  workshop
+  backstage
+  community_pass
+}
+
+enum FanPurchaseProductType {
+  ticket
+  merch
+  experience
+}
+
+enum FanPurchaseStatus {
+  recorded
+  pending_payment
+}
+
+model Ticket {
+  id        String                @id @default(cuid())
+  eventId   String
+  name      String
+  price     Float
+  currency  String                @default("INR")
+  quantity  Int
+  soldCount Int                   @default(0)
+  status    CommerceCatalogStatus @default(active)
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, status])
+}
+
+model CommerceProduct {
+  id          String                @id @default(cuid())
+  artistId    String?
+  communityId String?
+  name        String
+  type        CommerceProductType
+  price       Float
+  currency    String                @default("INR")
+  inventory   Int?
+  soldCount   Int                   @default(0)
+  status      CommerceCatalogStatus @default(active)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  artist    Artist?    @relation(fields: [artistId], references: [id], onDelete: SetNull)
+  community Community? @relation(fields: [communityId], references: [id], onDelete: SetNull)
+
+  @@index([artistId, status])
+  @@index([communityId, status])
+  @@index([type, status])
+}
+
+model CommerceExperience {
+  id          String                 @id @default(cuid())
+  artistId    String
+  name        String
+  type        CommerceExperienceType
+  price       Float
+  currency    String                 @default("INR")
+  slots       Int
+  bookedCount Int                    @default(0)
+  status      CommerceCatalogStatus  @default(active)
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@index([artistId, status])
+  @@index([type, status])
+}
+
+model FanPurchase {
+  id              String                 @id @default(cuid())
+  personId        String
+  productType     FanPurchaseProductType
+  productId       String
+  amount          Float
+  currency        String                 @default("INR")
+  status          FanPurchaseStatus      @default(recorded)
+  supportActionId String?
+  purchasedAt     DateTime               @default(now())
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  person        Person         @relation(fields: [personId], references: [id], onDelete: Cascade)
+  supportAction SupportAction? @relation(fields: [supportActionId], references: [id], onDelete: SetNull)
+
+  @@index([personId, purchasedAt(sort: Desc)])
+  @@index([productType, productId])
+  @@index([supportActionId])
+}
+
+// Extend ActivityAction enum with:
+//   purchased_product
+//
+// Extend Person model with:
+//   fanPurchases FanPurchase[]
+//
+// Extend SupportAction model with:
+//   fanPurchases FanPurchase[]
+//
+// Extend Event model with:
+//   tickets Ticket[]
+//
+// Extend Artist model with:
+//   commerceProducts CommerceProduct[]
+//   commerceExperiences CommerceExperience[]
+//
+// Extend Community model with:
+//   commerceProducts CommerceProduct[]

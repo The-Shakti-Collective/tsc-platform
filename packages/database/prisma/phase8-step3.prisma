@@ -1,0 +1,67 @@
+// Phase 8 Step 3 — Community Membership Programs — merge into schema.prisma
+
+enum MembershipBenefit {
+  early_access
+  private_events
+  meetups
+  discounts
+  exclusive_content
+}
+
+enum MembershipProgramTier {
+  standard
+  plus
+  premium
+  circle
+  collective
+}
+
+enum MembershipSubscriptionStatus {
+  active
+  cancelled
+  expired
+  pending
+}
+
+model Membership {
+  id          String                @id @default(cuid())
+  communityId String
+  name        String
+  slug        String
+  price       Float                 @default(0)
+  currency    String                @default("INR")
+  tier        MembershipProgramTier @default(standard)
+  benefits    MembershipBenefit[]   @default([])
+  isActive    Boolean               @default(true)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  community     Community                @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  subscriptions MembershipSubscription[]
+
+  @@unique([communityId, slug])
+  @@index([communityId, isActive])
+}
+
+model MembershipSubscription {
+  id           String                       @id @default(cuid())
+  membershipId String
+  personId     String
+  status       MembershipSubscriptionStatus @default(active)
+  startedAt    DateTime                     @default(now())
+  expiresAt    DateTime?
+  cancelledAt  DateTime?
+  createdAt    DateTime                     @default(now())
+  updatedAt    DateTime                     @updatedAt
+
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  person     Person     @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([membershipId, personId])
+  @@index([personId, status])
+  @@index([membershipId, status])
+}
+
+// Extend GraphEntityType enum with: Membership
+// Extend Community model with: membershipPrograms Membership[]
+// Extend Person model with: membershipSubscriptions MembershipSubscription[]

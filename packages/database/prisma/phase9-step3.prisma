@@ -1,0 +1,8 @@
+// Phase 9 Step 3 — Community Agent (Module 3) — merge into schema.prisma
+//
+// Extend ActivityAction enum with:
+//   community_agent_suggestions_generated
+//   community_suggestion_approved
+//   community_suggestion_dismissed
+//
+// No new models — reuses Agent, AgentTask, AgentDecision, AgentRecommendation from Step 1.

@@ -1,0 +1,59 @@
+// Phase 6.5 Sprint 5 — Reputation + Ecosystem Credits — merge into schema.prisma
+
+enum ReputationEntityType {
+  Person
+  Artist
+  Community
+}
+
+model ReputationSnapshot {
+  id                  String               @id @default(cuid())
+  entityType          ReputationEntityType
+  entityId            String
+  snapshotDate        DateTime             @default(now())
+  artistReputation    Float?
+  communityReputation Float?
+  organizerReputation Float?
+  scores              Json                 @default("{}")
+  overallScore        Float
+  rankPercentile      Float?
+  createdAt           DateTime             @default(now())
+
+  @@unique([entityType, entityId, snapshotDate])
+  @@index([entityType, entityId, snapshotDate(sort: Desc)])
+}
+
+model EcosystemCredit {
+  id             String   @id @default(cuid())
+  personId       String   @unique
+  balance        Int      @default(0)
+  lifetimeEarned Int      @default(0)
+  lifetimeSpent  Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  person       Person                       @relation(fields: [personId], references: [id], onDelete: Cascade)
+  transactions EcosystemCreditTransaction[]
+
+  @@index([balance])
+}
+
+model EcosystemCreditTransaction {
+  id            String   @id @default(cuid())
+  personId      String
+  amount        Int
+  reason        String
+  referenceType String?
+  referenceId   String?
+  createdAt     DateTime @default(now())
+
+  credit EcosystemCredit @relation(fields: [personId], references: [personId], onDelete: Cascade)
+
+  @@index([personId, createdAt(sort: Desc)])
+  @@index([referenceType, referenceId])
+}
+
+// Extend existing Person model with:
+//
+//   reputationSnapshots ReputationSnapshot[]  // optional inverse if needed
+//   ecosystemCredit     EcosystemCredit?

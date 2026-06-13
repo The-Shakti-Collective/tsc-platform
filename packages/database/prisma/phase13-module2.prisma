@@ -1,0 +1,96 @@
+// Phase 13 Module 2 — Skill Graph — merge into schema.prisma
+// Depends on: phase13-module1.prisma (CreativeIdentity)
+
+enum SkillCategory {
+  production
+  performance
+  visual
+  management
+  technical
+  marketing
+}
+
+enum SkillProficiency {
+  learning
+  intermediate
+  expert
+}
+
+enum SkillEndorsementSource {
+  peer
+  project
+  system
+}
+
+model Skill {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  name        String
+  category    SkillCategory
+  description String?
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  identitySkills CreativeIdentitySkill[]
+  endorsements   SkillEndorsement[]
+
+  @@index([category])
+  @@index([isActive])
+}
+
+model CreativeIdentitySkill {
+  creativeIdentityId String
+  skillId            String
+  proficiency        SkillProficiency
+  yearsExperience    Int?
+  isPrimary          Boolean          @default(false)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  creativeIdentity CreativeIdentity @relation(fields: [creativeIdentityId], references: [id], onDelete: Cascade)
+  skill            Skill            @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([creativeIdentityId, skillId])
+  @@index([skillId])
+  @@index([proficiency])
+  @@index([isPrimary])
+}
+
+model SkillEndorsement {
+  id                 String                 @id @default(cuid())
+  skillId            String
+  creativeIdentityId String
+  endorserPersonId   String?
+  source             SkillEndorsementSource
+  weight             Float                  @default(1)
+  createdAt          DateTime               @default(now())
+
+  skill            Skill            @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  creativeIdentity CreativeIdentity @relation(fields: [creativeIdentityId], references: [id], onDelete: Cascade)
+  endorser         Person?          @relation("SkillEndorsementsGiven", fields: [endorserPersonId], references: [id], onDelete: SetNull)
+
+  @@unique([skillId, creativeIdentityId, endorserPersonId, source])
+  @@index([creativeIdentityId])
+  @@index([skillId])
+  @@index([endorserPersonId])
+}
+
+// Extend CreativeIdentity model with:
+//   skills        CreativeIdentitySkill[]
+//   endorsements  SkillEndorsement[]
+// Deprecate capabilities String[] — replaced by skill graph (keep column for migration compat)
+//
+// Extend Person model with:
+//   skillEndorsementsGiven SkillEndorsement[] @relation("SkillEndorsementsGiven")
+//
+// Extend GraphEntityType enum with:
+//   CreativeIdentity
+//   Skill
+//
+// Extend RelationshipType enum with:
+//   HAS_SKILL
+//
+// Extend ActivityAction enum with:
+//   skill_added
+//   skill_endorsed

@@ -1,0 +1,65 @@
+// Phase 9 Step 10 — Autonomous Workflows (Module 10) + Command Center V5 prep
+// Merge into schema.prisma
+
+enum AutonomousWorkflowTriggerType {
+  manual
+  campaign_created
+  insight_action
+  schedule
+}
+
+enum AutonomousWorkflowStatus {
+  active
+  draft
+  archived
+}
+
+enum AutonomousWorkflowRunStatus {
+  pending
+  running
+  awaiting_approval
+  completed
+  failed
+  cancelled
+}
+
+model AutonomousWorkflow {
+  id          String                        @id @default(cuid())
+  slug        String                        @unique
+  name        String
+  triggerType AutonomousWorkflowTriggerType @default(manual)
+  steps       Json                          @default("[]")
+  status      AutonomousWorkflowStatus      @default(active)
+  createdBy   String?
+  createdAt   DateTime                      @default(now())
+  updatedAt   DateTime                      @updatedAt
+
+  runs AutonomousWorkflowRun[]
+
+  @@index([status, triggerType])
+}
+
+model AutonomousWorkflowRun {
+  id          String                      @id @default(cuid())
+  workflowId  String
+  status      AutonomousWorkflowRunStatus @default(pending)
+  currentStep Int                         @default(0)
+  stepsLog    Json                        @default("[]")
+  payload     Json                        @default("{}")
+  startedAt   DateTime                    @default(now())
+  completedAt DateTime?
+  approvedAt  DateTime?
+  result      Json                        @default("{}")
+
+  workflow AutonomousWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId, status])
+  @@index([status, startedAt(sort: Desc)])
+}
+
+// ActivityAction enum additions:
+//   autonomous_workflow_started
+//   autonomous_workflow_step_completed
+//   autonomous_workflow_approved
+//   autonomous_workflow_completed
+//   autonomous_workflow_cancelled

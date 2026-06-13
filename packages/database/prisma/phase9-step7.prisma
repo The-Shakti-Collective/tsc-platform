@@ -1,0 +1,89 @@
+// Phase 9 Step 7 — Forecast Agent (Module 7) — merge into schema.prisma
+
+enum ForecastMetric {
+  revenue
+  attendance
+  growth
+  demand
+  membership_churn
+}
+
+enum ForecastHorizon {
+  d30
+  d90
+}
+
+enum InsightSeverity {
+  info
+  warning
+  critical
+}
+
+enum InsightActionStatus {
+  pending
+  executed
+  failed
+}
+
+model Forecast {
+  id           String          @id @default(cuid())
+  entityType   String
+  entityId     String
+  metric       ForecastMetric
+  horizon      ForecastHorizon
+  modelVersion String          @default("linear_run_rate_v1")
+  createdAt    DateTime        @default(now())
+
+  snapshots ForecastSnapshot[]
+
+  @@index([entityType, entityId, metric, horizon])
+  @@index([createdAt(sort: Desc)])
+}
+
+model ForecastSnapshot {
+  forecastId     String
+  snapshotDate   DateTime @db.Date
+  predictedValue Float
+  lowerBound     Float
+  upperBound     Float
+  factors        Json     @default("{}")
+
+  forecast Forecast @relation(fields: [forecastId], references: [id], onDelete: Cascade)
+
+  @@id([forecastId, snapshotDate])
+  @@index([forecastId, snapshotDate(sort: Desc)])
+}
+
+model Insight {
+  id         String          @id @default(cuid())
+  entityType String
+  entityId   String
+  category   String
+  title      String
+  severity   InsightSeverity @default(info)
+  payload    Json            @default("{}")
+  createdAt  DateTime        @default(now())
+
+  actions InsightAction[]
+
+  @@index([entityType, entityId])
+  @@index([severity, createdAt(sort: Desc)])
+  @@index([category])
+}
+
+model InsightAction {
+  id         String              @id @default(cuid())
+  insightId  String
+  actionType String
+  status     InsightActionStatus @default(pending)
+  executedAt DateTime?
+
+  insight Insight @relation(fields: [insightId], references: [id], onDelete: Cascade)
+
+  @@unique([insightId, actionType])
+  @@index([insightId, status])
+}
+
+// Extend ActivityAction enum with:
+//   forecast_generated
+//   insight_action_executed

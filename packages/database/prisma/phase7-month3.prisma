@@ -1,0 +1,82 @@
+// Phase 7 Month 3 — Deal Pipeline + Revenue Tracking (merge into schema.prisma)
+
+enum DealStatus {
+  application
+  discussion
+  negotiation
+  agreement
+  completed
+  paid
+}
+
+enum RevenueTransactionType {
+  expected
+  received
+  pending
+}
+
+// Extend ActivityAction enum with:
+//   deal_created
+//   deal_completed
+//   deal_paid
+
+model Deal {
+  id               String     @id @default(cuid())
+  opportunityId    String
+  applicationId    String?
+  artistId         String
+  brandId          String?
+  agencyId         String?
+  status           DealStatus @default(discussion)
+  value            Decimal?
+  currency         String     @default("INR")
+  startDate        DateTime?
+  endDate          DateTime?
+  negotiationNotes String?
+  agreementUrl     String?
+  paidAt           DateTime?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  opportunity Opportunity            @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  application OpportunityApplication? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  artist      Artist                 @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  brand       Brand?                 @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  agency      Agency?                @relation(fields: [agencyId], references: [id], onDelete: SetNull)
+  revenue     RevenueTransaction[]
+
+  @@index([artistId, status])
+  @@index([brandId, status])
+  @@index([agencyId, status])
+  @@index([opportunityId])
+  @@index([status, updatedAt])
+}
+
+model RevenueTransaction {
+  id         String                 @id @default(cuid())
+  dealId     String
+  amount     Decimal
+  type       RevenueTransactionType
+  recordedAt DateTime               @default(now())
+  notes      String?
+
+  deal Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@index([dealId, recordedAt(sort: Desc)])
+  @@index([type])
+}
+
+// Extend Opportunity model with:
+//   deals Deal[]
+//
+// Extend OpportunityApplication model with:
+//   deals Deal[]
+//
+// Extend Artist model with:
+//   deals Deal[]
+//
+// Extend Brand model with:
+//   deals Deal[]
+//
+// Extend Agency model with:
+//   deals Deal[]

@@ -1,0 +1,8 @@
+// Phase 9 Step 4 — Event Agent (Module 4) — merge into schema.prisma
+//
+// Extend ActivityAction enum with:
+//   event_agent_insights_generated
+//   event_suggestion_approved
+//   event_suggestion_dismissed
+//
+// No new models — reuses Agent, AgentTask, AgentDecision, AgentRecommendation from Step 1.

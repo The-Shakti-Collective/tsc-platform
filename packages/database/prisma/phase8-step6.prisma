@@ -1,0 +1,41 @@
+// Phase 8 Step 6 — Creator-Fan Economy (SupportAction) — merge into schema.prisma
+
+enum SupportTargetType {
+  Artist
+  Community
+  Event
+}
+
+enum SupportActionType {
+  buy_ticket
+  buy_membership
+  buy_workshop
+  buy_experience
+  general_support
+}
+
+enum SupportActionStatus {
+  recorded
+  pending_payment
+}
+
+model SupportAction {
+  id                String              @id @default(cuid())
+  supporterPersonId String
+  targetType        SupportTargetType
+  targetId          String
+  actionType        SupportActionType
+  amount            Float?
+  currency          String?             @default("INR")
+  status            SupportActionStatus @default(recorded)
+  metadata          Json                @default("{}")
+  createdAt         DateTime            @default(now())
+
+  supporter Person @relation(fields: [supporterPersonId], references: [id], onDelete: Cascade)
+
+  @@index([supporterPersonId, createdAt(sort: Desc)])
+  @@index([targetType, targetId, createdAt(sort: Desc)])
+  @@index([targetType, targetId, actionType])
+}
+
+// Extend Person model with: supportActions SupportAction[]

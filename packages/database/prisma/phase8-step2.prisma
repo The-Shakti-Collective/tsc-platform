@@ -1,0 +1,31 @@
+// Phase 8 Step 2 — Superfan Engine — merge into schema.prisma
+
+enum SuperfanTier {
+  bronze
+  silver
+  gold
+  platinum
+  legend
+}
+
+model SuperfanSnapshot {
+  id            String       @id @default(cuid())
+  personId      String
+  artistId      String?
+  superfanScore Float        @default(0)
+  tier          SuperfanTier @default(bronze)
+  factors       Json         @default("{}")
+  snapshotDate  DateTime     @db.Date
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([personId, artistId, snapshotDate])
+  @@index([personId, snapshotDate(sort: Desc)])
+  @@index([artistId, superfanScore(sort: Desc)])
+  @@index([artistId, tier])
+}
+
+// Extend Person model with:
+//   superfanSnapshots SuperfanSnapshot[]

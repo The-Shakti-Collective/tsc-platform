@@ -1,0 +1,68 @@
+// Phase 14 Module 1 — Opportunity Generation Engine — merge into schema.prisma
+
+enum GeneratedOpportunitySource {
+  system
+  brand
+  community
+}
+
+enum GeneratedOpportunityStatus {
+  draft
+  pending_approval
+  published
+  dismissed
+}
+
+enum GeneratedOpportunityType {
+  showcase_event
+  collaboration_open_call
+  grant_opportunity
+}
+
+model GeneratedOpportunity {
+  id               String                     @id @default(cuid())
+  source           GeneratedOpportunitySource @default(system)
+  generationReason String
+  signalSnapshot   Json                       @default("{}")
+  suggestedType    GeneratedOpportunityType
+  title            String
+  description      String?
+  city             String?
+  genre            String?
+  targetEntityType String?
+  targetEntityId   String?
+  confidence       Float
+  status           GeneratedOpportunityStatus @default(draft)
+  opportunityId    String?
+  createdAt        DateTime                   @default(now())
+  approvedAt       DateTime?
+  approvedBy       String?
+
+  opportunity      Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  approvedByPerson Person?      @relation("GeneratedOpportunityApprovedBy", fields: [approvedBy], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt(sort: Desc)])
+  @@index([city, genre])
+  @@index([opportunityId])
+}
+
+model OpportunityGenerationRun {
+  id             String   @id @default(cuid())
+  triggeredBy    String
+  scope          Json     @default("{}")
+  signals        Json     @default("{}")
+  generatedCount Int      @default(0)
+  runAt          DateTime @default(now())
+
+  @@index([runAt(sort: Desc)])
+}
+
+// Extend ActivityAction enum with:
+//   opportunity_generated
+//   opportunity_generation_published
+//
+// Extend Person model with:
+//   generatedOpportunitiesApproved GeneratedOpportunity[] @relation("GeneratedOpportunityApprovedBy")
+//
+// Extend Opportunity model with:
+//   generatedFrom GeneratedOpportunity[]

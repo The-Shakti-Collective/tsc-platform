@@ -1,0 +1,45 @@
+name: CI — Website
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "apps/website/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "turbo.json"
+      - "package.json"
+      - ".github/workflows/ci-website.yml"
+      - ".github/actions/**"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "apps/website/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "turbo.json"
+      - "package.json"
+      - ".github/workflows/ci-website.yml"
+      - ".github/actions/**"
+
+concurrency:
+  group: ci-website-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_PUBLIC_AUTH_STUB: "true"
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_ci_placeholder
+  CLERK_SECRET_KEY: sk_test_ci_placeholder
+  NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
+  NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
+  NEXT_PUBLIC_APP_URL: http://localhost:3002
+
+jobs:
+  ci:
+    name: "@tsc/website pipeline"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-pnpm
+      - run: pnpm db:generate
+      - run: pnpm turbo run lint typecheck test build --filter=@tsc/website...

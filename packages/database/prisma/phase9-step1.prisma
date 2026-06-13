@@ -1,0 +1,120 @@
+// Phase 9 Step 1 — Decision Layer + Opportunity Agent (Module 1) — merge into schema.prisma
+
+enum AgentType {
+  opportunity
+  career
+  community
+  event
+  brand_match
+  talent_discovery
+  forecast
+  copilot
+  workflow
+}
+
+enum AgentTaskStatus {
+  pending
+  running
+  completed
+  failed
+}
+
+enum AgentDecisionStatus {
+  pending
+  approved
+  rejected
+  executed
+}
+
+enum AgentRecommendationStatus {
+  pending
+  active
+  dismissed
+  applied
+  expired
+}
+
+model Agent {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  name      String
+  type      AgentType
+  config    Json      @default("{}")
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  tasks           AgentTask[]
+  decisions       AgentDecision[]
+  recommendations AgentRecommendation[]
+
+  @@index([type, isActive])
+}
+
+model AgentTask {
+  id          String          @id @default(cuid())
+  agentId     String
+  status      AgentTaskStatus @default(pending)
+  input       Json            @default("{}")
+  output      Json            @default("{}")
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([agentId, status])
+  @@index([createdAt(sort: Desc)])
+}
+
+model AgentDecision {
+  id           String              @id @default(cuid())
+  agentId      String
+  entityType   String
+  entityId     String
+  decisionType String
+  payload      Json                @default("{}")
+  confidence   Float
+  status       AgentDecisionStatus @default(pending)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([agentId, status])
+  @@index([entityType, entityId])
+}
+
+model AgentRecommendation {
+  id             String                    @id @default(cuid())
+  agentId        String
+  targetPersonId String?
+  targetArtistId String?
+  title          String
+  rationale      String
+  score          Float
+  confidence     Float
+  status         AgentRecommendationStatus @default(pending)
+  metadata       Json                      @default("{}")
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+
+  agent        Agent   @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  targetPerson Person? @relation("AgentRecommendationsForPerson", fields: [targetPersonId], references: [id], onDelete: SetNull)
+  targetArtist Artist? @relation(fields: [targetArtistId], references: [id], onDelete: SetNull)
+
+  @@index([agentId, status])
+  @@index([targetArtistId, status])
+  @@index([targetPersonId, status])
+  @@index([createdAt(sort: Desc)])
+}
+
+// Extend ActivityAction enum with:
+//   agent_recommendation_created
+//
+// Extend Person model with:
+//   agentRecommendations AgentRecommendation[] @relation("AgentRecommendationsForPerson")
+//
+// Extend Artist model with:
+//   agentRecommendations AgentRecommendation[]

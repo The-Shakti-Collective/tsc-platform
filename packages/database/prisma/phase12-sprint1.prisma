@@ -1,0 +1,76 @@
+// Phase 12 Sprint 1 — Creator Workspace Network (Workspace + Teams + Members) — merge into schema.prisma
+
+enum WorkspaceType {
+  artist
+  manager
+  team
+  community_leader
+  agency
+  personal
+}
+
+enum WorkspaceMemberRole {
+  owner
+  admin
+  member
+  guest
+}
+
+enum WorkspaceMemberStatus {
+  active
+  invited
+  removed
+}
+
+model Workspace {
+  id            String        @id @default(cuid())
+  slug          String        @unique
+  name          String
+  ownerPersonId String
+  type          WorkspaceType
+  settings      Json          @default("{}")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  owner   Person            @relation("WorkspaceOwner", fields: [ownerPersonId], references: [id], onDelete: Cascade)
+  members WorkspaceMember[]
+  teams   WorkspaceTeam[]
+
+  @@index([ownerPersonId])
+  @@index([type])
+}
+
+model WorkspaceMember {
+  id          String                @id @default(cuid())
+  workspaceId String
+  personId    String
+  role        WorkspaceMemberRole
+  joinedAt    DateTime              @default(now())
+  status      WorkspaceMemberStatus @default(active)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  person    Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, personId])
+  @@index([personId, status])
+}
+
+model WorkspaceTeam {
+  id          String   @id @default(cuid())
+  workspaceId String
+  name        String
+  slug        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId])
+}
+
+// Extend Person model with:
+//   ownedWorkspaces  Workspace[]       @relation("WorkspaceOwner")
+//   workspaceMembers WorkspaceMember[]
+

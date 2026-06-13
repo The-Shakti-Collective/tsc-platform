@@ -1,0 +1,157 @@
+// Phase 12 Sprint 2 — Projects + Tasks — merge into schema.prisma
+
+enum ProjectType {
+  album
+  tour
+  festival
+  community_campaign
+  brand_campaign
+  music_video
+  general
+}
+
+enum ProjectStatus {
+  planning
+  active
+  on_hold
+  completed
+  archived
+}
+
+enum ProjectMemberRole {
+  owner
+  lead
+  member
+  viewer
+}
+
+enum TaskStatus {
+  todo
+  in_progress
+  blocked
+  done
+}
+
+enum TaskPriority {
+  low
+  medium
+  high
+  urgent
+}
+
+model Project {
+  id            String        @id @default(cuid())
+  workspaceId   String
+  slug          String
+  name          String
+  type          ProjectType
+  description   String?
+  status        ProjectStatus @default(planning)
+  budget        Float?
+  currency      String?
+  timelineStart DateTime?
+  timelineEnd   DateTime?
+  metadata      Json          @default("{}")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  workspace Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  members   ProjectMember[]
+  tasks     Task[]
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId])
+  @@index([status])
+}
+
+model ProjectMember {
+  projectId String
+  personId  String
+  role      ProjectMemberRole
+  joinedAt  DateTime          @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  person  Person  @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, personId])
+  @@index([personId])
+}
+
+model Task {
+  id                String       @id @default(cuid())
+  workspaceId       String
+  projectId         String?
+  title             String
+  description       String?
+  status            TaskStatus   @default(todo)
+  priority          TaskPriority @default(medium)
+  dueAt             DateTime?
+  createdByPersonId String
+  metadata          Json         @default("{}")
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  workspace Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project   Project?        @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  createdBy Person          @relation("TaskCreator", fields: [createdByPersonId], references: [id], onDelete: Cascade)
+  assignees TaskAssignee[]
+  comments  TaskComment[]
+  checklist TaskChecklist[]
+
+  @@index([workspaceId])
+  @@index([projectId])
+  @@index([status])
+  @@index([createdByPersonId])
+}
+
+model TaskAssignee {
+  taskId     String
+  personId   String
+  assignedAt DateTime @default(now())
+
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, personId])
+  @@index([personId])
+}
+
+model TaskComment {
+  id             String   @id @default(cuid())
+  taskId         String
+  authorPersonId String
+  body           String
+  createdAt      DateTime @default(now())
+
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author Person @relation(fields: [authorPersonId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+}
+
+model TaskChecklist {
+  id     String  @id @default(cuid())
+  taskId String
+  title  String
+  isDone Boolean @default(false)
+  order  Int     @default(0)
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+}
+
+// Extend Workspace model with:
+//   projects Project[]
+//   tasks    Task[]
+//
+// Extend Person model with:
+//   projectMembers ProjectMember[]
+//   createdTasks   Task[]          @relation("TaskCreator")
+//   taskAssignees  TaskAssignee[]
+//   taskComments   TaskComment[]
+//
+// Extend ActivityAction enum with:
+//   project_created
+//   task_created
+//   task_completed

@@ -1,0 +1,63 @@
+// Phase 13 Module 1 — Universal Creative Identity (CON) — merge into schema.prisma
+
+enum CreativeVertical {
+  music
+  film
+  photography
+  podcast
+  comedy
+  dance
+  content
+}
+
+enum CreativeRoleTag {
+  photographer
+  videographer
+  artist
+  producer
+  manager
+  founder
+  community_leader
+}
+
+model CreativeIdentity {
+  id                  String   @id @default(cuid())
+  personId            String   @unique
+  slug                String   @unique
+  displayName         String
+  headline            String?
+  bio                 String?
+  avatarUrl           String?
+  primaryCity         String?
+  verticals           String[] @default([])
+  roles               String[] @default([])
+  capabilities        String[] @default([])
+  isPublic            Boolean  @default(true)
+  verificationLevel   Int      @default(0)
+  trustScoreStub      Float?
+  ecosystemScoreStub  Float?
+  metadata            Json     @default("{}")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([slug])
+  @@index([isPublic])
+  @@index([verificationLevel])
+}
+
+// Extend Person model with:
+//   creativeIdentity CreativeIdentity?
+
+// Extend Workspace model (Phase 12) with optional link:
+//   creativeIdentityId String?
+//   creativeIdentity   CreativeIdentity? @relation(fields: [creativeIdentityId], references: [id], onDelete: SetNull)
+//   @@index([creativeIdentityId])
+
+// Extend ActivityAction enum with:
+//   creative_identity_created
+//   creative_role_added
+
+// Extend TscIdentityNamespace enum with:
+//   creator

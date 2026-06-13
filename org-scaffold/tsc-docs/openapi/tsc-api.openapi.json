@@ -1,0 +1,13 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TSC API",
+    "description": "Placeholder — replace with export from tsc-api",
+    "version": "0.0.0"
+  },
+  "servers": [
+    { "url": "https://api.theshakticollective.in", "description": "Production" },
+    { "url": "https://api-staging.theshakticollective.in", "description": "Staging" }
+  ],
+  "paths": {}
+}

@@ -1,0 +1,2 @@
+# Prisma migrations — run `pnpm db:migrate` after DATABASE_URL is set.
+# Initial baseline migration will be created in Stage 2 when Neon is wired.

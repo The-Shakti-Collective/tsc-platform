@@ -1,0 +1,152 @@
+// Phase 9 Step 8 — Automation Engine V2 (Module 8) — merge into schema.prisma
+
+enum AutomationRuleStatus {
+  active
+  paused
+  disabled
+}
+
+enum AutomationRunStatus {
+  pending
+  running
+  completed
+  failed
+  cancelled
+}
+
+enum AutomationTriggerType {
+  artist_path
+  booking_inquiry
+  workshop_lead
+  health_below
+  churn_above
+  deal_stale
+  superfan_drop
+}
+
+enum GoalEntityType {
+  Artist
+  Organization
+  Community
+  Person
+  Venue
+  Platform
+}
+
+enum GoalPeriod {
+  daily
+  weekly
+  monthly
+  quarterly
+  yearly
+  custom
+}
+
+model ArtistHealthSnapshot {
+  id           String   @id @default(cuid())
+  artistId     String
+  snapshotDate DateTime @db.Date
+  healthScore  Float    @default(0)
+  dimensions   Json     @default("{}")
+  riskAlerts   Json     @default("[]")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@unique([artistId, snapshotDate])
+  @@index([artistId, snapshotDate(sort: Desc)])
+  @@index([healthScore])
+}
+
+model AutomationRule {
+  id           String                @id @default(cuid())
+  name         String
+  workflowType String
+  triggerType  AutomationTriggerType @default(artist_path)
+  trigger      Json                  @default("{}")
+  steps        Json                  @default("[]")
+  status       AutomationRuleStatus  @default(active)
+  metadata     Json                  @default("{}")
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  runs AutomationRun[]
+
+  @@index([status, triggerType])
+  @@index([workflowType, status])
+}
+
+model AutomationRun {
+  id            String              @id @default(cuid())
+  ruleId        String?
+  status        AutomationRunStatus @default(running)
+  trigger       Json                @default("{}")
+  steps         Json                @default("[]")
+  result        Json                @default("{}")
+  opportunityId String?
+  personId      String?
+  communityId   String?
+  errorMessage  String?
+  startedAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime            @default(now())
+
+  rule        AutomationRule? @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+  opportunity Opportunity?    @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  person      Person?         @relation(fields: [personId], references: [id], onDelete: SetNull)
+  community   Community?      @relation(fields: [communityId], references: [id], onDelete: SetNull)
+
+  @@index([ruleId, createdAt(sort: Desc)])
+  @@index([status, createdAt(sort: Desc)])
+}
+
+model Goal {
+  id          String         @id @default(cuid())
+  name        String?
+  entityType  GoalEntityType
+  entityId    String
+  metric      String
+  target      Float
+  current     Float          @default(0)
+  period      GoalPeriod
+  periodStart DateTime?
+  periodEnd   DateTime?
+  metadata    Json           @default("{}")
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  progress GoalProgress[]
+
+  @@index([entityType, entityId])
+  @@index([period])
+}
+
+model GoalProgress {
+  id         String   @id @default(cuid())
+  goalId     String
+  current    Float
+  recordedAt DateTime @default(now())
+  metadata   Json     @default("{}")
+
+  goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@index([goalId, recordedAt(sort: Desc)])
+}
+
+// Extend ActivityAction enum with:
+//   automation_rule_evaluated
+//   automation_action_stubbed
+
+// Extend Artist model with:
+//   artistHealthSnapshots ArtistHealthSnapshot[]
+
+// Extend Person model with:
+//   automationRuns AutomationRun[]
+
+// Extend Community model with:
+//   automationRuns AutomationRun[]
+
+// Extend Opportunity model with:
+//   automationRuns AutomationRun[]
+

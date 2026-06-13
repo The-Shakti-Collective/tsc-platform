@@ -1,0 +1,55 @@
+// Phase 8 Step 4 — Rewards catalog + redemption — merge into schema.prisma
+
+enum RewardCategory {
+  merch
+  tickets
+  meet_greet
+  community_access
+  priority_application
+}
+
+enum RewardRedemptionStatus {
+  pending
+  fulfilled
+  cancelled
+}
+
+model Reward {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  name        String
+  description String?
+  creditCost  Int
+  category    RewardCategory
+  stock       Int?
+  isActive    Boolean        @default(true)
+  metadata    Json           @default("{}")
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  redemptions RewardRedemption[]
+
+  @@index([isActive, category])
+}
+
+model RewardRedemption {
+  id          String                 @id @default(cuid())
+  rewardId    String
+  personId    String
+  creditCost  Int
+  status      RewardRedemptionStatus @default(pending)
+  redeemedAt  DateTime               @default(now())
+  fulfilledAt DateTime?
+  notes       String?
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  reward Reward @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([personId, redeemedAt(sort: Desc)])
+  @@index([rewardId])
+  @@index([personId, rewardId, redeemedAt(sort: Desc)])
+}
+
+// Extend Person model with: rewardRedemptions RewardRedemption[]

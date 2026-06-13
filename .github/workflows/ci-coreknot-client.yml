@@ -1,0 +1,34 @@
+name: CI — CoreKnot Client
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "apps/coreknot/client/**"
+      - "pnpm-lock.yaml"
+      - "turbo.json"
+      - "package.json"
+      - ".github/workflows/ci-coreknot-client.yml"
+      - ".github/actions/**"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "apps/coreknot/client/**"
+      - "pnpm-lock.yaml"
+      - "turbo.json"
+      - "package.json"
+      - ".github/workflows/ci-coreknot-client.yml"
+      - ".github/actions/**"
+
+concurrency:
+  group: ci-coreknot-client-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: "@tsc/coreknot-client pipeline"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-pnpm
+      - run: pnpm turbo run lint typecheck test build --filter=@tsc/coreknot-client

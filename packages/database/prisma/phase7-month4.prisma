@@ -1,0 +1,34 @@
+// Phase 7 Month 4 — Trust Scores + Recommendation V2 (merge into schema.prisma)
+
+enum TrustEntityType {
+  Artist
+  Brand
+  Agency
+}
+
+model TrustSnapshot {
+  id           String          @id @default(cuid())
+  entityType   TrustEntityType
+  entityId     String
+  snapshotDate DateTime        @default(now())
+  trustScore   Float
+  factors      Json            @default("{}")
+  badges       String[]        @default([])
+  rankPercentile Float?
+  createdAt    DateTime        @default(now())
+
+  @@unique([entityType, entityId, snapshotDate])
+  @@index([entityType, entityId, snapshotDate(sort: Desc)])
+  @@index([entityType, trustScore(sort: Desc)])
+}
+
+// Extend Brand model with:
+//   trustSnapshots TrustSnapshot[]  // optional inverse — query by entityId
+//   trustScore updated on refresh (denormalized cache)
+//
+// Extend Agency model with:
+//   trustScore Float?  // denormalized cache — computed Month 4
+//
+// Verification badge integration (application layer):
+//   Verified Brand Partner — brand.verified OR trustScore >= 70
+//   Verified Artist — personProfile.verificationLevel >= 4

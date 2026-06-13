@@ -1,0 +1,44 @@
+// Phase 10.1 — TSC Identity Network + Industry Verification — merge into schema.prisma
+
+enum TscIdentityNamespace {
+  artist
+  community
+  brand
+  fan
+}
+
+enum TscIdentityEntityType {
+  Artist
+  Community
+  Brand
+  Person
+  Venue
+}
+
+enum TscVerificationBadge {
+  verified_artist
+  verified_community
+  verified_venue
+  verified_brand_partner
+}
+
+model TscIdentity {
+  id            String                 @id @default(cuid())
+  entityType    TscIdentityEntityType
+  entityId      String
+  namespace     TscIdentityNamespace
+  slug          String
+  canonicalUrl  String
+  isPublic      Boolean                @default(true)
+  verifiedBadge TscVerificationBadge?
+  verifiedAt    DateTime?
+  metadata      Json                   @default("{}")
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+
+  @@unique([namespace, slug])
+  @@unique([entityType, entityId, namespace])
+  @@index([entityType, entityId])
+  @@index([namespace, slug])
+  @@index([isPublic])
+}

@@ -1,0 +1,67 @@
+// Phase 6.5 Sprint 3 — Activity Feed + PersonFollow — merge into schema.prisma
+
+enum ActivityAction {
+  joined_community
+  left_community
+  registered_event
+  checked_in_event
+  posted_collaboration
+  applied_collaboration
+  applied_opportunity
+  won_opportunity
+  launched_opportunity
+  followed_person
+  unfollowed_person
+  updated_profile
+  created_brand
+  created_agency
+  created_label
+  reviewed_application
+  hired_artist
+  deal_created
+  deal_completed
+  deal_paid
+}
+
+enum ActivityVisibility {
+  public
+  followers
+  private
+}
+
+model Activity {
+  id            String             @id @default(cuid())
+  actorPersonId String
+  action        ActivityAction
+  targetType    String
+  targetId      String
+  metadata      Json               @default("{}")
+  timestamp     DateTime           @default(now())
+  visibility    ActivityVisibility @default(public)
+
+  actor Person @relation("PersonActivities", fields: [actorPersonId], references: [id], onDelete: Cascade)
+
+  @@index([actorPersonId, timestamp(sort: Desc)])
+  @@index([targetType, targetId, timestamp(sort: Desc)])
+  @@index([timestamp(sort: Desc)])
+}
+
+model PersonFollow {
+  id                String   @id @default(cuid())
+  followerPersonId  String
+  followingPersonId String
+  createdAt         DateTime @default(now())
+
+  follower  Person @relation("PersonFollowing", fields: [followerPersonId], references: [id], onDelete: Cascade)
+  following Person @relation("PersonFollowers", fields: [followingPersonId], references: [id], onDelete: Cascade)
+
+  @@unique([followerPersonId, followingPersonId])
+  @@index([followerPersonId])
+  @@index([followingPersonId])
+}
+
+// Extend existing Person model with:
+//
+//   activities        Activity[]     @relation("PersonActivities")
+//   following         PersonFollow[] @relation("PersonFollowing")
+//   followers         PersonFollow[] @relation("PersonFollowers")

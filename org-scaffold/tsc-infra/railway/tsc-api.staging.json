@@ -1,0 +1,23 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "$comment": "Copy to tsc-api repo root as railway.json for staging service",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "pnpm install && pnpm db:generate && pnpm build"
+  },
+  "deploy": {
+    "startCommand": "node dist/main.js",
+    "healthcheckPath": "/health/ready",
+    "healthcheckTimeout": 300,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  },
+  "environments": {
+    "staging": {
+      "variables": {
+        "NODE_ENV": "staging",
+        "API_GLOBAL_PREFIX": "api"
+      }
+    }
+  }
+}

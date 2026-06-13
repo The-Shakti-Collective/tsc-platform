@@ -1,0 +1,49 @@
+// Phase 10.4 — Public API Platform + White Label Ecosystem — merge into schema.prisma
+
+enum WhiteLabelTenantType {
+  agency
+  community
+  festival
+}
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  name        String
+  keyHash     String
+  prefix      String    @unique
+  scopes      String[]  @default([])
+  ownerOrgId  String?
+  rateLimit   Int       @default(100)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  lastUsedAt  DateTime?
+
+  ownerOrg         Organization?     @relation(fields: [ownerOrgId], references: [id], onDelete: SetNull)
+  whiteLabelTenant WhiteLabelTenant?
+
+  @@index([ownerOrgId])
+  @@index([isActive])
+}
+
+model WhiteLabelTenant {
+  id            String               @id @default(cuid())
+  slug          String               @unique
+  name          String
+  type          WhiteLabelTenantType
+  customDomain  String?
+  logoUrl       String?
+  primaryColor  String?
+  config        Json                 @default("{}")
+  apiKeyId      String?              @unique
+  isActive      Boolean              @default(true)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  apiKey ApiKey? @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+
+  @@index([type, isActive])
+  @@index([customDomain])
+}
+
+// Extend Organization model with:
+//   apiKeys ApiKey[]

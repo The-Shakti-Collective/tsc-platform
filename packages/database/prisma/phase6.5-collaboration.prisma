@@ -1,0 +1,67 @@
+// Phase 6.5 Sprint 4 — Collaboration Marketplace — merge into schema.prisma
+
+enum CollaborationType {
+  need_rapper
+  need_producer
+  need_guitarist
+  need_videographer
+  need_cover_artist
+  general
+}
+
+enum CollaborationStatus {
+  open
+  filled
+  closed
+  expired
+}
+
+enum CollaborationApplicationStatus {
+  applied
+  accepted
+  rejected
+  withdrawn
+}
+
+model Collaboration {
+  id              String               @id @default(cuid())
+  creatorPersonId String
+  title           String
+  description     String?
+  type            CollaborationType
+  genres          String[]             @default([])
+  city            String?
+  status          CollaborationStatus  @default(open)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  expiresAt       DateTime?
+
+  creator      Person                     @relation("CollaborationCreator", fields: [creatorPersonId], references: [id], onDelete: Cascade)
+  applications CollaborationApplication[]
+
+  @@index([status, type, createdAt(sort: Desc)])
+  @@index([creatorPersonId, status])
+  @@index([city])
+}
+
+model CollaborationApplication {
+  id                String                         @id @default(cuid())
+  collaborationId   String
+  applicantPersonId String
+  message           String?
+  status            CollaborationApplicationStatus @default(applied)
+  appliedAt         DateTime                       @default(now())
+  updatedAt         DateTime                       @updatedAt
+
+  collaboration Collaboration @relation(fields: [collaborationId], references: [id], onDelete: Cascade)
+  applicant     Person        @relation("CollaborationApplicant", fields: [applicantPersonId], references: [id], onDelete: Cascade)
+
+  @@unique([collaborationId, applicantPersonId])
+  @@index([collaborationId, status])
+  @@index([applicantPersonId, status])
+}
+
+// Extend existing Person model with:
+//
+//   collaborationsCreated  Collaboration[]            @relation("CollaborationCreator")
+//   collaborationApplications CollaborationApplication[] @relation("CollaborationApplicant")

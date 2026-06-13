@@ -1,0 +1,7 @@
+// Phase 9 Step 6 — Talent Discovery Agent (Module 6) — merge into schema.prisma
+//
+// Extend ActivityAction enum with:
+//   talent_discovery_scan_completed
+//   talent_discovery_alert_acknowledged
+//
+// No new models — reuses Agent, AgentTask, AgentDecision, AgentRecommendation from Step 1.

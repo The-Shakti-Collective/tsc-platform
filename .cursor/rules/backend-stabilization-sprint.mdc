@@ -1,0 +1,46 @@
+---
+description: Backend Stabilization Sprint (Phase R0) completion state — API health, auth, Swagger, observability, CI, Railway
+alwaysApply: true
+---
+
+# Backend Stabilization Sprint — 2026-06-13 (COMPLETE)
+
+Phase R0 code work is **done**. Domain apps (Community, CoreKnot, Marketplace) stay gated until founder production cutover.
+
+## Completed (code)
+
+| Area | Location / command |
+|------|-------------------|
+| Health | `apps/api/src/modules/health/` — `GET /api/health`, `/live`, `/ready` (Prisma `SELECT 1` + Redis PING via `QueueRegistryService.pingRedis()`); 10 unit tests |
+| Swagger | UI `/api/docs`; export `pnpm openapi:export` → `apps/api/openapi/tsc-api.openapi.json`; `swagger.setup.ts`, `generate-openapi.ts` |
+| Auth | Unified `ClerkAuthGuard`; dev stub when keys placeholder (`NODE_ENV=production` disables stub); per-app `.env.example` + root `ENVIRONMENT_GUIDE.md` |
+| Observability | `apps/api/src/observability/` — Sentry when `SENTRY_DSN`; PostHog no-op without token; BetterStack heartbeat scaffold (`BETTERSTACK_HEARTBEAT_URL`) |
+| Queues | BullMQ: `tsc.feed`, `tsc.reputation`, `tsc.graph`, `tsc.recommendation` (P1 gaps: emails, intelligence-snapshot queues) |
+| CI | `.github/workflows`: lint, typecheck, test, build, security; `CODEOWNERS`, `BRANCH-STRATEGY.md` |
+| Railway | `apps/api/railway.toml`; `start:prod`; health `/api/health/ready`; monorepo root as Railway root |
+| Typecheck | `pnpm --filter @tsc/api typecheck` → **0 errors** |
+
+## Reports
+
+`.agents/reports/execution/`: `DATABASE_HARDENING.md`, `LOCAL_RUNTIME_REPORT.md`, `PRODUCTION_READINESS_REPORT.md`, `BACKEND-DONE-CHECKLIST.md`, `PHASE-R0-ROADMAP.md`
+
+## Org / domains (canonical)
+
+| Resource | Value |
+|----------|-------|
+| GitHub org | `TheShaktiCollective` |
+| API | `api.theshakticollective.in` |
+| Website | `theshakticollective.in` |
+| CoreKnot | `coreknot.in` |
+| Community | `theshakticollective.in/community` |
+
+## Founder manual (blocks prod)
+
+- Secrets: `DATABASE_URL` (Neon), `REDIS_URL`, Clerk keys, `SENTRY_DSN`
+- Push monorepo to GitHub; Railway deploy; Cloudflare DNS
+- CI lint debt + `pnpm audit` security findings
+- Typesense + R2 env (P2 scaffolds only)
+
+## Next agent work
+
+After founder cutover: Community/CoreKnot completion (P1 agents 06–07), not more R0 backend scaffolding.

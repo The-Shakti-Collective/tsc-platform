@@ -1,0 +1,105 @@
+// Phase 6 — Identity Resolution (merge into schema.prisma)
+
+enum IdentifierProvider {
+  email
+  phone
+  instagram
+  spotify
+  tiktok
+  twitter
+  community_account
+  coreknot_user
+  website
+  other
+}
+
+enum PersonRoleType {
+  artist
+  manager
+  fan
+  community_leader
+  booker
+  curator
+  brand_rep
+  organizer
+  other
+}
+
+enum PersonRoleStatus {
+  active
+  inactive
+  pending
+}
+
+enum IdentityMergeReason {
+  manual
+  auto_match
+  sync_reconcile
+  admin_override
+}
+
+// Extend existing Person model with:
+//
+//   mergedIntoId String?
+//   mergedInto   Person?  @relation("PersonMerge", fields: [mergedIntoId], references: [id], onDelete: SetNull)
+//   mergedFrom   Person[] @relation("PersonMerge")
+//   identifiers  PersonIdentifier[]
+//   roles        PersonRole[]
+//   mergeLogs    IdentityMergeLog[] @relation("MergeSurvivor")
+//
+//   @@index([mergedIntoId])
+
+model PersonIdentifier {
+  id           String             @id @default(cuid())
+  personId     String
+  provider     IdentifierProvider
+  externalId   String
+  normalizedId String?
+  verified     Boolean            @default(false)
+  primary      Boolean            @default(false)
+  metadata     Json?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, externalId])
+  @@index([personId])
+  @@index([provider, normalizedId])
+}
+
+model PersonRole {
+  id         String           @id @default(cuid())
+  personId   String
+  role       PersonRoleType
+  status     PersonRoleStatus @default(active)
+  entityType String?
+  entityId   String?
+  metadata   Json?
+  assignedAt DateTime         @default(now())
+  expiresAt  DateTime?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([personId, status])
+  @@index([role, entityType, entityId])
+}
+
+model IdentityMergeLog {
+  id                  String              @id @default(cuid())
+  survivorPersonId    String
+  mergedPersonId      String
+  reason              IdentityMergeReason
+  matchSignals        Json?
+  conflictResolutions Json?
+  mergedBy            String?
+  metadata            Json?
+  createdAt           DateTime            @default(now())
+
+  survivorPerson Person @relation("MergeSurvivor", fields: [survivorPersonId], references: [id], onDelete: Cascade)
+
+  @@index([survivorPersonId])
+  @@index([mergedPersonId])
+}

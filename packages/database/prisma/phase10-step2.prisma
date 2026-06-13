@@ -1,0 +1,150 @@
+// Phase 10.2 — Booking Infrastructure + Contract Infrastructure — merge into schema.prisma
+
+enum BookingRequestStatus {
+  inquiry
+  matched
+  negotiating
+  contracted
+  completed
+  cancelled
+}
+
+enum ContractTemplateType {
+  brand_deal
+  performance
+  workshop
+  community
+}
+
+enum ContractStatus {
+  draft
+  sent
+  signed
+  cancelled
+}
+
+enum InvoiceStatus {
+  draft
+  sent
+  paid
+  overdue
+  cancelled
+}
+
+model BookingRequest {
+  id                String               @id @default(cuid())
+  requesterPersonId String
+  artistId          String
+  venueId           String?
+  eventDate         DateTime?
+  budget            Decimal?
+  message           String?
+  status            BookingRequestStatus @default(inquiry)
+  dealId            String?
+  opportunityId     String?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  requester Person       @relation("BookingRequestRequester", fields: [requesterPersonId], references: [id], onDelete: Cascade)
+  artist    Artist       @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  venue     Venue?       @relation(fields: [venueId], references: [id], onDelete: SetNull)
+  deal      Deal?        @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  opportunity Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  contracts Contract[]
+  invoices  Invoice[]
+
+  @@index([artistId, status])
+  @@index([requesterPersonId, status])
+  @@index([dealId])
+  @@index([opportunityId])
+  @@index([status, createdAt(sort: Desc)])
+}
+
+model ContractTemplate {
+  id           String               @id @default(cuid())
+  slug         String               @unique
+  name         String
+  type         ContractTemplateType
+  bodyTemplate String
+  variables    String[]             @default([])
+  isActive     Boolean              @default(true)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  contracts Contract[]
+
+  @@index([type, isActive])
+}
+
+model Contract {
+  id               String         @id @default(cuid())
+  templateId       String
+  dealId           String?
+  bookingRequestId String?
+  artistId         String
+  brandId          String?
+  status           ContractStatus @default(draft)
+  signedAt         DateTime?
+  documentUrl      String?
+  variables        Json           @default("{}")
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  template       ContractTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  deal           Deal?            @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  bookingRequest BookingRequest?  @relation(fields: [bookingRequestId], references: [id], onDelete: SetNull)
+  artist         Artist           @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  brand          Brand?           @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  invoices       Invoice[]
+
+  @@index([artistId, status])
+  @@index([brandId, status])
+  @@index([dealId])
+  @@index([bookingRequestId])
+  @@index([templateId])
+}
+
+model Invoice {
+  id               String        @id @default(cuid())
+  contractId       String?
+  dealId           String?
+  bookingRequestId String?
+  artistId         String
+  brandId          String?
+  amount           Decimal?
+  currency         String        @default("INR")
+  status           InvoiceStatus @default(draft)
+  dueDate          DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  contract       Contract?       @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  deal           Deal?           @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  bookingRequest BookingRequest? @relation(fields: [bookingRequestId], references: [id], onDelete: SetNull)
+
+  @@index([contractId])
+  @@index([dealId])
+  @@index([bookingRequestId])
+  @@index([artistId, status])
+}
+
+// Extend Person model with:
+//   bookingRequests BookingRequest[] @relation("BookingRequestRequester")
+//
+// Extend Artist model with:
+//   bookingRequests BookingRequest[]
+//   contracts       Contract[]
+//
+// Extend Brand model with:
+//   contracts Contract[]
+//
+// Extend Venue model with:
+//   bookingRequests BookingRequest[]
+//
+// Extend Deal model with:
+//   bookingRequests BookingRequest[]
+//   contracts       Contract[]
+//   invoices        Invoice[]
+//
+// Extend Opportunity model with:
+//   bookingRequests BookingRequest[]

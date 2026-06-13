@@ -1,0 +1,40 @@
+// Phase 6.5 Sprint 2 — Event Participation Layer — merge into schema.prisma
+
+enum EventParticipationRole {
+  Attendee
+  Artist
+  Volunteer
+  Organizer
+  Judge
+  Speaker
+}
+
+enum EventParticipationStatus {
+  registered
+  checked_in
+  cancelled
+  no_show
+}
+
+model EventParticipation {
+  id          String                   @id @default(cuid())
+  eventId     String
+  personId    String
+  role        EventParticipationRole   @default(Attendee)
+  status      EventParticipationStatus @default(registered)
+  checkedInAt DateTime?
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+
+  event  Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, personId])
+  @@index([eventId, role, status])
+  @@index([personId, status])
+}
+
+// Extend existing models with:
+//
+//   Event.participations EventParticipation[]
+//   Person.eventParticipations EventParticipation[]

@@ -1,0 +1,48 @@
+// Phase 8 Step 5 — Audience Intelligence V2 — merge into schema.prisma
+
+model AudienceHealthSnapshot {
+  id                String   @id @default(cuid())
+  artistId          String
+  snapshotDate      DateTime @db.Date
+  audienceGrowth    Float    @default(0)
+  audienceChurn     Float    @default(0)
+  fanRetention      Float    @default(0)
+  fanConversion     Float    @default(0)
+  lifetimeValueStub Float    @default(0)
+  metrics           Json     @default("{}")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@unique([artistId, snapshotDate])
+  @@index([artistId, snapshotDate(sort: Desc)])
+  @@index([audienceGrowth(sort: Desc)])
+  @@index([fanRetention(sort: Asc)])
+}
+
+model CommunityAudienceSnapshot {
+  id                     String   @id @default(cuid())
+  communityId            String
+  snapshotDate           DateTime @db.Date
+  memberGrowth           Float    @default(0)
+  activeMembers          Int      @default(0)
+  membershipRevenueStub  Float    @default(0)
+  fanGrowth              Float    @default(0)
+  eventConversion        Float    @default(0)
+  metrics                Json     @default("{}")
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@unique([communityId, snapshotDate])
+  @@index([communityId, snapshotDate(sort: Desc)])
+  @@index([memberGrowth(sort: Desc)])
+}
+
+// Extend Artist model with:
+//   audienceHealthSnapshots AudienceHealthSnapshot[]
+//
+// Extend Community model with:
+//   audienceSnapshots CommunityAudienceSnapshot[]

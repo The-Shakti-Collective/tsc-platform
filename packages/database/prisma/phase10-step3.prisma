@@ -1,0 +1,116 @@
+// Phase 10.3 — Payments Infrastructure (Revenue Rail) — merge into schema.prisma
+
+enum PaymentProvider {
+  razorpay
+  stripe
+  cashfree
+  manual
+}
+
+enum EscrowStatus {
+  pending
+  holding
+  released
+  cancelled
+}
+
+enum PayoutStatus {
+  scheduled
+  processing
+  paid
+  failed
+  cancelled
+}
+
+enum SettlementStatus {
+  draft
+  pending
+  settled
+  cancelled
+}
+
+// Upgrade InvoiceStatus — add overdue; add paidAt + paymentProvider on Invoice model
+// Replace existing InvoiceStatus enum with:
+enum InvoiceStatus {
+  draft
+  sent
+  paid
+  overdue
+  cancelled
+}
+
+model Escrow {
+  id         String          @id @default(cuid())
+  dealId     String?
+  contractId String?
+  amount     Decimal
+  currency   String          @default("INR")
+  status     EscrowStatus    @default(pending)
+  provider   PaymentProvider @default(razorpay)
+  externalId String?
+  heldAt     DateTime?
+  releasedAt DateTime?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  deal     Deal?     @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  contract Contract? @relation(fields: [contractId], references: [id], onDelete: SetNull)
+
+  @@index([dealId])
+  @@index([contractId])
+  @@index([status])
+}
+
+model Payout {
+  id          String          @id @default(cuid())
+  artistId    String?
+  personId    String
+  amount      Decimal
+  currency    String          @default("INR")
+  status      PayoutStatus    @default(scheduled)
+  provider    PaymentProvider @default(razorpay)
+  externalId  String?
+  scheduledAt DateTime?
+  paidAt      DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  artist Artist? @relation(fields: [artistId], references: [id], onDelete: SetNull)
+  person Person  @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([artistId, status])
+  @@index([personId, status])
+  @@index([status, scheduledAt])
+}
+
+model Settlement {
+  id           String           @id @default(cuid())
+  periodStart  DateTime
+  periodEnd    DateTime
+  totalAmount  Decimal
+  currency     String           @default("INR")
+  status       SettlementStatus @default(draft)
+  payoutIds    Json             @default("[]")
+  settledAt    DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([periodStart, periodEnd])
+  @@index([status])
+}
+
+// Invoice model upgrades (merge fields into existing Invoice):
+//   paidAt          DateTime?
+//   paymentProvider PaymentProvider?
+//
+// Extend Deal model with:
+//   escrows Escrow[]
+//
+// Extend Contract model with:
+//   escrows Escrow[]
+//
+// Extend Artist model with:
+//   payouts Payout[]
+//
+// Extend Person model with:
+//   payouts Payout[]

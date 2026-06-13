@@ -1,0 +1,32 @@
+// Phase 6 — Artist Passport (TSC Passport) — merge into schema.prisma
+
+model ArtistPassport {
+  id                      String    @id @default(cuid())
+  artistId                String    @unique
+  slug                    String    @unique
+  isPublic                Boolean   @default(false)
+  showHealthScore         Boolean   @default(true)
+  showCommunityScore      Boolean   @default(true)
+  showActivityScore       Boolean   @default(true)
+  showOpportunityHistory  Boolean   @default(false)
+  showCareerGraph         Boolean   @default(true)
+  headline                String?
+  bio                     String?
+  photoUrl                String?
+  links                   Json      @default("[]")
+  cachedEcosystemScore    Float?
+  ecosystemScoreUpdatedAt DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@index([isPublic, slug])
+}
+
+// Extend existing Artist model with:
+//
+//   passport ArtistPassport?
+//
+// Expected Artist fields used by passport aggregation:
+//   id, slug, displayName, name, personId, bio, photoUrl, metadata

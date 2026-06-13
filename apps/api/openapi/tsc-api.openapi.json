@@ -1,0 +1,7224 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/identity/resolve": {
+      "post": {
+        "operationId": "IdentityController_resolve",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Identity"
+        ]
+      }
+    },
+    "/api/identity/merge": {
+      "post": {
+        "operationId": "IdentityController_merge",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Identity"
+        ]
+      }
+    },
+    "/api/identity/persons/{id}/360": {
+      "get": {
+        "operationId": "IdentityController_getPerson360",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Identity"
+        ]
+      }
+    },
+    "/api/identity/persons/{id}": {
+      "get": {
+        "operationId": "IdentityController_getPerson",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Identity"
+        ]
+      },
+      "patch": {
+        "operationId": "IdentityController_updatePerson",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Identity"
+        ]
+      }
+    },
+    "/api/identity/persons/by-username/{username}": {
+      "get": {
+        "operationId": "IdentityController_getPersonByUsername",
+        "parameters": [
+          {
+            "name": "username",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Identity"
+        ]
+      }
+    },
+    "/api/profile/{slug}/public": {
+      "get": {
+        "operationId": "PublicProfileController_getPublicProfile",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PublicProfile"
+        ]
+      }
+    },
+    "/api/profile/{slug}/ecosystem": {
+      "get": {
+        "operationId": "PublicProfileController_getEcosystemPassport",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PublicProfile"
+        ]
+      }
+    },
+    "/api/profile/me": {
+      "get": {
+        "operationId": "ProfileController_getMyProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Profile"
+        ]
+      },
+      "patch": {
+        "operationId": "ProfileController_updateMyProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/api/profile/username/check": {
+      "post": {
+        "operationId": "ProfileController_checkUsername",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/api/profile/me/following/feed": {
+      "get": {
+        "operationId": "ProfileController_getFollowingFeed",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/api/profile/follow/{personId}": {
+      "post": {
+        "operationId": "ProfileController_followPerson",
+        "parameters": [
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/api/profile/unfollow/{personId}": {
+      "delete": {
+        "operationId": "ProfileController_unfollowPerson",
+        "parameters": [
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/api/profile/{personId}/followers": {
+      "get": {
+        "operationId": "ProfileController_listFollowers",
+        "parameters": [
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/api/profile/{personId}/following": {
+      "get": {
+        "operationId": "ProfileController_listFollowing",
+        "parameters": [
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/api/profile/{personId}/follow-status": {
+      "get": {
+        "operationId": "ProfileController_getFollowStatus",
+        "parameters": [
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/api/profile/{id}/verification": {
+      "get": {
+        "operationId": "ProfileController_getVerification",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/api/profile/verification/request-community": {
+      "post": {
+        "operationId": "ProfileController_requestCommunityVerification",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/api/admin/verification/{personId}": {
+      "patch": {
+        "operationId": "AdminVerificationController_setAdminVerification",
+        "parameters": [
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AdminVerification"
+        ]
+      }
+    },
+    "/api/passport/{slug}/public": {
+      "get": {
+        "operationId": "PublicPassportController_getPublicPassport",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PublicPassport"
+        ]
+      }
+    },
+    "/api/passport/{slug}": {
+      "get": {
+        "operationId": "PassportController_getPassportBySlug",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Passport"
+        ]
+      }
+    },
+    "/api/artists/{id}/passport": {
+      "get": {
+        "operationId": "ArtistPassportController_getPassportByArtistId",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ArtistPassport"
+        ]
+      },
+      "patch": {
+        "operationId": "ArtistPassportController_updatePassport",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ArtistPassport"
+        ]
+      }
+    },
+    "/api/marketplace/listings": {
+      "get": {
+        "operationId": "MarketplaceController_browseListings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Marketplace"
+        ]
+      }
+    },
+    "/api/marketplace/search": {
+      "get": {
+        "operationId": "MarketplaceController_searchListings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Marketplace"
+        ]
+      }
+    },
+    "/api/marketplace/listings/{id}": {
+      "get": {
+        "operationId": "MarketplaceController_getListingDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Marketplace"
+        ]
+      }
+    },
+    "/api/marketplace/listings/{id}/bookmark": {
+      "post": {
+        "operationId": "MarketplaceController_bookmarkListing",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Marketplace"
+        ]
+      }
+    },
+    "/api/marketplace/listings/{id}/apply": {
+      "post": {
+        "operationId": "MarketplaceController_applyToListing",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Marketplace"
+        ]
+      }
+    },
+    "/api/marketplace/listings/{id}/share": {
+      "post": {
+        "operationId": "MarketplaceController_shareListing",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Marketplace"
+        ]
+      }
+    },
+    "/api/marketplace/listings/{id}/track": {
+      "post": {
+        "operationId": "MarketplaceController_trackListing",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Marketplace"
+        ]
+      }
+    },
+    "/api/opportunities/marketplace": {
+      "get": {
+        "operationId": "OpportunityController_browseMarketplace",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Opportunity"
+        ]
+      }
+    },
+    "/api/opportunities/{id}": {
+      "get": {
+        "operationId": "OpportunityController_getDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Opportunity"
+        ]
+      }
+    },
+    "/api/opportunities/{id}/save": {
+      "post": {
+        "operationId": "OpportunityController_save",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Opportunity"
+        ]
+      }
+    },
+    "/api/opportunities/{id}/apply": {
+      "post": {
+        "operationId": "OpportunityController_apply",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Opportunity"
+        ]
+      }
+    },
+    "/api/opportunities/{id}/share": {
+      "post": {
+        "operationId": "OpportunityController_share",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Opportunity"
+        ]
+      }
+    },
+    "/api/artists/{id}/applications": {
+      "get": {
+        "operationId": "ArtistApplicationsController_listApplications",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ArtistApplications"
+        ]
+      }
+    },
+    "/api/artists/{artistId}/applications/{applicationId}": {
+      "patch": {
+        "operationId": "ArtistApplicationsController_updateApplicationStatus",
+        "parameters": [
+          {
+            "name": "artistId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "applicationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ArtistApplications"
+        ]
+      }
+    },
+    "/api/intelligence/opportunities/suggested": {
+      "get": {
+        "operationId": "IntelligenceController_getSuggestedOpportunities",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/opportunities/scores": {
+      "get": {
+        "operationId": "IntelligenceController_getOpportunityScores",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/artists/{id}/health": {
+      "get": {
+        "operationId": "IntelligenceController_getArtistHealth",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/artists/{id}/risk-alerts": {
+      "get": {
+        "operationId": "IntelligenceController_getArtistRiskAlerts",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/fans/{personId}/scores": {
+      "get": {
+        "operationId": "IntelligenceController_getFanScores",
+        "parameters": [
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/fans/{artistId}/segments": {
+      "get": {
+        "operationId": "IntelligenceController_getFanSegments",
+        "parameters": [
+          {
+            "name": "artistId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/cities/{city}/recommendations": {
+      "get": {
+        "operationId": "IntelligenceController_getCityRecommendations",
+        "parameters": [
+          {
+            "name": "city",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/cities/{city}": {
+      "get": {
+        "operationId": "IntelligenceController_getCityIntelligence",
+        "parameters": [
+          {
+            "name": "city",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/communities/{id}/intelligence": {
+      "get": {
+        "operationId": "IntelligenceController_getCommunityIntelligence",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/recommendations/artists": {
+      "get": {
+        "operationId": "IntelligenceController_getArtistRecommendations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/recommendations/events": {
+      "get": {
+        "operationId": "IntelligenceController_getEventRecommendations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/recommendations/workshops": {
+      "get": {
+        "operationId": "IntelligenceController_getWorkshopRecommendations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/ecosystem/{entityType}/{entityId}/graph": {
+      "get": {
+        "operationId": "IntelligenceController_getEcosystemGraph",
+        "parameters": [
+          {
+            "name": "entityType",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/command-center/v3": {
+      "get": {
+        "operationId": "IntelligenceController_getCommandCenterV3",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/command-center/v4": {
+      "get": {
+        "operationId": "IntelligenceController_getCommandCenterV4",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/command-center/v5": {
+      "get": {
+        "operationId": "IntelligenceController_getCommandCenterV5",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/command-center": {
+      "get": {
+        "operationId": "IntelligenceController_getCommandCenter",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/participation-dashboard": {
+      "get": {
+        "operationId": "IntelligenceController_getParticipationDashboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/executive/today": {
+      "get": {
+        "operationId": "IntelligenceController_getExecutiveToday",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/executive/weekly": {
+      "get": {
+        "operationId": "IntelligenceController_getExecutiveWeekly",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/executive/monthly": {
+      "get": {
+        "operationId": "IntelligenceController_getExecutiveMonthly",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/actions/create-campaign": {
+      "post": {
+        "operationId": "IntelligenceActionsController_createCampaign",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "IntelligenceActions"
+        ]
+      }
+    },
+    "/api/intelligence/actions/invite-artists": {
+      "post": {
+        "operationId": "IntelligenceActionsController_inviteArtists",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "IntelligenceActions"
+        ]
+      }
+    },
+    "/api/intelligence/actions/launch-opportunity": {
+      "post": {
+        "operationId": "IntelligenceActionsController_launchOpportunity",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "IntelligenceActions"
+        ]
+      }
+    },
+    "/api/intelligence/actions/contact-community": {
+      "post": {
+        "operationId": "IntelligenceActionsController_contactCommunity",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "IntelligenceActions"
+        ]
+      }
+    },
+    "/api/intelligence/actions/review-pipeline-deals": {
+      "post": {
+        "operationId": "IntelligenceActionsController_reviewPipelineDeals",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "IntelligenceActions"
+        ]
+      }
+    },
+    "/api/intelligence/actions/launch-brand-campaign": {
+      "post": {
+        "operationId": "IntelligenceActionsController_launchBrandCampaign",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "IntelligenceActions"
+        ]
+      }
+    },
+    "/api/intelligence/actions/contact-at-risk-artists": {
+      "post": {
+        "operationId": "IntelligenceActionsController_contactAtRiskArtists",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "IntelligenceActions"
+        ]
+      }
+    },
+    "/api/intelligence/actions/review-recovery-plan": {
+      "post": {
+        "operationId": "IntelligenceActionsController_reviewRecoveryPlan",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "IntelligenceActions"
+        ]
+      }
+    },
+    "/api/intelligence/actions/apply-recommended": {
+      "post": {
+        "operationId": "IntelligenceActionsController_applyRecommended",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "IntelligenceActions"
+        ]
+      }
+    },
+    "/api/intelligence/actions/launch-community-campaign": {
+      "post": {
+        "operationId": "IntelligenceActionsController_launchCommunityCampaign",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "IntelligenceActions"
+        ]
+      }
+    },
+    "/api/intelligence/automation/rules": {
+      "get": {
+        "operationId": "AutomationController_listRules",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Automation"
+        ]
+      },
+      "post": {
+        "operationId": "AutomationController_createRule",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Automation"
+        ]
+      }
+    },
+    "/api/intelligence/automation/runs/recent": {
+      "get": {
+        "operationId": "AutomationController_listRecentRuns",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Automation"
+        ]
+      }
+    },
+    "/api/intelligence/automation/rules/{id}": {
+      "get": {
+        "operationId": "AutomationController_getRule",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Automation"
+        ]
+      },
+      "patch": {
+        "operationId": "AutomationController_updateRule",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Automation"
+        ]
+      },
+      "delete": {
+        "operationId": "AutomationController_deleteRule",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Automation"
+        ]
+      }
+    },
+    "/api/intelligence/automation/evaluate": {
+      "post": {
+        "operationId": "AutomationController_evaluateAll",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Automation"
+        ]
+      }
+    },
+    "/api/intelligence/automation/evaluate/artist/{id}": {
+      "post": {
+        "operationId": "AutomationController_evaluateArtist",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Automation"
+        ]
+      }
+    },
+    "/api/intelligence/automation/trigger": {
+      "post": {
+        "operationId": "AutomationController_trigger",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Automation"
+        ]
+      }
+    },
+    "/api/intelligence/goals/dashboard": {
+      "get": {
+        "operationId": "GoalController_getDashboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Goal"
+        ]
+      }
+    },
+    "/api/intelligence/goals": {
+      "get": {
+        "operationId": "GoalController_listGoals",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Goal"
+        ]
+      },
+      "post": {
+        "operationId": "GoalController_createGoal",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Goal"
+        ]
+      }
+    },
+    "/api/intelligence/goals/{id}": {
+      "get": {
+        "operationId": "GoalController_getGoal",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Goal"
+        ]
+      },
+      "patch": {
+        "operationId": "GoalController_updateGoal",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Goal"
+        ]
+      },
+      "delete": {
+        "operationId": "GoalController_deleteGoal",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Goal"
+        ]
+      }
+    },
+    "/api/intelligence/goals/{id}/progress": {
+      "patch": {
+        "operationId": "GoalController_updateProgress",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Goal"
+        ]
+      }
+    },
+    "/api/audience/artists/{id}/health": {
+      "get": {
+        "operationId": "AudienceController_getArtistHealth",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Audience"
+        ]
+      }
+    },
+    "/api/audience/communities/{id}": {
+      "get": {
+        "operationId": "AudienceController_getCommunityAudience",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Audience"
+        ]
+      }
+    },
+    "/api/audience/insights/top-growth-artists": {
+      "get": {
+        "operationId": "AudienceController_getTopGrowthArtists",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Audience"
+        ]
+      }
+    },
+    "/api/audience/insights/churn-risk": {
+      "get": {
+        "operationId": "AudienceController_getChurnRiskArtists",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Audience"
+        ]
+      }
+    },
+    "/api/audience/refresh/artist/{id}": {
+      "post": {
+        "operationId": "AudienceAdminController_refreshArtist",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AudienceAdmin"
+        ]
+      }
+    },
+    "/api/audience/refresh/community/{id}": {
+      "post": {
+        "operationId": "AudienceAdminController_refreshCommunity",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AudienceAdmin"
+        ]
+      }
+    },
+    "/api/agents/decisions/{id}/approve": {
+      "post": {
+        "operationId": "AgentsController_approveDecision",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Agents"
+        ]
+      }
+    },
+    "/api/agents/decisions/{id}/reject": {
+      "post": {
+        "operationId": "AgentsController_rejectDecision",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Agents"
+        ]
+      }
+    },
+    "/api/agents/recommendations/for-me": {
+      "get": {
+        "operationId": "AgentsController_recommendationsForMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Agents"
+        ]
+      }
+    },
+    "/api/agents/recommendations/artist/{artistId}": {
+      "get": {
+        "operationId": "AgentsController_recommendationsForArtist",
+        "parameters": [
+          {
+            "name": "artistId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Agents"
+        ]
+      }
+    },
+    "/api/agents/opportunity/run": {
+      "post": {
+        "operationId": "OpportunityAgentController_run",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "OpportunityAgent"
+        ]
+      }
+    },
+    "/api/agents/opportunity/recommendations/{artistId}": {
+      "get": {
+        "operationId": "OpportunityAgentController_listRecommendations",
+        "parameters": [
+          {
+            "name": "artistId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "OpportunityAgent"
+        ]
+      }
+    },
+    "/api/agents/career/run/{artistId}": {
+      "post": {
+        "operationId": "CareerAgentController_run",
+        "parameters": [
+          {
+            "name": "artistId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CareerAgent"
+        ]
+      }
+    },
+    "/api/agents/career/actions/{artistId}": {
+      "get": {
+        "operationId": "CareerAgentController_listActions",
+        "parameters": [
+          {
+            "name": "artistId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CareerAgent"
+        ]
+      }
+    },
+    "/api/agents/career/actions/{id}/dismiss": {
+      "post": {
+        "operationId": "CareerAgentController_dismissAction",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CareerAgent"
+        ]
+      }
+    },
+    "/api/agents/career/dashboard/{artistId}": {
+      "get": {
+        "operationId": "CareerAgentController_dashboard",
+        "parameters": [
+          {
+            "name": "artistId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CareerAgent"
+        ]
+      }
+    },
+    "/api/agents/community/run/{communityId}": {
+      "post": {
+        "operationId": "CommunityAgentController_run",
+        "parameters": [
+          {
+            "name": "communityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CommunityAgent"
+        ]
+      }
+    },
+    "/api/agents/community/suggestions/{communityId}": {
+      "get": {
+        "operationId": "CommunityAgentController_listSuggestions",
+        "parameters": [
+          {
+            "name": "communityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CommunityAgent"
+        ]
+      }
+    },
+    "/api/agents/community/suggestions/{id}/approve": {
+      "post": {
+        "operationId": "CommunityAgentController_approveSuggestion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CommunityAgent"
+        ]
+      }
+    },
+    "/api/agents/community/suggestions/{id}/dismiss": {
+      "post": {
+        "operationId": "CommunityAgentController_dismissSuggestion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CommunityAgent"
+        ]
+      }
+    },
+    "/api/agents/event/run/{eventId}": {
+      "post": {
+        "operationId": "EventAgentController_run",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventAgent"
+        ]
+      }
+    },
+    "/api/agents/event/insights/{eventId}": {
+      "get": {
+        "operationId": "EventAgentController_getInsights",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventAgent"
+        ]
+      }
+    },
+    "/api/agents/event/suggestions/{id}/approve": {
+      "post": {
+        "operationId": "EventAgentController_approveSuggestion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventAgent"
+        ]
+      }
+    },
+    "/api/agents/event/suggestions/{id}/dismiss": {
+      "post": {
+        "operationId": "EventAgentController_dismissSuggestion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventAgent"
+        ]
+      }
+    },
+    "/api/agents/brand-match/run": {
+      "post": {
+        "operationId": "BrandMatchAgentController_run",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "BrandMatchAgent"
+        ]
+      }
+    },
+    "/api/agents/brand-match/results/{brandId}": {
+      "get": {
+        "operationId": "BrandMatchAgentController_getResults",
+        "parameters": [
+          {
+            "name": "brandId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "BrandMatchAgent"
+        ]
+      }
+    },
+    "/api/agents/brand-match/results/{recommendationId}/invite": {
+      "post": {
+        "operationId": "BrandMatchAgentController_inviteArtist",
+        "parameters": [
+          {
+            "name": "recommendationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "BrandMatchAgent"
+        ]
+      }
+    },
+    "/api/agents/brand-match/campaigns/{brandId}": {
+      "get": {
+        "operationId": "BrandMatchAgentController_getCampaignHistory",
+        "parameters": [
+          {
+            "name": "brandId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "BrandMatchAgent"
+        ]
+      }
+    },
+    "/api/agents/talent-discovery/run": {
+      "post": {
+        "operationId": "TalentDiscoveryAgentController_run",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TalentDiscoveryAgent"
+        ]
+      }
+    },
+    "/api/agents/talent-discovery/alerts": {
+      "get": {
+        "operationId": "TalentDiscoveryAgentController_listAlerts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TalentDiscoveryAgent"
+        ]
+      }
+    },
+    "/api/agents/talent-discovery/alerts/{id}/acknowledge": {
+      "post": {
+        "operationId": "TalentDiscoveryAgentController_acknowledgeAlert",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TalentDiscoveryAgent"
+        ]
+      }
+    },
+    "/api/agents/talent-discovery/emerging-cities": {
+      "get": {
+        "operationId": "TalentDiscoveryAgentController_emergingCities",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TalentDiscoveryAgent"
+        ]
+      }
+    },
+    "/api/agents/talent-discovery/fast-growing-artists": {
+      "get": {
+        "operationId": "TalentDiscoveryAgentController_fastGrowingArtists",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TalentDiscoveryAgent"
+        ]
+      }
+    },
+    "/api/agents/forecast/run": {
+      "post": {
+        "operationId": "ForecastAgentController_run",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ForecastAgent"
+        ]
+      }
+    },
+    "/api/agents/forecast/platform": {
+      "get": {
+        "operationId": "ForecastAgentController_platformRollup",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ForecastAgent"
+        ]
+      }
+    },
+    "/api/agents/forecast/{entityType}/{entityId}": {
+      "get": {
+        "operationId": "ForecastAgentController_entityForecasts",
+        "parameters": [
+          {
+            "name": "entityType",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ForecastAgent"
+        ]
+      }
+    },
+    "/api/agents/copilot/query": {
+      "post": {
+        "operationId": "CopilotAgentController_query",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CopilotAgent"
+        ]
+      }
+    },
+    "/api/agents/copilot/suggestions": {
+      "get": {
+        "operationId": "CopilotAgentController_suggestions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CopilotAgent"
+        ]
+      }
+    },
+    "/api/agents/copilot/feedback": {
+      "post": {
+        "operationId": "CopilotAgentController_feedback",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CopilotAgent"
+        ]
+      }
+    },
+    "/api/agents/insights": {
+      "get": {
+        "operationId": "InsightsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Insights"
+        ]
+      }
+    },
+    "/api/agents/insights/{id}/actions/{actionType}": {
+      "post": {
+        "operationId": "InsightsController_executeAction",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "actionType",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Insights"
+        ]
+      }
+    },
+    "/api/agents/workflows": {
+      "get": {
+        "operationId": "AutonomousWorkflowController_catalog",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AutonomousWorkflow"
+        ]
+      }
+    },
+    "/api/agents/workflows/run": {
+      "post": {
+        "operationId": "AutonomousWorkflowController_run",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AutonomousWorkflow"
+        ]
+      }
+    },
+    "/api/agents/workflows/runs/{id}": {
+      "get": {
+        "operationId": "AutonomousWorkflowController_getRun",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AutonomousWorkflow"
+        ]
+      }
+    },
+    "/api/agents/workflows/runs/{id}/approve": {
+      "post": {
+        "operationId": "AutonomousWorkflowController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AutonomousWorkflow"
+        ]
+      }
+    },
+    "/api/agents/workflows/runs/{id}/cancel": {
+      "post": {
+        "operationId": "AutonomousWorkflowController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AutonomousWorkflow"
+        ]
+      }
+    },
+    "/api/agents/opportunity-generation/run": {
+      "post": {
+        "operationId": "OpportunityGenerationController_run",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "OpportunityGeneration"
+        ]
+      }
+    },
+    "/api/agents/opportunity-generation/drafts": {
+      "get": {
+        "operationId": "OpportunityGenerationController_listDrafts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "OpportunityGeneration"
+        ]
+      }
+    },
+    "/api/agents/opportunity-generation/signals": {
+      "get": {
+        "operationId": "OpportunityGenerationController_getSignals",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "OpportunityGeneration"
+        ]
+      }
+    },
+    "/api/agents/opportunity-generation/drafts/{id}/approve": {
+      "post": {
+        "operationId": "OpportunityGenerationController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "OpportunityGeneration"
+        ]
+      }
+    },
+    "/api/agents/opportunity-generation/drafts/{id}/dismiss": {
+      "post": {
+        "operationId": "OpportunityGenerationController_dismiss",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "OpportunityGeneration"
+        ]
+      }
+    },
+    "/api/activity/feed": {
+      "get": {
+        "operationId": "ActivityController_getFeed",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Activity"
+        ]
+      }
+    },
+    "/api/activity/person/{personId}": {
+      "get": {
+        "operationId": "ActivityController_getPersonActivity",
+        "parameters": [
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Activity"
+        ]
+      }
+    },
+    "/api/activity/community/{communityId}": {
+      "get": {
+        "operationId": "ActivityController_getCommunityActivity",
+        "parameters": [
+          {
+            "name": "communityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Activity"
+        ]
+      }
+    },
+    "/api/activity": {
+      "post": {
+        "operationId": "ActivityController_recordActivity",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Activity"
+        ]
+      }
+    },
+    "/api/collaborations": {
+      "get": {
+        "operationId": "CollaborationController_browse",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Collaboration"
+        ]
+      },
+      "post": {
+        "operationId": "CollaborationController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Collaboration"
+        ]
+      }
+    },
+    "/api/collaborations/me/created": {
+      "get": {
+        "operationId": "CollaborationController_listMyCreated",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Collaboration"
+        ]
+      }
+    },
+    "/api/collaborations/me/applications": {
+      "get": {
+        "operationId": "CollaborationController_listMyApplications",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Collaboration"
+        ]
+      }
+    },
+    "/api/collaborations/{id}": {
+      "get": {
+        "operationId": "CollaborationController_getDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Collaboration"
+        ]
+      },
+      "patch": {
+        "operationId": "CollaborationController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Collaboration"
+        ]
+      }
+    },
+    "/api/collaborations/{id}/apply": {
+      "post": {
+        "operationId": "CollaborationController_apply",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Collaboration"
+        ]
+      }
+    },
+    "/api/collaborations/{id}/applications/{applicationId}": {
+      "patch": {
+        "operationId": "CollaborationController_updateApplication",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "applicationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Collaboration"
+        ]
+      }
+    },
+    "/api/credits/me": {
+      "get": {
+        "operationId": "CreditsController_getMyBalance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Credits"
+        ]
+      }
+    },
+    "/api/credits/me/history": {
+      "get": {
+        "operationId": "CreditsController_getMyHistory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Credits"
+        ]
+      }
+    },
+    "/api/credits/earn": {
+      "post": {
+        "operationId": "CreditsController_earn",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Credits"
+        ]
+      }
+    },
+    "/api/credits/stub/share": {
+      "post": {
+        "operationId": "CreditsController_shareStub",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Credits"
+        ]
+      }
+    },
+    "/api/credits/stub/refer": {
+      "post": {
+        "operationId": "CreditsController_referStub",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Credits"
+        ]
+      }
+    },
+    "/api/events/intelligence/insights/cities": {
+      "get": {
+        "operationId": "EventIntelligenceController_getCityInsights",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventIntelligence"
+        ]
+      }
+    },
+    "/api/events/intelligence/insights/conversion-leaders": {
+      "get": {
+        "operationId": "EventIntelligenceController_getConversionLeaders",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventIntelligence"
+        ]
+      }
+    },
+    "/api/events/intelligence/insights/repeat-attendance": {
+      "get": {
+        "operationId": "EventIntelligenceController_getRepeatAttendance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventIntelligence"
+        ]
+      }
+    },
+    "/api/events/{id}/intelligence/recommendations": {
+      "get": {
+        "operationId": "EventIntelligenceController_getRecommendations",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventIntelligence"
+        ]
+      }
+    },
+    "/api/events/{id}/intelligence/predict": {
+      "get": {
+        "operationId": "EventIntelligenceController_getPredict",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventIntelligence"
+        ]
+      }
+    },
+    "/api/events/{id}/intelligence": {
+      "get": {
+        "operationId": "EventIntelligenceController_getIntelligence",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventIntelligence"
+        ]
+      }
+    },
+    "/api/events/{id}/intelligence/refresh": {
+      "post": {
+        "operationId": "EventIntelligenceController_refreshIntelligence",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventIntelligence"
+        ]
+      }
+    },
+    "/api/events/{id}/register": {
+      "post": {
+        "operationId": "EventController_register",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Event"
+        ]
+      }
+    },
+    "/api/events/{id}/check-in": {
+      "post": {
+        "operationId": "EventController_checkIn",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Event"
+        ]
+      }
+    },
+    "/api/events/{id}/participants": {
+      "get": {
+        "operationId": "EventController_listParticipants",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Event"
+        ]
+      }
+    },
+    "/api/events/{id}/participants/{personId}/role": {
+      "patch": {
+        "operationId": "EventController_updateParticipantRole",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Event"
+        ]
+      }
+    },
+    "/api/identity/network/{personId}": {
+      "get": {
+        "operationId": "TscIdentityNetworkController_getPersonNetwork",
+        "parameters": [
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TscIdentityNetwork"
+        ]
+      }
+    },
+    "/api/identity/verify/badges/{entityType}/{entityId}": {
+      "get": {
+        "operationId": "TscIdentityNetworkController_getVerificationBadges",
+        "parameters": [
+          {
+            "name": "entityType",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TscIdentityNetwork"
+        ]
+      }
+    },
+    "/api/identity/{namespace}/{slug}/public": {
+      "get": {
+        "operationId": "TscIdentityNetworkController_getPublicIdentity",
+        "parameters": [
+          {
+            "name": "namespace",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TscIdentityNetwork"
+        ]
+      }
+    },
+    "/api/admin/identity/verify/{entityType}/{entityId}": {
+      "post": {
+        "operationId": "AdminIdentityController_setVerificationBadge",
+        "parameters": [
+          {
+            "name": "entityType",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AdminIdentity"
+        ]
+      }
+    },
+    "/api/admin/webhooks": {
+      "post": {
+        "operationId": "AdminWebhookController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AdminWebhook"
+        ]
+      },
+      "get": {
+        "operationId": "AdminWebhookController_list",
+        "parameters": [
+          {
+            "name": "apiKeyId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AdminWebhook"
+        ]
+      }
+    },
+    "/api/admin/webhooks/deliveries": {
+      "get": {
+        "operationId": "AdminWebhookController_deliveries",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AdminWebhook"
+        ]
+      }
+    },
+    "/api/admin/webhooks/{id}": {
+      "delete": {
+        "operationId": "AdminWebhookController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AdminWebhook"
+        ]
+      }
+    },
+    "/api/admin/webhooks/{id}/test": {
+      "post": {
+        "operationId": "AdminWebhookController_test",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AdminWebhook"
+        ]
+      }
+    },
+    "/api/public/v1/export/artists": {
+      "get": {
+        "operationId": "PublicExportController_exportArtists",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PublicExport"
+        ]
+      }
+    },
+    "/api/public/v1/export/relationships": {
+      "get": {
+        "operationId": "PublicExportController_exportRelationships",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PublicExport"
+        ]
+      }
+    },
+    "/api/public/v1/export/analytics": {
+      "get": {
+        "operationId": "PublicExportController_exportAnalytics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PublicExport"
+        ]
+      }
+    },
+    "/api/public/v1/graph/export/{entityType}/{entityId}": {
+      "get": {
+        "operationId": "PublicGraphExportController_exportGraph",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PublicGraphExport"
+        ]
+      }
+    },
+    "/api/exchange/partners/{slug}/ingest": {
+      "post": {
+        "operationId": "ExchangePartnerController_ingest",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ExchangePartner"
+        ]
+      }
+    },
+    "/api/exchange/partners/{slug}/status": {
+      "get": {
+        "operationId": "ExchangePartnerController_status",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ExchangePartner"
+        ]
+      }
+    },
+    "/api/public/v1/artists": {
+      "get": {
+        "operationId": "PublicApiController_listArtists",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PublicApi"
+        ]
+      }
+    },
+    "/api/public/v1/artists/{id}": {
+      "get": {
+        "operationId": "PublicApiController_getArtist",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PublicApi"
+        ]
+      }
+    },
+    "/api/public/v1/communities": {
+      "get": {
+        "operationId": "PublicApiController_listCommunities",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PublicApi"
+        ]
+      }
+    },
+    "/api/public/v1/opportunities": {
+      "get": {
+        "operationId": "PublicApiController_listOpportunities",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PublicApi"
+        ]
+      }
+    },
+    "/api/public/v1/events": {
+      "get": {
+        "operationId": "PublicApiController_listEvents",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PublicApi"
+        ]
+      }
+    },
+    "/api/public/v1/venues": {
+      "get": {
+        "operationId": "PublicApiController_listVenues",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PublicApi"
+        ]
+      }
+    },
+    "/api/public/v1/analytics/summary": {
+      "get": {
+        "operationId": "PublicApiController_analyticsSummary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PublicApi"
+        ]
+      }
+    },
+    "/api/public/v1/identity/{namespace}/{slug}": {
+      "get": {
+        "operationId": "PublicApiController_resolveIdentity",
+        "parameters": [
+          {
+            "name": "namespace",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PublicApi"
+        ]
+      }
+    },
+    "/api/admin/api-keys": {
+      "post": {
+        "operationId": "AdminApiKeyController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AdminApiKey"
+        ]
+      },
+      "get": {
+        "operationId": "AdminApiKeyController_list",
+        "parameters": [
+          {
+            "name": "ownerOrgId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AdminApiKey"
+        ]
+      }
+    },
+    "/api/admin/api-keys/{id}": {
+      "delete": {
+        "operationId": "AdminApiKeyController_revoke",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AdminApiKey"
+        ]
+      }
+    },
+    "/api/relationships/types": {
+      "get": {
+        "operationId": "RelationshipController_listTypes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Relationship"
+        ]
+      }
+    },
+    "/api/relationships/graph/{entityType}/{entityId}": {
+      "get": {
+        "operationId": "RelationshipController_getEntityGraph",
+        "parameters": [
+          {
+            "name": "entityType",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Relationship"
+        ]
+      }
+    },
+    "/api/relationships": {
+      "get": {
+        "operationId": "RelationshipController_listRelationships",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Relationship"
+        ]
+      },
+      "post": {
+        "operationId": "RelationshipController_createRelationship",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Relationship"
+        ]
+      }
+    },
+    "/api/relationships/{id}": {
+      "get": {
+        "operationId": "RelationshipController_getRelationship",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Relationship"
+        ]
+      },
+      "patch": {
+        "operationId": "RelationshipController_updateRelationship",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Relationship"
+        ]
+      },
+      "delete": {
+        "operationId": "RelationshipController_deleteRelationship",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Relationship"
+        ]
+      }
+    },
+    "/api/workspace": {
+      "post": {
+        "operationId": "WorkspaceController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Workspace"
+        ]
+      }
+    },
+    "/api/workspace/me": {
+      "get": {
+        "operationId": "WorkspaceController_getMyWorkspace",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Workspace"
+        ]
+      }
+    },
+    "/api/workspace/{slug}": {
+      "get": {
+        "operationId": "WorkspaceController_getBySlug",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Workspace"
+        ]
+      },
+      "patch": {
+        "operationId": "WorkspaceController_patchSettings",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Workspace"
+        ]
+      }
+    },
+    "/api/workspace/{slug}/members": {
+      "get": {
+        "operationId": "WorkspaceController_listMembers",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Workspace"
+        ]
+      },
+      "post": {
+        "operationId": "WorkspaceController_addMember",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Workspace"
+        ]
+      }
+    },
+    "/api/workspace/{slug}/members/{personId}": {
+      "patch": {
+        "operationId": "WorkspaceController_patchMemberRole",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Workspace"
+        ]
+      },
+      "delete": {
+        "operationId": "WorkspaceController_removeMember",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Workspace"
+        ]
+      }
+    },
+    "/api/workspace/{slug}/teams": {
+      "post": {
+        "operationId": "WorkspaceController_createTeam",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Workspace"
+        ]
+      },
+      "get": {
+        "operationId": "WorkspaceController_listTeams",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Workspace"
+        ]
+      }
+    },
+    "/api/creative-identity/{slug}/public": {
+      "get": {
+        "operationId": "PublicCreativeIdentityController_getPublic",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PublicCreativeIdentity"
+        ]
+      }
+    },
+    "/api/creative-identity/{slug}/roles": {
+      "get": {
+        "operationId": "PublicCreativeIdentityController_getRoles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PublicCreativeIdentity"
+        ]
+      }
+    },
+    "/api/creative-identity/{slug}/skills": {
+      "get": {
+        "operationId": "PublicCreativeIdentityController_getSkills",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PublicCreativeIdentity"
+        ]
+      }
+    },
+    "/api/creative-identity/me": {
+      "get": {
+        "operationId": "CreativeIdentityController_getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CreativeIdentity"
+        ]
+      },
+      "patch": {
+        "operationId": "CreativeIdentityController_patchMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CreativeIdentity"
+        ]
+      }
+    },
+    "/api/creative-identity/me/skills": {
+      "post": {
+        "operationId": "CreativeIdentityController_addSkill",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CreativeIdentity"
+        ]
+      }
+    },
+    "/api/creative-identity/me/skills/{skillId}": {
+      "delete": {
+        "operationId": "CreativeIdentityController_removeSkill",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CreativeIdentity"
+        ]
+      }
+    },
+    "/api/creative-identity/me/roles": {
+      "post": {
+        "operationId": "CreativeIdentityController_addRole",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CreativeIdentity"
+        ]
+      }
+    },
+    "/api/creative-identity/me/roles/{roleId}": {
+      "delete": {
+        "operationId": "CreativeIdentityController_removeRole",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CreativeIdentity"
+        ]
+      }
+    },
+    "/api/skills": {
+      "get": {
+        "operationId": "SkillsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Skills"
+        ]
+      }
+    },
+    "/api/skills/{slug}": {
+      "get": {
+        "operationId": "SkillsController_getBySlug",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Skills"
+        ]
+      }
+    },
+    "/api/skills/{slug}/creators": {
+      "get": {
+        "operationId": "SkillsController_getCreators",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Skills"
+        ]
+      }
+    },
+    "/api/skills/{slug}/endorse": {
+      "post": {
+        "operationId": "SkillsController_endorse",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Skills"
+        ]
+      }
+    },
+    "/api/fans/me/profile": {
+      "get": {
+        "operationId": "FanController_getMyProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Fan"
+        ]
+      },
+      "patch": {
+        "operationId": "FanController_patchMyProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Fan"
+        ]
+      }
+    },
+    "/api/fans/follow/{artistId}": {
+      "post": {
+        "operationId": "FanController_followArtist",
+        "parameters": [
+          {
+            "name": "artistId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Fan"
+        ]
+      }
+    },
+    "/api/fans/support/{artistId}": {
+      "post": {
+        "operationId": "FanController_supportArtist",
+        "parameters": [
+          {
+            "name": "artistId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Fan"
+        ]
+      }
+    },
+    "/api/fans/superfan/refresh/{personId}": {
+      "post": {
+        "operationId": "FanController_refreshSuperfan",
+        "parameters": [
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Fan"
+        ]
+      }
+    },
+    "/api/fans/{personId}/profile": {
+      "get": {
+        "operationId": "FanController_getPublicProfile",
+        "parameters": [
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Fan"
+        ]
+      }
+    },
+    "/api/fans/{personId}/scores": {
+      "get": {
+        "operationId": "FanController_getScores",
+        "parameters": [
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Fan"
+        ]
+      }
+    },
+    "/api/fans/{personId}/graph": {
+      "get": {
+        "operationId": "FanController_getFanGraph",
+        "parameters": [
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Fan"
+        ]
+      }
+    },
+    "/api/fans/{personId}/superfan": {
+      "get": {
+        "operationId": "FanController_getSuperfan",
+        "parameters": [
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Fan"
+        ]
+      }
+    },
+    "/api/artists/{id}/fans": {
+      "get": {
+        "operationId": "ArtistFansController_listTopFans",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ArtistFans"
+        ]
+      }
+    },
+    "/api/artists/{id}/superfans": {
+      "get": {
+        "operationId": "ArtistFansController_listSuperfans",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ArtistFans"
+        ]
+      }
+    },
+    "/api/artists/{id}/superfan-segments": {
+      "get": {
+        "operationId": "ArtistFansController_superfanSegments",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ArtistFans"
+        ]
+      }
+    },
+    "/api/support/artist/{artistId}": {
+      "post": {
+        "operationId": "SupportController_recordArtistSupport",
+        "parameters": [
+          {
+            "name": "artistId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Support"
+        ]
+      }
+    },
+    "/api/support/community/{communityId}": {
+      "post": {
+        "operationId": "SupportController_recordCommunitySupport",
+        "parameters": [
+          {
+            "name": "communityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Support"
+        ]
+      }
+    },
+    "/api/support/event/{eventId}": {
+      "post": {
+        "operationId": "SupportController_recordEventSupport",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Support"
+        ]
+      }
+    },
+    "/api/fans/me/support-history": {
+      "get": {
+        "operationId": "SupportFanController_getMySupportHistory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "SupportFan"
+        ]
+      }
+    },
+    "/api/artists/{id}/supporters": {
+      "get": {
+        "operationId": "ArtistSupportersController_listSupporters",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ArtistSupporters"
+        ]
+      }
+    },
+    "/api/communities/{id}/supporters": {
+      "get": {
+        "operationId": "CommunitySupportersController_listSupporters",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CommunitySupporters"
+        ]
+      }
+    },
+    "/api/events/{id}/supporters": {
+      "get": {
+        "operationId": "EventSupportersController_listSupporters",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventSupporters"
+        ]
+      }
+    },
+    "/api/trust/artist/{id}": {
+      "get": {
+        "operationId": "TrustController_getArtistTrust",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Trust"
+        ]
+      }
+    },
+    "/api/trust/brand/{id}": {
+      "get": {
+        "operationId": "TrustController_getBrandTrust",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Trust"
+        ]
+      }
+    },
+    "/api/trust/agency/{id}": {
+      "get": {
+        "operationId": "TrustController_getAgencyTrust",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Trust"
+        ]
+      }
+    },
+    "/api/trust/refresh/{entityType}/{entityId}": {
+      "post": {
+        "operationId": "TrustController_refresh",
+        "parameters": [
+          {
+            "name": "entityType",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Trust"
+        ]
+      }
+    },
+    "/api/intelligence/recommendations/v2/brand-match": {
+      "post": {
+        "operationId": "RecommendationsV2Controller_brandMatch",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "RecommendationsV2"
+        ]
+      }
+    },
+    "/api/intelligence/recommendations/v2/artist-opportunities": {
+      "post": {
+        "operationId": "RecommendationsV2Controller_artistOpportunities",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "RecommendationsV2"
+        ]
+      }
+    },
+    "/api/deals": {
+      "get": {
+        "operationId": "DealController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Deal"
+        ]
+      },
+      "post": {
+        "operationId": "DealController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Deal"
+        ]
+      }
+    },
+    "/api/deals/{id}/revenue": {
+      "get": {
+        "operationId": "DealController_listRevenue",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Deal"
+        ]
+      },
+      "post": {
+        "operationId": "DealController_recordRevenue",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Deal"
+        ]
+      }
+    },
+    "/api/deals/{id}/status": {
+      "patch": {
+        "operationId": "DealController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Deal"
+        ]
+      }
+    },
+    "/api/deals/{id}": {
+      "get": {
+        "operationId": "DealController_getDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Deal"
+        ]
+      },
+      "patch": {
+        "operationId": "DealController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Deal"
+        ]
+      }
+    },
+    "/api/artists/{id}/deals": {
+      "get": {
+        "operationId": "ArtistDealsController_listDeals",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ArtistDeals"
+        ]
+      }
+    },
+    "/api/brands/{id}/deals": {
+      "get": {
+        "operationId": "BrandDealsController_listDeals",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "BrandDeals"
+        ]
+      }
+    },
+    "/api/contracts/templates": {
+      "get": {
+        "operationId": "ContractController_listTemplates",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Contract"
+        ]
+      }
+    },
+    "/api/contracts": {
+      "post": {
+        "operationId": "ContractController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Contract"
+        ]
+      }
+    },
+    "/api/contracts/{id}": {
+      "get": {
+        "operationId": "ContractController_getDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Contract"
+        ]
+      }
+    },
+    "/api/contracts/{id}/sign": {
+      "patch": {
+        "operationId": "ContractController_sign",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Contract"
+        ]
+      }
+    },
+    "/api/artists/{id}/contracts": {
+      "get": {
+        "operationId": "ArtistContractsController_listContracts",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ArtistContracts"
+        ]
+      }
+    },
+    "/api/brands/{id}/contracts": {
+      "get": {
+        "operationId": "BrandContractsController_listContracts",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "BrandContracts"
+        ]
+      }
+    },
+    "/api/health": {
+      "get": {
+        "operationId": "HealthController_health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthSummaryDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Overall API health summary",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/health/live": {
+      "get": {
+        "operationId": "HealthController_liveness",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LivenessDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Liveness probe — process alive, no dependency checks",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/health/ready": {
+      "get": {
+        "operationId": "HealthController_readiness",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "One or more required dependencies are unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Readiness probe — verifies PostgreSQL and Redis connectivity",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/communities/{id}/dashboard": {
+      "get": {
+        "operationId": "CommunityController_getDashboard",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Community"
+        ]
+      }
+    },
+    "/api/communities/{id}/members": {
+      "get": {
+        "operationId": "CommunityController_listMembers",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Community"
+        ]
+      },
+      "post": {
+        "operationId": "CommunityController_addMember",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Community"
+        ]
+      }
+    },
+    "/api/communities/{id}/join": {
+      "post": {
+        "operationId": "CommunityController_join",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Community"
+        ]
+      }
+    },
+    "/api/communities/{id}/leave": {
+      "post": {
+        "operationId": "CommunityController_leave",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Community"
+        ]
+      }
+    },
+    "/api/communities/{id}/members/{personId}/role": {
+      "patch": {
+        "operationId": "CommunityController_updateMemberRole",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Community"
+        ]
+      }
+    },
+    "/api/communities/{id}/events": {
+      "get": {
+        "operationId": "CommunityController_listEvents",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Community"
+        ]
+      }
+    },
+    "/api/communities/{id}/opportunities": {
+      "post": {
+        "operationId": "CommunityController_createOpportunity",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Community"
+        ]
+      }
+    },
+    "/api/communities/{id}": {
+      "patch": {
+        "operationId": "CommunityController_updateLeaderSettings",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Community"
+        ]
+      }
+    },
+    "/api/feed/health": {
+      "get": {
+        "operationId": "FeedController_health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Feed"
+        ]
+      }
+    },
+    "/api/posts/health": {
+      "get": {
+        "operationId": "PostController_health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Post"
+        ]
+      }
+    },
+    "/api/notifications/health": {
+      "get": {
+        "operationId": "NotificationController_health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Notification"
+        ]
+      }
+    },
+    "/api/communities/{id}/memberships": {
+      "get": {
+        "operationId": "MembershipCommunityController_listPrograms",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "MembershipCommunity"
+        ]
+      },
+      "post": {
+        "operationId": "MembershipCommunityController_createProgram",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "MembershipCommunity"
+        ]
+      }
+    },
+    "/api/memberships/{id}": {
+      "get": {
+        "operationId": "MembershipController_getProgram",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Membership"
+        ]
+      },
+      "patch": {
+        "operationId": "MembershipController_patchProgram",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Membership"
+        ]
+      }
+    },
+    "/api/memberships/{id}/subscribe": {
+      "post": {
+        "operationId": "MembershipController_subscribe",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Membership"
+        ]
+      }
+    },
+    "/api/memberships/{id}/cancel": {
+      "post": {
+        "operationId": "MembershipController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Membership"
+        ]
+      }
+    },
+    "/api/fans/me/memberships": {
+      "get": {
+        "operationId": "MembershipFanController_listMySubscriptions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "MembershipFan"
+        ]
+      }
+    },
+    "/api/graph/edge-types": {
+      "get": {
+        "operationId": "GraphController_listEdgeTypes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Graph"
+        ]
+      }
+    },
+    "/api/brands": {
+      "get": {
+        "operationId": "BrandController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Brand"
+        ]
+      },
+      "post": {
+        "operationId": "BrandController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Brand"
+        ]
+      }
+    },
+    "/api/brands/{id}": {
+      "get": {
+        "operationId": "BrandController_getDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Brand"
+        ]
+      },
+      "patch": {
+        "operationId": "BrandController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Brand"
+        ]
+      }
+    },
+    "/api/brands/{id}/campaigns": {
+      "get": {
+        "operationId": "BrandController_listCampaigns",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Brand"
+        ]
+      }
+    },
+    "/api/brands/{id}/opportunities": {
+      "get": {
+        "operationId": "BrandController_listOpportunities",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Brand"
+        ]
+      },
+      "post": {
+        "operationId": "BrandController_createOpportunity",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Brand"
+        ]
+      }
+    },
+    "/api/brands/{id}/applications": {
+      "get": {
+        "operationId": "BrandController_listApplications",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Brand"
+        ]
+      }
+    },
+    "/api/brands/{id}/applications/{applicationId}": {
+      "patch": {
+        "operationId": "BrandController_reviewApplication",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "applicationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Brand"
+        ]
+      }
+    },
+    "/api/agencies": {
+      "get": {
+        "operationId": "AgencyController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Agency"
+        ]
+      },
+      "post": {
+        "operationId": "AgencyController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Agency"
+        ]
+      }
+    },
+    "/api/agencies/{id}": {
+      "get": {
+        "operationId": "AgencyController_getDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Agency"
+        ]
+      },
+      "patch": {
+        "operationId": "AgencyController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Agency"
+        ]
+      }
+    },
+    "/api/agencies/{id}/artists": {
+      "get": {
+        "operationId": "AgencyController_listArtists",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Agency"
+        ]
+      }
+    },
+    "/api/labels": {
+      "get": {
+        "operationId": "LabelController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Label"
+        ]
+      },
+      "post": {
+        "operationId": "LabelController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Label"
+        ]
+      }
+    },
+    "/api/labels/{id}": {
+      "get": {
+        "operationId": "LabelController_getDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Label"
+        ]
+      },
+      "patch": {
+        "operationId": "LabelController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Label"
+        ]
+      }
+    },
+    "/api/labels/{id}/roster": {
+      "get": {
+        "operationId": "LabelController_listRoster",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Label"
+        ]
+      }
+    },
+    "/api/labels/{id}/signings": {
+      "post": {
+        "operationId": "LabelController_recordSigning",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Label"
+        ]
+      }
+    },
+    "/api/reputation/person/{id}": {
+      "get": {
+        "operationId": "ReputationController_getPersonReputation",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Reputation"
+        ]
+      }
+    },
+    "/api/reputation/community/{id}": {
+      "get": {
+        "operationId": "ReputationController_getCommunityReputation",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Reputation"
+        ]
+      }
+    },
+    "/api/reputation/refresh/{entityType}/{entityId}": {
+      "post": {
+        "operationId": "ReputationController_refresh",
+        "parameters": [
+          {
+            "name": "entityType",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Reputation"
+        ]
+      }
+    },
+    "/api/discovery/people": {
+      "get": {
+        "operationId": "DiscoveryController_discoverPeople",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Discovery"
+        ]
+      }
+    },
+    "/api/discovery/communities": {
+      "get": {
+        "operationId": "DiscoveryController_discoverCommunities",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Discovery"
+        ]
+      }
+    },
+    "/api/discovery/events": {
+      "get": {
+        "operationId": "DiscoveryController_discoverEvents",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Discovery"
+        ]
+      }
+    },
+    "/api/discovery/collaborations": {
+      "get": {
+        "operationId": "DiscoveryController_discoverCollaborations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Discovery"
+        ]
+      }
+    },
+    "/api/booking/inquiries": {
+      "post": {
+        "operationId": "BookingController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Booking"
+        ]
+      },
+      "get": {
+        "operationId": "BookingController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Booking"
+        ]
+      }
+    },
+    "/api/booking/inquiries/{id}": {
+      "get": {
+        "operationId": "BookingController_getDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Booking"
+        ]
+      }
+    },
+    "/api/booking/inquiries/{id}/status": {
+      "patch": {
+        "operationId": "BookingController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Booking"
+        ]
+      }
+    },
+    "/api/booking/inquiries/{id}/convert-to-deal": {
+      "post": {
+        "operationId": "BookingController_convertToDeal",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Booking"
+        ]
+      }
+    },
+    "/api/payments/dashboard": {
+      "get": {
+        "operationId": "PaymentController_dashboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
+    "/api/payments/settlements": {
+      "get": {
+        "operationId": "PaymentController_listSettlements",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
+    "/api/payments/payouts/artist/{id}": {
+      "get": {
+        "operationId": "PaymentController_listArtistPayouts",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
+    "/api/payments/payouts": {
+      "post": {
+        "operationId": "PaymentController_schedulePayout",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
+    "/api/payments/invoices/{id}/collect": {
+      "post": {
+        "operationId": "PaymentController_collectInvoice",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
+    "/api/payments/invoices/{id}/mark-paid": {
+      "post": {
+        "operationId": "PaymentController_markInvoicePaid",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
+    "/api/payments/escrow/{dealId}/hold": {
+      "post": {
+        "operationId": "PaymentController_holdEscrow",
+        "parameters": [
+          {
+            "name": "dealId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
+    "/api/payments/escrow/{id}/release": {
+      "post": {
+        "operationId": "PaymentController_releaseEscrow",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
+    "/api/sync/events": {
+      "post": {
+        "operationId": "SyncController_ingestEvents",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Sync"
+        ]
+      }
+    },
+    "/api/sync/mappings": {
+      "get": {
+        "operationId": "SyncController_getMappings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Sync"
+        ]
+      }
+    },
+    "/api/rewards": {
+      "get": {
+        "operationId": "RewardsController_listCatalog",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Rewards"
+        ]
+      }
+    },
+    "/api/rewards/{id}": {
+      "get": {
+        "operationId": "RewardsController_getReward",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Rewards"
+        ]
+      }
+    },
+    "/api/rewards/{id}/redeem": {
+      "post": {
+        "operationId": "RewardsController_redeem",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Rewards"
+        ]
+      }
+    },
+    "/api/fans/me/redemptions": {
+      "get": {
+        "operationId": "RewardsFanController_listMyRedemptions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "RewardsFan"
+        ]
+      }
+    },
+    "/api/admin/rewards/redemptions/{id}": {
+      "patch": {
+        "operationId": "RewardsAdminController_patchRedemption",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "RewardsAdmin"
+        ]
+      }
+    },
+    "/api/commerce/tickets": {
+      "get": {
+        "operationId": "CommerceController_listTickets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Commerce"
+        ]
+      }
+    },
+    "/api/commerce/merch": {
+      "get": {
+        "operationId": "CommerceController_listMerch",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Commerce"
+        ]
+      }
+    },
+    "/api/commerce/experiences": {
+      "get": {
+        "operationId": "CommerceController_listExperiences",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Commerce"
+        ]
+      }
+    },
+    "/api/commerce/tickets/{id}/purchase": {
+      "post": {
+        "operationId": "CommerceController_purchaseTicket",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Commerce"
+        ]
+      }
+    },
+    "/api/commerce/merch/{id}/purchase": {
+      "post": {
+        "operationId": "CommerceController_purchaseMerch",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Commerce"
+        ]
+      }
+    },
+    "/api/commerce/experiences/{id}/purchase": {
+      "post": {
+        "operationId": "CommerceController_purchaseExperience",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Commerce"
+        ]
+      }
+    },
+    "/api/fans/me/purchases": {
+      "get": {
+        "operationId": "CommerceFanController_getMyPurchases",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CommerceFan"
+        ]
+      }
+    },
+    "/api/audience-os/artists/{id}/dashboard": {
+      "get": {
+        "operationId": "AudienceOsController_getArtistDashboard",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AudienceOs"
+        ]
+      }
+    },
+    "/api/audience-os/artists/{id}/export": {
+      "get": {
+        "operationId": "AudienceOsController_exportArtistDashboard",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AudienceOs"
+        ]
+      }
+    },
+    "/api/audience-os/communities/{id}/dashboard": {
+      "get": {
+        "operationId": "AudienceOsController_getCommunityDashboard",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AudienceOs"
+        ]
+      }
+    },
+    "/api/white-label/tenants/{slug}/config": {
+      "get": {
+        "operationId": "WhiteLabelController_getConfig",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "WhiteLabel"
+        ]
+      }
+    },
+    "/api/white-label/tenants/{slug}/artists": {
+      "get": {
+        "operationId": "WhiteLabelController_listArtists",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "WhiteLabel"
+        ]
+      }
+    },
+    "/api/admin/white-label/tenants": {
+      "post": {
+        "operationId": "AdminWhiteLabelController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AdminWhiteLabel"
+        ]
+      }
+    },
+    "/api/workspace/{slug}/projects": {
+      "get": {
+        "operationId": "ProjectController_list",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Project"
+        ]
+      },
+      "post": {
+        "operationId": "ProjectController_create",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Project"
+        ]
+      }
+    },
+    "/api/workspace/{slug}/projects/{projectSlug}": {
+      "get": {
+        "operationId": "ProjectController_getBySlug",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "projectSlug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Project"
+        ]
+      },
+      "patch": {
+        "operationId": "ProjectController_patch",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "projectSlug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Project"
+        ]
+      },
+      "delete": {
+        "operationId": "ProjectController_delete",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "projectSlug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Project"
+        ]
+      }
+    },
+    "/api/workspace/{slug}/projects/{projectSlug}/members": {
+      "get": {
+        "operationId": "ProjectController_listMembers",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "projectSlug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Project"
+        ]
+      },
+      "post": {
+        "operationId": "ProjectController_addMember",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "projectSlug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Project"
+        ]
+      }
+    },
+    "/api/workspace/{slug}/tasks": {
+      "get": {
+        "operationId": "TaskController_list",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Task"
+        ]
+      },
+      "post": {
+        "operationId": "TaskController_create",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Task"
+        ]
+      }
+    },
+    "/api/workspace/{slug}/tasks/{taskId}": {
+      "get": {
+        "operationId": "TaskController_getById",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Task"
+        ]
+      },
+      "patch": {
+        "operationId": "TaskController_patch",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Task"
+        ]
+      },
+      "delete": {
+        "operationId": "TaskController_delete",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Task"
+        ]
+      }
+    },
+    "/api/workspace/{slug}/tasks/{taskId}/comments": {
+      "post": {
+        "operationId": "TaskController_addComment",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Task"
+        ]
+      }
+    },
+    "/api/workspace/{slug}/tasks/{taskId}/checklist": {
+      "post": {
+        "operationId": "TaskController_addChecklistItem",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Task"
+        ]
+      }
+    },
+    "/api/workspace/{slug}/tasks/{taskId}/checklist/{itemId}": {
+      "patch": {
+        "operationId": "TaskController_patchChecklistItem",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Task"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "TSC API",
+    "description": "The Shakti Collective platform API — identity, community, marketplace, workspace, and intelligence services.",
+    "version": "0.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [
+    {
+      "url": "http://localhost:4000/api",
+      "description": "Local development"
+    },
+    {
+      "url": "https://api.theshakticollective.in",
+      "description": "Production"
+    },
+    {
+      "url": "https://api-staging.theshakticollective.in",
+      "description": "Staging"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "description": "Clerk session token (Authorization: Bearer <token>)"
+      }
+    },
+    "schemas": {
+      "HealthSummaryDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ok",
+            "enum": [
+              "ok",
+              "degraded"
+            ]
+          },
+          "service": {
+            "type": "string",
+            "example": "tsc-api"
+          },
+          "environment": {
+            "type": "string",
+            "example": "production"
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2026-06-13T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "status",
+          "service",
+          "environment",
+          "timestamp"
+        ]
+      },
+      "LivenessDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ok",
+            "enum": [
+              "ok"
+            ]
+          },
+          "service": {
+            "type": "string",
+            "example": "tsc-api"
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2026-06-13T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "status",
+          "service",
+          "timestamp"
+        ]
+      },
+      "DependencyChecksDto": {
+        "type": "object",
+        "properties": {
+          "database": {
+            "type": "string",
+            "example": "ok",
+            "enum": [
+              "ok",
+              "degraded",
+              "unavailable"
+            ]
+          },
+          "redis": {
+            "type": "string",
+            "example": "ok",
+            "enum": [
+              "ok",
+              "degraded",
+              "unavailable"
+            ]
+          }
+        },
+        "required": [
+          "database",
+          "redis"
+        ]
+      },
+      "ReadinessDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ok",
+            "enum": [
+              "ok",
+              "degraded"
+            ]
+          },
+          "service": {
+            "type": "string",
+            "example": "tsc-api"
+          },
+          "checks": {
+            "$ref": "#/components/schemas/DependencyChecksDto"
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2026-06-13T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "status",
+          "service",
+          "checks",
+          "timestamp"
+        ]
+      }
+    }
+  }
+}

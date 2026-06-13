@@ -1,0 +1,43 @@
+// Phase 6.5 — PersonProfile + Verification V1 — merge into schema.prisma
+
+model PersonProfile {
+  id                  String   @id @default(cuid())
+  personId            String   @unique
+  username            String?  @unique
+  slug                String   @unique
+  bio                 String?
+  city                String?
+  genres              String[] @default([])
+  skills              String[] @default([])
+  links               Json     @default("[]")
+  verificationLevel   Int      @default(0)
+  reputationScore     Float?
+  ecosystemScore      Float?
+  adminVerified       Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([slug])
+  @@index([username])
+}
+
+model PersonVerificationRequest {
+  id        String   @id @default(cuid())
+  personId  String
+  type      String
+  status    String   @default("pending")
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([personId, type, status])
+}
+
+// Extend existing Person model with:
+//
+//   profile                 PersonProfile?
+//   verificationRequests    PersonVerificationRequest[]

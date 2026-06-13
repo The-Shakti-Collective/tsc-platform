@@ -1,0 +1,40 @@
+name: CI — Packages
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "turbo.json"
+      - "package.json"
+      - "vitest.config.ts"
+      - ".github/workflows/ci-packages.yml"
+      - ".github/actions/**"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "turbo.json"
+      - "package.json"
+      - "vitest.config.ts"
+      - ".github/workflows/ci-packages.yml"
+      - ".github/actions/**"
+
+concurrency:
+  group: ci-packages-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DATABASE_URL: postgresql://tsc:tsc@localhost:5432/tsc_ci
+
+jobs:
+  ci:
+    name: "packages/* pipeline"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-pnpm
+      - run: pnpm db:generate
+      - run: pnpm turbo run lint typecheck test build --filter=./packages/*

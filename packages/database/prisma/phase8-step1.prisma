@@ -1,0 +1,47 @@
+// Phase 8 Step 1 — Universal Fan Identity + Fan Graph — merge into schema.prisma
+
+// Extend RelationshipType enum with:
+//   SUPPORTED
+//   SUBSCRIBED
+//   PURCHASED
+//   REFERRED
+
+model FanProfile {
+  id              String   @id @default(cuid())
+  personId        String   @unique
+  favoriteGenres  String[] @default([])
+  favoriteArtists String[] @default([])
+  cities          String[] @default([])
+  engagementScore Float    @default(0)
+  spendScore      Float    @default(0)
+  attendanceScore Float    @default(0)
+  influenceScore  Float    @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([engagementScore(sort: Desc)])
+}
+
+/// Person → Artist follow (parallel to PersonFollow for Person → Person).
+model ArtistFollow {
+  id         String   @id @default(cuid())
+  personId   String
+  artistId   String
+  followedAt DateTime @default(now())
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@unique([personId, artistId])
+  @@index([artistId, followedAt(sort: Desc)])
+  @@index([personId])
+}
+
+// Extend Person model with:
+//   fanProfile    FanProfile?
+//   artistFollows ArtistFollow[]
+//
+// Extend Artist model with:
+//   followers ArtistFollow[]

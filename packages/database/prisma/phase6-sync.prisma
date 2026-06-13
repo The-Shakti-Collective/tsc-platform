@@ -1,0 +1,58 @@
+// Phase 6 — CoreKnot ↔ TSC Sync Layer (merge into schema.prisma)
+
+enum SyncSourceSystem {
+  coreknot
+  tsc
+}
+
+enum SyncEventReceiptStatus {
+  processed
+  duplicate
+  failed
+}
+
+/// Maps external system entity ids to TSC canonical ids.
+model SyncMapping {
+  id            String           @id @default(cuid())
+  sourceSystem  SyncSourceSystem
+  externalId    String
+  tscEntityType String
+  tscEntityId   String
+  eventType     String?
+  metadata      Json?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@unique([sourceSystem, externalId, tscEntityType])
+  @@index([tscEntityType, tscEntityId])
+  @@index([sourceSystem, tscEntityType])
+}
+
+/// Idempotency ledger — dedupe by sourceSystem + externalId (event id).
+model SyncEventReceipt {
+  id           String                 @id @default(cuid())
+  sourceSystem SyncSourceSystem
+  externalId   String
+  eventType    String
+  status       SyncEventReceiptStatus @default(processed)
+  result       Json?
+  processedAt  DateTime               @default(now())
+
+  @@unique([sourceSystem, externalId])
+  @@index([eventType, processedAt(sort: Desc)])
+}
+
+// Optional ArtistPassport stub if not yet merged from passport deliverable:
+//
+// model ArtistPassport {
+//   id        String   @id @default(cuid())
+//   artistId  String   @unique
+//   slug      String   @unique
+//   isPublic  Boolean  @default(false)
+//   bio       String?
+//   links     Json?
+//   metadata  Json?
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   artist    Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
+// }

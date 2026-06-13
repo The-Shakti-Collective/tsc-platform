@@ -1,0 +1,28 @@
+// Phase 8 Step 7 — Event Intelligence (Module 8) — merge into schema.prisma
+
+model EventIntelligenceSnapshot {
+  id                    String   @id @default(cuid())
+  eventId               String
+  snapshotDate          DateTime @default(now())
+  predictedAttendance   Float?
+  actualAttendance      Float    @default(0)
+  predictedRevenueStub  Float?
+  actualRevenueStub     Float    @default(0)
+  conversionRate        Float    @default(0)
+  audienceGrowthImpact  Float    @default(0)
+  communityImpact       Float    @default(0)
+  fanDensityByCity      Json     @default("{}")
+  metrics               Json     @default("{}")
+  createdAt             DateTime @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, snapshotDate])
+  @@index([eventId, snapshotDate(sort: Desc)])
+}
+
+// Extend Venue with optional capacity stub:
+//   capacity Int?
+//
+// Extend Event model with:
+//   intelligenceSnapshots EventIntelligenceSnapshot[]

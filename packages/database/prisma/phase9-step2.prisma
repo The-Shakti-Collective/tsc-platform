@@ -1,0 +1,7 @@
+// Phase 9 Step 2 — Career Agent (Module 2) — merge into schema.prisma
+//
+// Extend ActivityAction enum with:
+//   career_actions_generated
+//   career_action_dismissed
+//
+// No new models — reuses Agent, AgentTask, AgentDecision, AgentRecommendation from Step 1.

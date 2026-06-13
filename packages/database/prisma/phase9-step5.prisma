@@ -1,0 +1,7 @@
+// Phase 9 Step 5 — Brand Match Agent (Module 5) — merge into schema.prisma
+//
+// Extend ActivityAction enum with:
+//   brand_match_run_completed
+//   brand_match_invite_sent
+//
+// No new models — reuses Agent, AgentTask, AgentDecision, AgentRecommendation from Step 1.

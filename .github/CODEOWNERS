@@ -1,0 +1,25 @@
+# TSC Platform monorepo — default reviewers for pull requests.
+# Teams must exist in https://github.com/The-Shakti-Collective before these take effect.
+# See org-scaffold/tsc-infra/docs/branch-strategy.md for branch flow.
+
+* @The-Shakti-Collective/platform @RaghavSobti37
+
+# CI/CD and repo governance
+/.github/ @The-Shakti-Collective/platform
+
+# Applications
+/apps/api/ @The-Shakti-Collective/backend @The-Shakti-Collective/platform
+/apps/community/ @The-Shakti-Collective/frontend @The-Shakti-Collective/community
+/apps/coreknot/ @The-Shakti-Collective/frontend
+/apps/web/ @The-Shakti-Collective/frontend
+/apps/website/ @The-Shakti-Collective/frontend
+
+# Shared packages
+/packages/ @The-Shakti-Collective/backend @The-Shakti-Collective/platform
+
+# Database schema and migrations
+/packages/database/ @The-Shakti-Collective/backend @The-Shakti-Collective/platform
+
+# Infrastructure scripts and org scaffold
+/scripts/ @The-Shakti-Collective/platform
+/org-scaffold/ @The-Shakti-Collective/platform

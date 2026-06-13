@@ -1,0 +1,61 @@
+// Phase 6 — Opportunity Marketplace (merge into schema.prisma)
+
+enum OpportunityCategory {
+  scholarship
+  residency
+  brand_deal
+  festival_slot
+  workshop
+  collaboration
+  open_call
+  funding
+}
+
+enum OpportunityApplicationStatus {
+  saved
+  applied
+  shortlisted
+  won
+  rejected
+}
+
+// Extend existing Opportunity model with:
+//
+//   category          OpportunityCategory?
+//   city              String?
+//   deadline          DateTime?
+//   marketplaceVisible Boolean @default(true)
+//   description       String?
+//   brandId           String?
+//   agencyId          String?
+//   brand             Brand?   @relation(fields: [brandId], references: [id], onDelete: SetNull)
+//   agency            Agency?  @relation(fields: [agencyId], references: [id], onDelete: SetNull)
+//   applications      OpportunityApplication[]
+//
+//   @@index([category, deadline])
+//   @@index([city])
+//   @@index([marketplaceVisible, status])
+//   @@index([brandId])
+//   @@index([agencyId])
+
+model OpportunityApplication {
+  id            String                       @id @default(cuid())
+  opportunityId String
+  personId      String
+  artistId      String?
+  status        OpportunityApplicationStatus @default(saved)
+  appliedAt     DateTime?
+  notes         String?
+  metadata      Json?
+  createdAt     DateTime                     @default(now())
+  updatedAt     DateTime                     @updatedAt
+
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  person      Person      @relation(fields: [personId], references: [id], onDelete: Cascade)
+  artist      Artist?     @relation(fields: [artistId], references: [id], onDelete: SetNull)
+
+  @@unique([opportunityId, personId])
+  @@index([artistId, status])
+  @@index([personId, status])
+  @@index([opportunityId, status])
+}

@@ -1,0 +1,39 @@
+// Phase 7 Month 2 — Marketplace Listing upgrade (merge into schema.prisma)
+// MarketplaceListing aliases Opportunity — no separate table.
+
+enum MarketplaceListingType {
+  brand_campaign
+  festival_slot
+  opening_act
+  workshop
+  grant
+  residency
+  sync_licensing
+  collaboration
+}
+
+enum MarketplaceOwnerType {
+  brand
+  agency
+  artist
+}
+
+// Extend Opportunity model with:
+//
+//   listingType   MarketplaceListingType?
+//   ownerType     MarketplaceOwnerType?
+//   ownerId       String?
+//   budget        Decimal?              // display budget; falls back to value
+//   requirements  String[]              @default([])
+//   genre         String?
+//
+//   @@index([listingType, city])
+//   @@index([genre])
+//   @@index([ownerType, ownerId])
+//
+// Extend ActivityAction enum with:
+//   reviewed_application
+//   hired_artist
+//   tracked_listing
+//
+// OpportunityApplicationStatus unchanged — "hire" maps to "won" in API layer.

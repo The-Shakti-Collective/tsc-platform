@@ -1,0 +1,45 @@
+name: Publish Packages
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: "@tsc"
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build
+
+      - name: Publish @tsc/* packages
+        run: |
+          for pkg in packages/*/package.json; do
+            dir=$(dirname "$pkg")
+            name=$(node -p "require('./$pkg').name")
+            if [ "$name" != "undefined" ] && grep -q '"private": true' "$pkg" 2>/dev/null; then
+              echo "Skipping private package $name"
+              continue
+            fi
+            echo "Publishing $name from $dir"
+            (cd "$dir" && pnpm publish --access restricted --no-git-checks)
+          done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
