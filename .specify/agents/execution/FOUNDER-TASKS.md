@@ -58,10 +58,11 @@ Steps that **require founder secrets, billing, or org admin access**. Agents can
 
 | Record type | Name | Target |
 |-------------|------|--------|
-| CNAME | `api` | Railway custom domain |
-| CNAME | `community` | Vercel |
-| CNAME | `coreknot` | Vercel |
-| CNAME / A | `@` | Vercel or marketing host |
+| CNAME | `api` | Railway (`tsc-platform-production.up.railway.app` — confirm in Networking) |
+| CNAME | `community` | Vercel tsc-community |
+| CNAME / A | `@` | Vercel website apex |
+
+**Separate zone `coreknot.in`:** CNAME `@` → Vercel tsc-coreknot (proxied). See [dns-records.md](../../../org-scaffold/tsc-infra/cloudflare/dns-records.md).
 
 **Also:** R2 bucket (step 6), optional Workers/Tunnel for dev.
 
@@ -87,7 +88,7 @@ Steps that **require founder secrets, billing, or org admin access**. Agents can
 | Project | Root | Domain |
 |---------|------|--------|
 | Community | `apps/community` | `community.theshakticollective.in` |
-| CoreKnot | `apps/coreknot/client` | `coreknot.theshakticollective.in` |
+| CoreKnot | `apps/coreknot/client` | `coreknot.in` (+ optional `coreknot.theshakticollective.in`) |
 | Website | `apps/website` | `theshakticollective.in` |
 
 **Env:** `NEXT_PUBLIC_API_URL` / `NEXT_PUBLIC_TSC_API_URL` → prod API URL.

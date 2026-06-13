@@ -153,22 +153,74 @@ Complete steps **in order**. Placeholders shown as `<LIKE_THIS>` — replace wit
 
 ---
 
-## Step 6 — Cloudflare DNS
+## Step 6 — Cloudflare DNS + SSL
 
-1. Open [Cloudflare Dashboard](https://dash.cloudflare.com) → zone `theshakticollective.in`.
-2. Add records:
+**Probe log (2026-06-14):** [reports/platform-cloudflare-loop.md](./reports/platform-cloudflare-loop.md)
 
-   | Type | Name | Target | Proxy |
-   |------|------|--------|-------|
-   | CNAME | `api` | `<RAILWAY_CNAME_FROM_STEP_5>` | DNS only (grey cloud) recommended for Railway |
-   | CNAME | `community` | `cname.vercel-dns.com` (or Vercel-provided) | Proxied OK |
-   | CNAME | `@` | Vercel apex target | Proxied OK |
+### Zone A — `theshakticollective.in`
 
-3. For **coreknot.in** zone (separate domain):
-   - CNAME `@` or `www` → Vercel CoreKnot project target
-   - SSL/TLS mode: **Full** if origin is Vercel
+Nameservers (already correct): `harvey.ns.cloudflare.com`, `joan.ns.cloudflare.com`.
 
-4. Wait for propagation (5–30 min), then re-test URLs in Step 9.
+1. Open [Cloudflare Dashboard](https://dash.cloudflare.com) → **Websites** → zone **`theshakticollective.in`**.
+2. **DNS → Records → Add record** for each row below (skip any that already exist):
+
+   | Type | Name | Content (target) | Proxy | Service |
+   |------|------|------------------|-------|---------|
+   | CNAME | `api` | `tsc-platform-production.up.railway.app` | **DNS only** (grey cloud ☁️) | Railway API |
+   | CNAME | `community` | `<VERCEL_COMMUNITY_CNAME>` — from Vercel → tsc-community → Domains | **Proxied** (orange ☁️) | Community |
+   | CNAME | `www` | `cname.vercel-dns.com` (or Vercel-provided) | Proxied | Website redirect |
+   | CNAME | `@` | `cname.vercel-dns.com` (or Vercel apex / ALIAS target) | Proxied | Website apex |
+
+   **Railway CNAME target:** After Railway → **tsc-platform** → **Settings → Networking → Custom Domain** → add `api.theshakticollective.in`, copy the exact CNAME Railway shows. As of 2026-06-14 the service default hostname is `tsc-platform-production.up.railway.app` (verify in dashboard; CLI: `railway domain api.theshakticollective.in --service tsc-platform` after `railway login`).
+
+   **Vercel CNAME target:** Vercel project → **Settings → Domains** → click domain → **DNS Records** tab shows project-specific value (often `76.76.21.21` A for apex or `cname.vercel-dns.com` CNAME). Do **not** guess — copy from Vercel per project.
+
+3. **SSL/TLS** (zone `theshakticollective.in` → **SSL/TLS**):
+   - **Overview → SSL/TLS encryption mode:** **Full (strict)** for Vercel frontends (`@`, `www`, `community`).
+   - **Edge Certificates:** **Always Use HTTPS** = On; **Minimum TLS Version** = 1.2.
+   - For `api` record: grey-cloud (DNS only) — Railway terminates TLS; Cloudflare SSL mode does not apply to that hostname.
+
+4. **Redirect rule** (optional, recommended): **Rules → Redirect Rules** → `www.theshakticollective.in/*` → `https://theshakticollective.in/$1` (301).
+
+### Zone B — `coreknot.in` (separate zone)
+
+Nameservers: `jillian.ns.cloudflare.com`, `lars.ns.cloudflare.com`.
+
+1. Dashboard → zone **`coreknot.in`** → **DNS → Records**.
+2. Add (after Vercel CoreKnot domain is attached in Step 7):
+
+   | Type | Name | Content | Proxy | Service |
+   |------|------|---------|-------|---------|
+   | CNAME | `@` | `<VERCEL_COREKNOT_CNAME>` from Vercel → tsc-coreknot → Domains | Proxied | CoreKnot apex |
+   | CNAME | `www` | `cname.vercel-dns.com` (or Vercel-provided) | Proxied | redirect to apex |
+
+3. **SSL/TLS → Full (strict)**; **Always Use HTTPS** = On.
+
+   **Current status:** apex resolves to Cloudflare but HTTPS **times out** (origin not responding — attach Vercel domain + deploy before retest).
+
+### Founder click checklist (both zones)
+
+| # | Where | Action |
+|---|--------|--------|
+| 1 | Cloudflare → DNS | Add missing `api`, `community` records in `theshakticollective.in` |
+| 2 | Cloudflare → DNS | Set `api` proxy to **DNS only** (grey cloud) |
+| 3 | Railway → Networking | Add custom domain `api.theshakticollective.in`; wait for **Valid** |
+| 4 | Vercel → each project → Domains | Add domains; copy CNAME targets into Cloudflare |
+| 5 | Cloudflare → SSL/TLS | Full (strict) + Always Use HTTPS on both zones |
+| 6 | Wait 5–30 min | Re-run probes in Step 9 |
+
+Agents cannot create Cloudflare DNS records without a **Cloudflare API token** (Zone.DNS Edit). Founder must complete dashboard steps above.
+
+### Verify DNS before HTTP
+
+```powershell
+nslookup theshakticollective.in 1.1.1.1
+nslookup api.theshakticollective.in 1.1.1.1
+nslookup community.theshakticollective.in 1.1.1.1
+nslookup coreknot.in 1.1.1.1
+```
+
+Expected after cutover: all four resolve (no `Non-existent domain`). Then re-test URLs in Step 9.
 
 ---
 
@@ -245,11 +297,21 @@ Complete steps **in order**. Placeholders shown as `<LIKE_THIS>` — replace wit
 Run from any machine with network access:
 
 ```powershell
-curl -I https://theshakticollective.in
-curl -I https://community.theshakticollective.in
-curl -I https://coreknot.in
-curl https://api.theshakticollective.in/api/health/ready
+# Headers only — note HTTP code and Server header
+curl.exe -sI -m 20 -w "`nHTTP:%{http_code}`n" https://theshakticollective.in
+curl.exe -sI -m 20 -w "`nHTTP:%{http_code}`n" https://community.theshakticollective.in
+curl.exe -sI -m 20 -w "`nHTTP:%{http_code}`n" https://coreknot.in
+curl.exe -sI -m 20 -w "`nHTTP:%{http_code}`n" https://api.theshakticollective.in/api/health/live
+curl.exe -s https://api.theshakticollective.in/api/health/ready
 ```
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `Could not resolve host` / NXDOMAIN | Missing Cloudflare DNS record | Step 6 — add CNAME |
+| HTTP **525** | Cloudflare proxied + bad origin SSL | Grey-cloud API to Railway; Vercel domains on Full (strict) |
+| HTTP **522** / curl timeout | Origin down or domain not on host | Railway deploy + custom domain; Vercel domain attach |
+| HTTP **404** from `railway-hikari` | Railway service not running / wrong URL | Fix deploy (see [reports/railway-runtime-fix.md](./reports/railway-runtime-fix.md)) |
+| HTTP **200** + `Server: cloudflare` + `X-Vercel-*` | OK for frontends | — |
 
 Expected: marketing + community + coreknot return **HTTP 200**; API ready returns JSON with DB/Redis status.
 

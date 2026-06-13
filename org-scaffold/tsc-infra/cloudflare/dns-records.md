@@ -1,19 +1,34 @@
-# Cloudflare DNS — theshakticollective.in
+# Cloudflare DNS — TSC Platform
+
+**Live probe:** [reports/platform-cloudflare-loop.md](../../../reports/platform-cloudflare-loop.md) (2026-06-14)
 
 Proxy status: API origins **DNS only** (Railway). Frontends **Proxied** (CDN + WAF).
 
-| Type | Name | Target | Proxy | Service |
-|------|------|--------|-------|---------|
-| CNAME | `api` | `<railway-prod>.up.railway.app` | DNS only | tsc-api prod |
-| CNAME | `api-staging` | `<railway-staging>.up.railway.app` | DNS only | tsc-api staging |
-| CNAME | `community` | `cname.vercel-dns.com` | Proxied | tsc-community prod |
-| CNAME | `community-staging` | Vercel staging CNAME | Proxied | tsc-community staging |
-| CNAME | `coreknot` | `cname.vercel-dns.com` | Proxied | tsc-coreknot prod |
-| CNAME | `coreknot-staging` | Vercel staging CNAME | Proxied | tsc-coreknot staging |
-| CNAME | `docs` | `cname.vercel-dns.com` | Proxied | tsc-docs |
-| CNAME | `www` | `cname.vercel-dns.com` | Proxied | tsc-web |
-| CNAME | `assets` | R2 public bucket custom domain | Proxied | R2 CDN (optional) |
-| A/CNAME | `@` | Vercel apex | Proxied | tsc-web |
+## Zone: `theshakticollective.in`
+
+NS: `harvey.ns.cloudflare.com`, `joan.ns.cloudflare.com`
+
+| Type | Name | Target | Proxy | Service | Probe 2026-06-14 |
+|------|------|--------|-------|---------|------------------|
+| CNAME | `api` | `tsc-platform-production.up.railway.app` *(confirm Railway Networking)* | DNS only | tsc-api prod | **MISSING — NXDOMAIN** |
+| CNAME | `api-staging` | `<railway-staging>.up.railway.app` | DNS only | tsc-api staging | — |
+| CNAME | `community` | Vercel tsc-community CNAME | Proxied | tsc-community prod | **MISSING — NXDOMAIN** |
+| CNAME | `community-staging` | Vercel staging CNAME | Proxied | tsc-community staging | — |
+| CNAME | `coreknot` | `cname.vercel-dns.com` | Proxied | tsc-coreknot (subdomain) | optional |
+| CNAME | `coreknot-staging` | Vercel staging CNAME | Proxied | tsc-coreknot staging | — |
+| CNAME | `docs` | `cname.vercel-dns.com` | Proxied | tsc-docs | — |
+| CNAME | `www` | `cname.vercel-dns.com` | Proxied | tsc-web | resolves (CF) |
+| CNAME | `assets` | R2 public bucket custom domain | Proxied | R2 CDN (optional) | — |
+| CNAME | `@` | Vercel apex | Proxied | tsc-web | **200 OK** |
+
+## Zone: `coreknot.in` (separate apex domain)
+
+NS: `jillian.ns.cloudflare.com`, `lars.ns.cloudflare.com`
+
+| Type | Name | Target | Proxy | Service | Probe 2026-06-14 |
+|------|------|--------|-------|---------|------------------|
+| CNAME | `@` | Vercel tsc-coreknot CNAME | Proxied | CoreKnot prod | **522/timeout — origin down** |
+| CNAME | `www` | `cname.vercel-dns.com` | Proxied | redirect → apex | — |
 
 ## SSL/TLS
 
