@@ -23,3 +23,5 @@ cmds = ["pnpm --filter @tsc/api... build"]
 
 [start]
 cmd = "pnpm --filter @tsc/api start:prod"
+
+
