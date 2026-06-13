@@ -118,29 +118,36 @@ function prismaModuleRoots(baseDir) {
   return roots;
 }
 
+function isGeneratedPrismaClient(clientDir) {
+  const marker = join(clientDir, 'default.js');
+  if (!existsSync(marker)) return false;
+  const content = readFileSync(marker, 'utf8');
+  return !content.includes('did not initialize yet');
+}
+
 function syncPrismaClientToModuleRoots(sourceClientDir) {
   for (const modRoot of prismaModuleRoots(deployDir)) {
     const target = join(modRoot, '.prisma/client');
-    if (existsSync(join(target, 'default.js'))) continue;
     console.warn(`[deploy:bundle] Syncing .prisma/client into ${target}`);
+    rmSync(target, { recursive: true, force: true });
     mkdirSync(join(modRoot, '.prisma'), { recursive: true });
     cpSync(sourceClientDir, target, { recursive: true });
   }
 }
 
 function findMonorepoPrismaClientDir() {
-  const rootClient = join(root, 'node_modules/.prisma/client');
-  if (existsSync(join(rootClient, 'default.js'))) {
-    return rootClient;
-  }
+  const candidates = [join(root, 'node_modules/.prisma/client')];
 
   const pnpmDir = join(root, 'node_modules/.pnpm');
-  if (!existsSync(pnpmDir)) return null;
+  if (existsSync(pnpmDir)) {
+    for (const entry of readdirSync(pnpmDir)) {
+      if (!entry.startsWith('@prisma+client@')) continue;
+      candidates.push(join(pnpmDir, entry, 'node_modules/.prisma/client'));
+    }
+  }
 
-  for (const entry of readdirSync(pnpmDir)) {
-    if (!entry.startsWith('@prisma+client@')) continue;
-    const candidate = join(pnpmDir, entry, 'node_modules/.prisma/client');
-    if (existsSync(join(candidate, 'default.js'))) {
+  for (const candidate of candidates) {
+    if (isGeneratedPrismaClient(candidate)) {
       return candidate;
     }
   }
@@ -150,27 +157,8 @@ function findMonorepoPrismaClientDir() {
 
 function ensurePrismaClient() {
   const marker = join(deployDir, PRISMA_CLIENT_MARKER);
-  if (existsSync(marker)) {
-    syncPrismaClientToModuleRoots(join(deployDir, 'node_modules/.prisma/client'));
-    return;
-  }
-
-  const sourceClient = findMonorepoPrismaClientDir();
-  if (sourceClient) {
-    const target = join(deployDir, 'node_modules/.prisma/client');
-    console.log('[deploy:bundle] Copying generated Prisma client into deploy bundle');
-    mkdirSync(join(deployDir, 'node_modules/.prisma'), { recursive: true });
-    cpSync(sourceClient, target, { recursive: true });
-    syncPrismaClientToModuleRoots(target);
-    if (existsSync(marker)) return;
-  }
 
   const prismaCli = resolvePrismaCli();
-  if (!prismaCli) {
-    console.error('[deploy:bundle] Prisma CLI not found — run pnpm install && pnpm db:generate first');
-    process.exit(1);
-  }
-
   const prismaDir = join(deployDir, 'prisma');
   mkdirSync(prismaDir, { recursive: true });
 
@@ -183,6 +171,22 @@ function ensurePrismaClient() {
     );
   }
   writeFileSync(join(prismaDir, 'schema.prisma'), schema);
+
+  const sourceClient = findMonorepoPrismaClientDir();
+  if (sourceClient) {
+    const target = join(deployDir, 'node_modules/.prisma/client');
+    console.log('[deploy:bundle] Copying generated Prisma client into deploy bundle');
+    mkdirSync(join(deployDir, 'node_modules/.prisma'), { recursive: true });
+    rmSync(target, { recursive: true, force: true });
+    cpSync(sourceClient, target, { recursive: true });
+    syncPrismaClientToModuleRoots(target);
+    if (isGeneratedPrismaClient(target)) return;
+  }
+
+  if (!prismaCli) {
+    console.error('[deploy:bundle] Prisma client missing — run pnpm db:generate && pnpm build first');
+    process.exit(1);
+  }
 
   console.log('[deploy:bundle] Generating Prisma client in deploy bundle');
   const generateArgs = [
@@ -205,8 +209,8 @@ function ensurePrismaClient() {
     process.exit(result.status ?? 1);
   }
 
-  if (!existsSync(marker)) {
-    console.error(`[deploy:bundle] Prisma generate did not create ${PRISMA_CLIENT_MARKER}`);
+  if (!isGeneratedPrismaClient(join(deployDir, 'node_modules/.prisma/client'))) {
+    console.error(`[deploy:bundle] Prisma generate did not create a initialized client at ${PRISMA_CLIENT_MARKER}`);
     process.exit(1);
   }
 
@@ -254,6 +258,7 @@ ensureWorkspaceDist();
 ensurePrismaClient();
 
 process.env.RAILWAY_DEPLOY_DIR = deployDir;
+writeFileSync(join(root, '.deploy-active'), deployDir);
 run('node', ['scripts/verify-deploy-bundle.mjs'], { cwd: root });
 
 console.log('[deploy:bundle] OK');

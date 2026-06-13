@@ -6,6 +6,8 @@ node_modules/
 .turbo/
 dist/
 deploy/
+deploy.build.*/
+.deploy-active/
 .railway-deploy-test/
 .next/
 out/

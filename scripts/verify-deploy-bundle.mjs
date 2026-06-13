@@ -2,15 +2,33 @@
 /**
  * Fail Railway / CI if pnpm deploy bundle lacks runtime artifacts.
  */
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const deployDir =
-  process.env.RAILWAY_DEPLOY_DIR ??
-  (existsSync('/app/deploy') ? '/app/deploy' : join(root, 'deploy'));
+
+function resolveDeployDir() {
+  if (process.env.RAILWAY_DEPLOY_DIR) {
+    return process.env.RAILWAY_DEPLOY_DIR;
+  }
+  if (existsSync('/app/deploy')) {
+    return '/app/deploy';
+  }
+
+  const activePathFile = join(root, '.deploy-active');
+  if (existsSync(activePathFile)) {
+    const active = readFileSync(activePathFile, 'utf8').trim();
+    if (active && existsSync(join(active, 'dist/main.js'))) {
+      return active;
+    }
+  }
+
+  return join(root, 'deploy');
+}
+
+const deployDir = resolveDeployDir();
 
 const required = [
   'dist/main.js',
@@ -41,7 +59,7 @@ const prismaSmoke = spawnSync(
   process.execPath,
   [
     '-e',
-    "const { PrismaClient } = require('@tsc/database/client'); if (typeof PrismaClient !== 'function') process.exit(1);",
+    "const { PrismaClient } = require('@tsc/database/client'); new PrismaClient();",
   ],
   {
     cwd: deployDir,
