@@ -8,9 +8,11 @@
 
 ## ROOT CAUSE
 
-Railway built **only the API** (or API completed while workspace packages did not emit `dist/`). At runtime NestJS `require("@tsc/database")` resolves to `packages/database/dist/index.js` via pnpm workspace symlink — **file missing** → crash before health endpoints.
+Nixpacks builds workspace `dist/` successfully (`verify:dist` passes), then final `COPY . /app` replaces git-tracked package dirs without gitignored `dist/`. Runtime `require("@tsc/database")` follows pnpm symlinks to `packages/database/` — **package.json present, dist/ gone** → crash.
 
-Classification: **B — workspace dist not built**, not wrong import path.
+Classification: **A — dist built but excluded from runtime image** (Nixpacks COPY + `.gitignore` dist/).
+
+Prior **B** (turbo full graph) was necessary but insufficient alone.
 
 ---
 
@@ -19,13 +21,13 @@ Classification: **B — workspace dist not built**, not wrong import path.
 | # | Fix |
 |---|-----|
 | 1 | Root `build` → `turbo run build --filter=@tsc/api...` (full dep graph) |
-| 2 | `"files": ["dist"]` on all 14 workspace packages |
-| 3 | `@tsc/database` package.json cleaned; `main`/`types`/`exports` verified |
-| 4 | `scripts/verify-workspace-dist.mjs` + `pnpm verify:dist` |
-| 5 | `nixpacks.toml`: `db:generate` + `build` + `verify:dist` |
-| 6 | `apps/api/railway.toml` buildCommand aligned |
-| 7 | `.github/workflows/runtime-validation.yml` (new) |
-| 8 | `.github/workflows/build.yml` — added verify step |
+| 2 | `"files": ["dist"]` on all workspace packages |
+| 3 | `scripts/verify-workspace-dist.mjs` + `pnpm verify:dist` |
+| 4 | **`pnpm deploy` → `/app/deploy`** — self-contained prod bundle |
+| 5 | **`scripts/railway-start.mjs`** — start from deploy dir with preflight |
+| 6 | **`scripts/verify-deploy-bundle.mjs`** — fail build if bundle incomplete |
+| 7 | `nixpacks.toml` / `railway.json` start → `node scripts/railway-start.mjs` |
+| 8 | `.github/workflows/runtime-validation.yml` — deploy bundle checks |
 
 ---
 

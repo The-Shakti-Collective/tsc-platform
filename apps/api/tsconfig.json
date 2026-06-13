@@ -11,12 +11,6 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "paths": {
-      "@tsc/database/client": ["../../packages/database/dist/client"],
-      "@tsc/contracts/*": ["../../packages/contracts/dist/*"],
-      "@tsc/types": ["../../packages/types/dist/index"],
-      "@tsc/types/*": ["../../packages/types/dist/*"]
-    },
     "incremental": true,
     "skipLibCheck": true,
     "strict": false,

@@ -5,7 +5,13 @@ nixPkgs = ["nodejs_20","pnpm"]
 cmds = ["pnpm install --frozen-lockfile"]
 
 [phases.build]
-cmds = ["pnpm db:generate", "pnpm build", "pnpm verify:dist"]
+cmds = [
+  "pnpm db:generate",
+  "pnpm build",
+  "pnpm verify:dist",
+  "pnpm --filter @tsc/api --prod deploy /app/deploy",
+  "node scripts/verify-deploy-bundle.mjs",
+]
 
 [start]
-cmd = "pnpm --filter @tsc/api start:prod"
+cmd = "node scripts/railway-start.mjs"

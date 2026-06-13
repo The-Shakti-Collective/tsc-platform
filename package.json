@@ -9,6 +9,9 @@
     "scripts":  {
                     "build":  "turbo run build --filter=@tsc/api...",
                     "verify:dist":  "node scripts/verify-workspace-dist.mjs",
+                    "deploy:api":  "pnpm --filter @tsc/api --prod deploy ./deploy",
+                    "verify:deploy":  "node scripts/verify-deploy-bundle.mjs",
+                    "start:prod:railway":  "node scripts/railway-start.mjs",
                     "build:all":  "pnpm -r run build",
                     "dev":  "turbo run dev --parallel --filter=@tsc/api --filter=@tsc/community",
                     "lint":  "turbo run lint",

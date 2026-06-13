@@ -38,14 +38,20 @@ jobs:
       - name: Verify workspace dist artifacts
         run: pnpm verify:dist
 
-      - name: Resolve @tsc/database from API context
-        working-directory: apps/api
+      - name: Create production deploy bundle
+        run: pnpm deploy:api
+
+      - name: Verify deploy bundle artifacts
+        run: pnpm verify:deploy
+
+      - name: Resolve @tsc/database from deploy bundle
+        working-directory: deploy
         run: |
           node -e "const fs=require('fs'); const p=require.resolve('@tsc/database'); if(!fs.existsSync(p)) { console.error('missing', p); process.exit(1); } console.log('resolved', p);"
           node -e "const d=require('@tsc/database'); if(!d.slugifyWorkspace) { console.error('exports empty'); process.exit(1); } console.log('require ok');"
 
-      - name: Smoke start API (5s)
-        working-directory: apps/api
+      - name: Smoke start API from deploy bundle (5s)
+        working-directory: deploy
         env:
           PORT: "4099"
           TSC_AUTH_STUB: "true"

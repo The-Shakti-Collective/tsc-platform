@@ -51,3 +51,9 @@ jobs:
 
       - name: Verify workspace dist artifacts
         run: pnpm verify:dist
+
+      - name: Create production deploy bundle
+        run: pnpm deploy:api
+
+      - name: Verify deploy bundle
+        run: pnpm verify:deploy

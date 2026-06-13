@@ -3,10 +3,10 @@
   "$comment": "Reference mirror — canonical config lives at monorepo root: /railway.json + /nixpacks.toml",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "pnpm install --frozen-lockfile && pnpm --filter @tsc/api... build"
+    "buildCommand": "pnpm install --frozen-lockfile && pnpm db:generate && pnpm build && pnpm verify:dist && pnpm --filter @tsc/api --prod deploy /app/deploy && node scripts/verify-deploy-bundle.mjs"
   },
   "deploy": {
-    "startCommand": "pnpm --filter @tsc/api start:prod",
+    "startCommand": "node scripts/railway-start.mjs",
     "healthcheckPath": "/api/health/ready",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",

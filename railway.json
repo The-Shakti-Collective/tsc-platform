@@ -14,7 +14,7 @@
     ]
   },
   "deploy": {
-    "startCommand": "pnpm --filter @tsc/api start:prod",
+    "startCommand": "node scripts/railway-start.mjs",
     "healthcheckPath": "/api/health/ready",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",

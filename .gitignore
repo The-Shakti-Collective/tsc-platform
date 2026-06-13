@@ -5,6 +5,8 @@ logs/
 node_modules/
 .turbo/
 dist/
+deploy/
+.railway-deploy-test/
 .next/
 out/
 coverage/
