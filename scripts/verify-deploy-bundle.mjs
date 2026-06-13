@@ -59,7 +59,7 @@ const prismaSmoke = spawnSync(
   process.execPath,
   [
     '-e',
-    "const { PrismaClient } = require('@tsc/database/client'); new PrismaClient();",
+    "process.chdir('dist'); const { PrismaClient } = require('@tsc/database/client'); new PrismaClient();",
   ],
   {
     cwd: deployDir,

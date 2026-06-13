@@ -156,9 +156,12 @@ function findMonorepoPrismaClientDir() {
 }
 
 function ensurePrismaClient() {
-  const marker = join(deployDir, PRISMA_CLIENT_MARKER);
-
   const prismaCli = resolvePrismaCli();
+  if (!prismaCli) {
+    console.error('[deploy:bundle] Prisma CLI not found — run pnpm install && pnpm db:generate first');
+    process.exit(1);
+  }
+
   const prismaDir = join(deployDir, 'prisma');
   mkdirSync(prismaDir, { recursive: true });
 
@@ -171,22 +174,6 @@ function ensurePrismaClient() {
     );
   }
   writeFileSync(join(prismaDir, 'schema.prisma'), schema);
-
-  const sourceClient = findMonorepoPrismaClientDir();
-  if (sourceClient) {
-    const target = join(deployDir, 'node_modules/.prisma/client');
-    console.log('[deploy:bundle] Copying generated Prisma client into deploy bundle');
-    mkdirSync(join(deployDir, 'node_modules/.prisma'), { recursive: true });
-    rmSync(target, { recursive: true, force: true });
-    cpSync(sourceClient, target, { recursive: true });
-    syncPrismaClientToModuleRoots(target);
-    if (isGeneratedPrismaClient(target)) return;
-  }
-
-  if (!prismaCli) {
-    console.error('[deploy:bundle] Prisma client missing — run pnpm db:generate && pnpm build first');
-    process.exit(1);
-  }
 
   console.log('[deploy:bundle] Generating Prisma client in deploy bundle');
   const generateArgs = [
@@ -209,12 +196,21 @@ function ensurePrismaClient() {
     process.exit(result.status ?? 1);
   }
 
+  const generated = join(deployDir, PRISMA_CLIENT_MARKER);
   if (!isGeneratedPrismaClient(join(deployDir, 'node_modules/.prisma/client'))) {
-    console.error(`[deploy:bundle] Prisma generate did not create a initialized client at ${PRISMA_CLIENT_MARKER}`);
+    console.error(`[deploy:bundle] Prisma generate did not create an initialized client at ${PRISMA_CLIENT_MARKER}`);
     process.exit(1);
   }
 
   syncPrismaClientToModuleRoots(join(deployDir, 'node_modules/.prisma/client'));
+
+  for (const modRoot of prismaModuleRoots(deployDir)) {
+    const clientDir = join(modRoot, '.prisma/client');
+    if (!isGeneratedPrismaClient(clientDir)) {
+      console.error(`[deploy:bundle] Prisma client missing or stubbed at ${clientDir}`);
+      process.exit(1);
+    }
+  }
 }
 
 function ensureWorkspaceDist() {
