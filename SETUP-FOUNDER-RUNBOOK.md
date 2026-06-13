@@ -155,7 +155,15 @@ Complete steps **in order**. Placeholders shown as `<LIKE_THIS>` — replace wit
 
 ## Step 6 — Cloudflare DNS + SSL
 
-**Probe log (2026-06-14):** [reports/platform-cloudflare-loop.md](./reports/platform-cloudflare-loop.md)
+**Live probe (2026-06-14):** [reports/platform-infra-live-verify.md](./reports/platform-infra-live-verify.md)
+
+| Host | DNS (1.1.1.1) | HTTP | Blocker |
+|------|---------------|------|---------|
+| `theshakticollective.in` | A → Cloudflare | **200** | — |
+| `www.theshakticollective.in` | (works) | **200** | — |
+| `api.theshakticollective.in` | CNAME → Railway | **000** / 404 | Railway custom domain not attached; DNS propagating |
+| `community.theshakticollective.in` | **NXDOMAIN** | **000** | Add CNAME in Cloudflare + Vercel domain |
+| `coreknot.in` | A → Cloudflare | **timeout** | Vercel CoreKnot domain not serving |
 
 ### Zone A — `theshakticollective.in`
 
@@ -196,18 +204,19 @@ Nameservers: `jillian.ns.cloudflare.com`, `lars.ns.cloudflare.com`.
 
 3. **SSL/TLS → Full (strict)**; **Always Use HTTPS** = On.
 
-   **Current status:** apex resolves to Cloudflare but HTTPS **times out** (origin not responding — attach Vercel domain + deploy before retest).
+   **Current status (2026-06-14):** apex + `www` resolve to Cloudflare; HTTPS **times out** — attach Vercel CoreKnot domain and deploy before retest.
 
 ### Founder click checklist (both zones)
 
 | # | Where | Action |
 |---|--------|--------|
-| 1 | Cloudflare → DNS | Add missing `api`, `community` records in `theshakticollective.in` |
-| 2 | Cloudflare → DNS | Set `api` proxy to **DNS only** (grey cloud) |
-| 3 | Railway → Networking | Add custom domain `api.theshakticollective.in`; wait for **Valid** |
-| 4 | Vercel → each project → Domains | Add domains; copy CNAME targets into Cloudflare |
-| 5 | Cloudflare → SSL/TLS | Full (strict) + Always Use HTTPS on both zones |
-| 6 | Wait 5–30 min | Re-run probes in Step 9 |
+| 1 | Terminal | `railway login` (CLI token expired — blocks `variables`, `logs`, `status`) |
+| 2 | Railway → Variables | Confirm `NODE_ENV=production`, `TSC_AUTH_STUB=false`, Neon/Redis/Clerk secrets |
+| 3 | Railway → Networking | Add custom domain `api.theshakticollective.in`; wait for certificate **Valid** |
+| 4 | Cloudflare → DNS | Add **`community`** CNAME (missing); confirm **`api`** CNAME grey-cloud → Railway |
+| 5 | Vercel → each project → Domains | Add domains; copy CNAME targets into Cloudflare |
+| 6 | Cloudflare → SSL/TLS | Full (strict) + Always Use HTTPS on both zones |
+| 7 | Wait 5–30 min | Re-run probes in Step 9 |
 
 Agents cannot create Cloudflare DNS records without a **Cloudflare API token** (Zone.DNS Edit). Founder must complete dashboard steps above.
 
@@ -293,6 +302,8 @@ Expected after cutover: all four resolve (no `Non-existent domain`). Then re-tes
 ---
 
 ## Step 9 — Production verification (founder + engineering)
+
+**Latest snapshot (2026-06-14):** Railway default URL healthy (`/ready` 200, DB+Redis ok). Custom API hostname blocked until Railway Networking + DNS propagation. Website OK; community NXDOMAIN; coreknot timeout. Full matrix: [reports/platform-infra-live-verify.md](./reports/platform-infra-live-verify.md).
 
 Run from any machine with network access:
 
