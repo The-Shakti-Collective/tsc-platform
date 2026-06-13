@@ -4,20 +4,28 @@
     "workspaces":  [
                        "apps/*",
                        "apps/coreknot/client",
-                       "packages/*"
+                       "packages/*",
+                       "e2e"
                    ],
     "scripts":  {
-                    "build":  "turbo run build --filter=@tsc/api...",
+                    "build":  "node scripts/turbo-or-fallback.mjs run build --filter=@tsc/api...",
+                    "build:api":  "pnpm --filter @tsc/api... run build",
+                    "build:fallback":  "pnpm --filter @tsc/api... run build",
                     "verify:dist":  "node scripts/verify-workspace-dist.mjs",
-                    "deploy:api":  "pnpm --filter @tsc/api --prod deploy ./deploy",
+                    "deploy:api":  "node scripts/create-deploy-bundle.mjs",
                     "verify:deploy":  "node scripts/verify-deploy-bundle.mjs",
                     "start:prod:railway":  "node scripts/railway-start.mjs",
                     "build:all":  "pnpm -r run build",
-                    "dev":  "turbo run dev --parallel --filter=@tsc/api --filter=@tsc/community",
-                    "lint":  "turbo run lint",
-                    "typecheck":  "turbo run typecheck",
-                    "test":  "turbo run test",
-                    "ci":  "turbo run lint typecheck test build",
+                    "dev":  "node scripts/turbo-or-fallback.mjs run dev --parallel --filter=@tsc/api --filter=@tsc/community",
+                    "lint":  "node scripts/turbo-or-fallback.mjs run lint",
+                    "lint:fallback":  "pnpm -r run lint",
+                    "typecheck":  "node scripts/turbo-or-fallback.mjs run typecheck",
+                    "typecheck:fallback":  "pnpm -r run typecheck",
+                    "test":  "node scripts/turbo-or-fallback.mjs run test",
+                    "test:fallback":  "pnpm -r run test",
+                    "test:e2e":  "pnpm --filter @tsc/e2e test",
+                    "ci":  "node scripts/turbo-or-fallback.mjs run lint typecheck test build",
+                    "ci:fallback":  "pnpm -r run lint && pnpm -r run typecheck && pnpm -r run test && pnpm --filter @tsc/api... run build",
                     "setup":  "powershell -ExecutionPolicy Bypass -File scripts/setup.ps1",
                     "setup:unix":  "bash scripts/setup.sh",
                     "start":  "powershell -ExecutionPolicy Bypass -File scripts/start-stack.ps1 -Target community",
@@ -65,5 +73,10 @@
                             "typescript-eslint": "^8.18.0",
                             "vitest":  "^3.0.0"
                         },
-    "packageManager":  "pnpm@9.15.0"
+    "packageManager":  "pnpm@9.15.0",
+    "pnpm": {
+        "overrides": {
+            "fast-check": "3.22.0"
+        }
+    }
 }

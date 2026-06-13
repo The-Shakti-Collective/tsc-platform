@@ -18,7 +18,7 @@ Copy-ready repository scaffolds for The Shakti Collective multi-repo migration.
 
 ## Master documentation
 
-See `.agents/shakti-collective-org-setup.md` for org architecture and `.agents/production-setup-runbook.md` for full production setup + `gh` bootstrap commands.
+See `.agents/shakti-collective-org-setup.md` for org architecture and [.specify/operations/setup-runbook.md](../.specify/operations/setup-runbook.md) for full production setup + `gh` bootstrap commands.
 
 ## Migration order
 

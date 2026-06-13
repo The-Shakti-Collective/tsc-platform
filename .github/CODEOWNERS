@@ -11,8 +11,8 @@
 /apps/api/ @The-Shakti-Collective/backend @The-Shakti-Collective/platform
 /apps/community/ @The-Shakti-Collective/frontend @The-Shakti-Collective/community
 /apps/coreknot/ @The-Shakti-Collective/frontend
-/apps/web/ @The-Shakti-Collective/frontend
 /apps/website/ @The-Shakti-Collective/frontend
+/e2e/ @The-Shakti-Collective/platform
 
 # Shared packages
 /packages/ @The-Shakti-Collective/backend @The-Shakti-Collective/platform

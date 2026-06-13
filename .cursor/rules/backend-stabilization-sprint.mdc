@@ -20,9 +20,7 @@ Phase R0 code work is **done**. Domain apps (Community, CoreKnot, Marketplace) s
 | Railway | `apps/api/railway.toml`; `start:prod`; health `/api/health/ready`; monorepo root as Railway root |
 | Typecheck | `pnpm --filter @tsc/api typecheck` → **0 errors** |
 
-## Reports
-
-`.agents/reports/execution/`: `DATABASE_HARDENING.md`, `LOCAL_RUNTIME_REPORT.md`, `PRODUCTION_READINESS_REPORT.md`, `BACKEND-DONE-CHECKLIST.md`, `PHASE-R0-ROADMAP.md`
+Historical execution reports under `.agents/reports/` were removed. Canonical status: [AGENTS.md](../../AGENTS.md), [FOUNDER-TASKS.md](../../.specify/agents/execution/FOUNDER-TASKS.md), [`.agents/MEMORY.md`](../../.agents/MEMORY.md).
 
 ## Org / domains (canonical)
 

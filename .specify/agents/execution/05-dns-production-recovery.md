@@ -14,7 +14,7 @@ Restore production reachability: DNS for `api`, `community`, `coreknot`; Railway
 ## Input
 
 - [FOUNDER-TASKS.md](FOUNDER-TASKS.md) steps 3–5 (Cloudflare, Railway, Vercel)
-- [production-sweep-report.md](../../../.agents/reports/production-sweep-report.md)
+- [production-sweep runbook](../sweeps/production-sweep.md) — output: `.agents/reports/production-sweep-report.md` (gitignored; regen via `pnpm sweep:prod`)
 - Target URLs: `api.theshakticollective.in`, `community.theshakticollective.in`, `coreknot.theshakticollective.in`
 
 ## Tasks

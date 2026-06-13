@@ -1,34 +1,15 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { isAuthStubEnabled } from '@/lib/clerk-env';
 
-const authStubEnabled = isAuthStubEnabled();
+export async function middleware(request: NextRequest) {
+  if (isAuthStubEnabled()) {
+    return NextResponse.next();
+  }
 
-const isPublicRoute = createRouteMatcher([
-  '/',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/u/(.*)',
-  '/artists',
-  '/communities',
-  '/events',
-  '/collaborations',
-  '/opportunities',
-  '/search',
-  '/community/(.*)',
-  '/event/(.*)',
-  '/api/health',
-]);
-
-export default authStubEnabled
-  ? function stubMiddleware() {
-      return NextResponse.next();
-    }
-  : clerkMiddleware(async (auth, request) => {
-      if (!isPublicRoute(request)) {
-        await auth.protect();
-      }
-    });
+  const { default: clerkMiddleware } = await import('./clerk-middleware');
+  return clerkMiddleware(request, {} as never);
+}
 
 export const config = {
   matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],

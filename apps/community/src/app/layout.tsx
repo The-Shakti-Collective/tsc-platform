@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
-import { ClerkProvider } from '@clerk/nextjs';
 import { PosthogProvider } from '@/components/analytics/posthog-provider';
 import { SentryProvider } from '@/components/analytics/sentry-provider';
 import { SiteHeader } from '@/components/layout/site-header';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { AuthTokenProvider } from '@/components/providers/auth-token-provider';
-import { isAuthStubEnabled, requireClerkPublishableKey } from '@/lib/clerk-env';
+import { isAuthStubEnabled } from '@/lib/clerk-env';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -15,11 +14,8 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const stubEnabled = isAuthStubEnabled();
-  const publishableKey = stubEnabled ? null : requireClerkPublishableKey();
-
-  const body = (
+function AppShell({ children }: { children: React.ReactNode }) {
+  return (
     <html lang="en">
       <body>
         <SentryProvider>
@@ -35,10 +31,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </body>
     </html>
   );
+}
 
-  if (stubEnabled || !publishableKey) {
-    return body;
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  if (isAuthStubEnabled()) {
+    return <AppShell>{children}</AppShell>;
   }
 
-  return <ClerkProvider publishableKey={publishableKey}>{body}</ClerkProvider>;
+  const { ClerkRootLayout } = await import('./clerk-root-layout');
+  return <ClerkRootLayout>{children}</ClerkRootLayout>;
 }

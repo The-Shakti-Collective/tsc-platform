@@ -1,9 +1,11 @@
-import { SignIn } from '@clerk/nextjs';
+import { isAuthStubEnabled } from '@/lib/clerk-env';
+import { StubAuthPage } from '@/components/auth/stub-auth-page';
+import { ClerkSignInPage } from './clerk-sign-in-page';
 
 export default function SignInPage() {
-  return (
-    <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4 py-12">
-      <SignIn routing="path" path="/sign-in" signUpUrl="/sign-up" />
-    </div>
-  );
+  if (isAuthStubEnabled()) {
+    return <StubAuthPage mode="sign-in" />;
+  }
+
+  return <ClerkSignInPage />;
 }

@@ -1,6 +1,6 @@
 # Environment Variable Matrix
 
-No secret values in this document. See [production-setup-runbook.md §6](../production-setup-runbook.md#6-environment-matrix).
+No secret values in this document. See [env-vars.md](../../.specify/infrastructure/env-vars.md) and [setup-runbook.md](../../.specify/operations/setup-runbook.md).
 
 Legend: **S** = store as secret | **P** = public (client-safe) | **—** = not used
 

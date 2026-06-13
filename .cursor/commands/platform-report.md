@@ -5,9 +5,11 @@ description: Open latest consolidated TSC platform health report (all 18 agents)
 
 # Platform report
 
-Latest master report: [`.agents/reports/MASTER-PLATFORM-REPORT.md`](.agents/reports/MASTER-PLATFORM-REPORT.md)
+Canonical status: [AGENTS.md](AGENTS.md) · [.agents/MEMORY.md](.agents/MEMORY.md)
 
-Per-agent reports in the same folder. Re-run sweeps:
+Optional sweep outputs (gitignored): `.agents/reports/local-sweep-report.md`, `.agents/reports/production-sweep-report.md`
+
+Re-run sweeps:
 
 ```powershell
 pnpm sweep:local

@@ -3,7 +3,7 @@
 [← Master index](../MASTER.md)
 
 > **Canonical production stack:** Railway (API) + Vercel (frontends) + Neon (Postgres) + Upstash (Redis).  
-> **Not Render** — despite `STARTUP.md` "Production notes (Render)" section (outdated).
+> **Not Render** — prod is Railway + Vercel (see [production-deploy.md](production-deploy.md)).
 
 ---
 
@@ -127,7 +127,7 @@ flowchart LR
     VERCEL_SETUP --> DNS_SETUP
 ```
 
-Full checklist: [setup-runbook.md](../operations/setup-runbook.md) and `.agents/production-setup-runbook.md`.
+Full checklist: [setup-runbook.md](../operations/setup-runbook.md)
 
 ---
 

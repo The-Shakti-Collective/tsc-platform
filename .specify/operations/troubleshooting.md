@@ -318,4 +318,4 @@ Railway health check should use `/api/feed/health` until global health ships.
 
 - [local-dev.md](../infrastructure/local-dev.md)
 - [known-gaps.md](../decisions/known-gaps.md)
-- [STARTUP.md](../../STARTUP.md)
+- [.specify/infrastructure/local-dev.md](../infrastructure/local-dev.md)

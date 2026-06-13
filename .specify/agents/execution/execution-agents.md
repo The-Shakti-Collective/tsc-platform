@@ -80,8 +80,8 @@ flowchart TD
 
 1. Complete applicable steps in [FOUNDER-TASKS.md](FOUNDER-TASKS.md).
 2. Run agents **01 → 15** in order; skip only when deliverable already PASS.
-3. Write report to each agent's **Deliverable path** (create `.agents/reports/execution/` if missing).
-4. Refresh [MASTER-PLATFORM-REPORT.md](../../../.agents/reports/MASTER-PLATFORM-REPORT.md) after P0 complete.
+3. Write report to each agent's **Deliverable path** (create `.agents/reports/execution/` if missing; gitignored, optional regen).
+4. Update [AGENTS.md](../../../AGENTS.md) and [.agents/MEMORY.md](../../../.agents/MEMORY.md) after P0 complete.
 
 ```powershell
 # Baseline before any execution agent

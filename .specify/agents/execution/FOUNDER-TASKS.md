@@ -73,7 +73,7 @@ Steps that **require founder secrets, billing, or org admin access**. Agents can
 
 | Action | Detail |
 |--------|--------|
-| Link repo / monorepo root | Build: `pnpm --filter @tsc/api build`; start command per `apps/api` |
+| Link repo / monorepo root | Build: `pnpm build`; start command per `apps/api` |
 | Set env vars | `DATABASE_URL`, `REDIS_URL`, `CLERK_*`, `CORS_ORIGIN`, optional R2/Typesense |
 | Health check | `GET /api/feed/health` |
 | Bind | `0.0.0.0:$PORT` |

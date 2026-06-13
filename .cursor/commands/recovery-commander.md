@@ -15,10 +15,11 @@ pnpm sweep:prod
 Review blockers and founder prerequisites:
 
 ```powershell
-Get-Content .agents/reports/MASTER-PLATFORM-REPORT.md -Head 30
+Get-Content AGENTS.md -Head 40
+Get-Content .agents/MEMORY.md -Head 40
 Get-Content .specify/agents/execution/FOUNDER-TASKS.md -Head 40
 ```
 
-**Output:** `.agents/reports/execution/01-recovery-commander.md` with agent assignments and NEXT PRIORITY.
+**Output:** `.agents/reports/execution/01-recovery-commander.md` (gitignored; optional regen) with agent assignments and NEXT PRIORITY. Canonical status: [AGENTS.md](AGENTS.md), [.agents/MEMORY.md](.agents/MEMORY.md).
 
 **Registry:** [execution-agents.md](.specify/agents/execution/execution-agents.md) · **Founder tasks:** [FOUNDER-TASKS.md](.specify/agents/execution/FOUNDER-TASKS.md)

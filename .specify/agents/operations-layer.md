@@ -152,7 +152,7 @@ rg "posthog|sentry|PostHog|Sentry" apps packages --glob "*.{ts,tsx,js}"
 ### Task checklist
 
 - [ ] Verify `.specify/MASTER.md` index matches actual files
-- [ ] Check `STARTUP.md` vs canonical `.specify/infrastructure/local-dev.md` for conflicts
+- [ ] Check `.specify/infrastructure/local-dev.md` is canonical for local dev
 - [ ] Audit `.env.example` completeness vs `.specify/infrastructure/env-vars.md`
 - [ ] Verify app-specific docs: `.specify/apps/api.md`, `community.md`, `coreknot.md`
 - [ ] Check for stale Render references (prod is Railway + Vercel)
@@ -167,7 +167,7 @@ rg "posthog|sentry|PostHog|Sentry" apps packages --glob "*.{ts,tsx,js}"
 | Master index | `.specify/MASTER.md` | Links resolve |
 | Known gaps | `.specify/decisions/known-gaps.md` | Matches current state |
 | CI/CD | `.specify/operations/ci-cd.md` | Root workflows exist |
-| STARTUP | `STARTUP.md` | No Render-as-prod |
+| Local dev | `.specify/infrastructure/local-dev.md` | No Render-as-prod |
 | AGENTS | `AGENTS.md` | Points to hierarchy |
 | Infra | `.agents/infra/` | Synced with org-scaffold |
 
@@ -175,7 +175,7 @@ rg "posthog|sentry|PostHog|Sentry" apps packages --glob "*.{ts,tsx,js}"
 
 ```powershell
 # Link check — manual review of MASTER.md TOC
-rg "Render\.com|railway|vercel" STARTUP.md .specify -i
+rg "Render\.com|railway|vercel" .specify -i
 ls .specify/architecture .specify/apps .specify/infrastructure .specify/operations
 ```
 

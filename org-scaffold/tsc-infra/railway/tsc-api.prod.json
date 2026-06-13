@@ -3,11 +3,11 @@
   "$comment": "Reference for tsc-api-prod Railway service",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "pnpm install && pnpm db:generate && pnpm build"
+    "buildCommand": "pnpm install --frozen-lockfile && pnpm db:generate && pnpm build && pnpm verify:dist && RAILWAY_DEPLOY_DIR=/app/deploy node scripts/create-deploy-bundle.mjs"
   },
   "deploy": {
-    "startCommand": "node dist/main.js",
-    "healthcheckPath": "/health/ready",
+    "startCommand": "node scripts/railway-start.mjs",
+    "healthcheckPath": "/api/health/ready",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3

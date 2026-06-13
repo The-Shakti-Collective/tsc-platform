@@ -13,9 +13,8 @@ Orchestrate P0 recovery: triage MASTER report blockers, verify founder prerequis
 
 ## Input
 
-- [MASTER-PLATFORM-REPORT.md](../../../.agents/reports/MASTER-PLATFORM-REPORT.md)
-- [local-sweep-report.md](../../../.agents/reports/local-sweep-report.md)
-- [production-sweep-report.md](../../../.agents/reports/production-sweep-report.md)
+- [AGENTS.md](../../../AGENTS.md) and [.agents/MEMORY.md](../../../.agents/MEMORY.md) — canonical platform status
+- Sweep outputs in `.agents/reports/` (gitignored; optional regen via `pnpm sweep:local` / `pnpm sweep:prod`)
 - [FOUNDER-TASKS.md](FOUNDER-TASKS.md) checklist status
 
 ## Tasks
@@ -33,7 +32,8 @@ Orchestrate P0 recovery: triage MASTER report blockers, verify founder prerequis
 ```powershell
 pnpm sweep:local
 pnpm sweep:prod
-Get-Content .agents/reports/MASTER-PLATFORM-REPORT.md -Head 20
+Get-Content AGENTS.md -Head 20
+Get-Content .agents/MEMORY.md -Head 20
 Test-Path .specify/agents/execution/FOUNDER-TASKS.md
 ```
 

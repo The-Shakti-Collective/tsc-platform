@@ -62,7 +62,7 @@ flowchart TB
 
 ## GitHub Organization Secrets (Planned)
 
-From `.agents/production-setup-runbook.md`:
+From [.specify/operations/setup-runbook.md](../operations/setup-runbook.md):
 
 | Secret | Used by |
 |--------|---------|
@@ -208,7 +208,7 @@ flowchart TD
 | No monorepo `.github/workflows` | Medium | Add root CI while monorepo is SSOT |
 | No automated tests in CI templates | High | Add test scripts to packages |
 | `gh` CLI not on all dev machines | Low | Document in setup runbook |
-| GitHub org repos not created | High | Run Appendix bootstrap in runbook |
+| GitHub org repos not created | High | Run bootstrap in [setup-runbook.md](setup-runbook.md) Phase 5 |
 | Health check path inconsistency | Medium | Standardize on `/api/feed/health` |
 
 ---

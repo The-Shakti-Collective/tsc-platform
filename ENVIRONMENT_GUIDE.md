@@ -121,7 +121,7 @@ Set on platform dashboards — do not copy prod secrets.
 | `NEXT_PUBLIC_API_URL` | Vercel | No — `https://api.theshakticollective.in/api` |
 | CI tokens (`RAILWAY_TOKEN`, `VERCEL_*`, `SENTRY_AUTH_TOKEN`) | GitHub Actions | Yes |
 
-Production runbook: `.agents/production-setup-runbook.md`  
+Production runbook: [.specify/operations/setup-runbook.md](.specify/operations/setup-runbook.md)  
 Detailed var catalog: `.specify/infrastructure/env-vars.md`
 
 ---
@@ -182,5 +182,5 @@ Shared packages under `packages/` do not need `.env.example` — they inherit `D
 ## Related docs
 
 - [env-vars.md](.specify/infrastructure/env-vars.md) — full variable catalog
-- [AUTH-ARCHITECTURE.md](.agents/reports/execution/AUTH-ARCHITECTURE.md) — auth guard design
+- [03-auth-recovery.md](.specify/agents/execution/03-auth-recovery.md) — `ClerkAuthGuard` and dev stub path
 - [FOUNDER-TASKS.md](.specify/agents/execution/FOUNDER-TASKS.md) — Clerk, Railway, Vercel setup

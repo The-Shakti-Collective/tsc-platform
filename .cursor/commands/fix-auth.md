@@ -17,6 +17,6 @@ pnpm --filter @tsc/api build
 
 **Founder prerequisite:** [FOUNDER-TASKS.md](.specify/agents/execution/FOUNDER-TASKS.md) step 2 (Clerk keys).
 
-**Output:** `.agents/reports/execution/03-auth-recovery.md`
+**Output:** `.agents/reports/execution/03-auth-recovery.md` (gitignored; optional regen). Canonical status: [AGENTS.md](AGENTS.md), [.agents/MEMORY.md](.agents/MEMORY.md).
 
 **Registry:** [execution-agents.md](.specify/agents/execution/execution-agents.md)

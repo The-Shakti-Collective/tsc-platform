@@ -146,7 +146,7 @@ Runbook alias: `POSTHOG_API_KEY` = same project key (`phc_...`).
 
 ## Production-Only Variables (not in `.env.example`)
 
-From `.agents/production-setup-runbook.md` — set on Railway/Vercel/GitHub secrets:
+From [.specify/operations/setup-runbook.md](../operations/setup-runbook.md) — set on Railway/Vercel/GitHub secrets:
 
 | Variable | Platform | Secret? |
 |----------|----------|---------|

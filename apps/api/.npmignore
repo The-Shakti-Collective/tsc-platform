@@ -1,0 +1,1 @@
+# Intentionally empty — prevents root .gitignore (dist/) from excluding API build output during pnpm deploy.

@@ -15,6 +15,10 @@ const deployDir =
 const checks = [
   join(deployDir, 'dist/main.js'),
   join(deployDir, 'node_modules/@tsc/database/dist/index.js'),
+  join(deployDir, 'node_modules/@tsc/database/dist/client.js'),
+  join(deployDir, 'node_modules/@tsc/constants/dist/index.js'),
+  join(deployDir, 'node_modules/@tsc/types/dist/index.js'),
+  join(deployDir, 'node_modules/@tsc/contracts/dist/index.js'),
 ];
 
 for (const path of checks) {

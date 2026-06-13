@@ -34,15 +34,14 @@ quadrantChart
 
 ## Documentation Conflicts
 
-| Topic | File A | File B | Canonical truth |
-|-------|--------|--------|-----------------|
-| Production host | `STARTUP.md` → Render | `.agents/production-setup-runbook.md` → Railway + Vercel | **Railway + Vercel** |
-| Local Postgres creds | `.env.example` → `postgres/postgres/tsc_community` | Runbook → `tsc:tsc@localhost:5432/tsc_dev` | **`.env.example` / `docker-compose.yml`** |
-| Dev port matrix | `STARTUP.md` → community :3000, coreknot :3001 | Runbook §6 → community :3001, coreknot :3002 | **`STARTUP.md` / actual package.json scripts** |
-| Workspace package count | Runbook → 17 | `pnpm -r list` → 16 | **16 verified** |
-| CoreKnot in workspace | `STARTUP.md` → "not in workspace yet" | `pnpm-workspace.yaml` includes `apps/coreknot/client` | **Client is in workspace; parent folder is not** |
-| Health endpoint | Runbook → `/health` or `/api/health` | Code + Railway → `/api/health/ready` | **`/api/health/ready` (global module)** |
-| CORS env name | `.env.example` → `CORS_ORIGIN` | Runbook → `CORS_ORIGINS` (prod) | Both may be needed post-migration |
+| Topic | Was (removed) | Canonical truth |
+|-------|---------------|-----------------|
+| Production host | Root STARTUP → Render | **Railway + Vercel** — [production-deploy.md](../infrastructure/production-deploy.md) |
+| Dev port matrix | Old runbook env matrix | **local-dev.md / package.json** — community :3000, coreknot :3001, website :3002 |
+| Workspace package count | Historical "17" | **~20** — run `pnpm m ls --depth -1` |
+| CoreKnot in workspace | Old STARTUP note | **Client in workspace; parent folder is not** |
+| Health endpoint | `/health` variants | **`/api/health/ready`** (global module) |
+| CORS env name | `.env.example` → `CORS_ORIGIN` | Both may be needed post-migration |
 
 ---
 
@@ -100,7 +99,7 @@ Auto-kill can surprise developers running unrelated services on 3000-4000.
 
 ## Build Blockers (Pre-Migration Gate)
 
-From `.agents/production-setup-runbook.md` — must pass before repo extraction:
+From [.specify/operations/setup-runbook.md](../operations/setup-runbook.md) Phase 4 — must pass before repo extraction:
 
 ```powershell
 pnpm db:validate  # exit 0
@@ -198,7 +197,7 @@ flowchart TD
     F1["1. Verify pnpm build"]
     F2["2. Add /api/health global endpoint"]
     F3["3. Baseline Prisma migration"]
-    F4["4. Align STARTUP.md prod section"]
+    F4["4. Confirm local-dev.md canonical"]
     F5["5. Unify setup.ps1 with start-infra logic"]
     F6["6. Add root CI workflow"]
     F7["7. Clerk JWT on API"]
@@ -220,5 +219,4 @@ flowchart TD
 - [MASTER.md](../MASTER.md) — Current state table
 - [troubleshooting.md](../operations/troubleshooting.md)
 - [ci-cd.md](../operations/ci-cd.md)
-- `.agents/production-setup-runbook.md`
-- `.agents/stage1-step1-monorepo-report.md` (if present)
+- [setup-runbook.md](../operations/setup-runbook.md)

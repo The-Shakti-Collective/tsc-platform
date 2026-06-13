@@ -175,7 +175,7 @@ curl http://localhost:4000/api/feed/health
 1. `gh auth login` with org admin on `The-Shakti-Collective`
 2. Create 7 repos from `org-scaffold/` (see [ci-cd.md](ci-cd.md))
 3. Configure teams, branch protection, org secrets
-4. Full commands in `.agents/production-setup-runbook.md` Appendix
+4. Full bootstrap commands: [.agents/shakti-collective-org-setup.md](../../.agents/shakti-collective-org-setup.md) and [org-scaffold/README.md](../../org-scaffold/README.md)
 
 ---
 
@@ -247,6 +247,10 @@ Checklist:
 | Kill stuck ports | `pnpm kill:ports` |
 | Stop Docker | `pnpm stop` |
 | Prisma GUI | `pnpm db:studio` |
+| Windows build (no Turbo) | `pnpm run build:fallback` |
+| Full workspace build | `pnpm run build:all` |
+| E2E smoke | `pnpm run test:e2e` |
+| Deploy artifact check | `pnpm run verify:dist` |
 
 ---
 

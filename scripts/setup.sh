@@ -52,7 +52,7 @@ if command -v docker >/dev/null 2>&1; then
     sleep 2
   done
 else
-  echo "Warning: Docker not found. Start Postgres + Redis manually (see STARTUP.md)."
+  echo "Warning: Docker not found. Start Postgres + Redis manually (see .specify/infrastructure/local-dev.md)."
 fi
 
 echo

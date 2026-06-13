@@ -13,7 +13,7 @@ Fix documentation drift: package counts, auth guard references, architecture acc
 
 ## Input
 
-- [documentation-health.md](../../../.agents/reports/documentation-health.md)
+- [documentation-health template](../reports/templates/documentation-health.md) (output: `.agents/reports/documentation-health.md`, gitignored)
 - Stale StubAuthGuard references; wrong package counts
 - New execution agent docs in `.specify/agents/execution/`
 
@@ -25,7 +25,7 @@ Fix documentation drift: package counts, auth guard references, architecture acc
 4. Add execution agents section cross-links where missing.
 5. Verify `.env.example` covers all FOUNDER-TASKS variables.
 6. Add OpenAPI spec task or stub pointer if still MISSING.
-7. Refresh MASTER-PLATFORM-REPORT NEXT PRIORITY after P0–P2 completion.
+7. Update [AGENTS.md](../../../AGENTS.md) and [.agents/MEMORY.md](../../../.agents/MEMORY.md) after P0–P2 completion.
 
 ## Verification commands
 

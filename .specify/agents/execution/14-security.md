@@ -13,7 +13,7 @@ Address security debt: npm audit findings, rate limiting, prod auth verification
 
 ## Input
 
-- [security-report.md](../../../.agents/reports/security-report.md)
+- [security-report template](../reports/templates/security-report.md) (output: `.agents/reports/security-report.md`, gitignored)
 - 5 npm audit findings (1 critical, 1 high — dev deps)
 - No rate limiting on API
 - Agent 03 auth + agent 05 prod status

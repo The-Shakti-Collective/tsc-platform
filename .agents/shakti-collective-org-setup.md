@@ -1,4 +1,4 @@
-﻿# The Shakti Collective â€” GitHub Organization Setup
+# The Shakti Collective ? GitHub Organization Setup
 
 > Master reference for multi-repo architecture. Migration scaffold lives in `org-scaffold/`.
 > **Do not commit secrets.** Use GitHub Organization secrets and per-environment variables only.
@@ -30,20 +30,20 @@ Last Updated: June 2026
 | **tsc-community** | https://github.com/The-Shakti-Collective/tsc-community | Private | Public ecosystem (profiles, events, feed) | Vercel |
 | **tsc-web** | https://github.com/The-Shakti-Collective/tsc-web | **Public** | Marketing, SEO, landing pages | Vercel |
 | **tsc-shared** | https://github.com/The-Shakti-Collective/tsc-shared | Private | `@tsc/*` packages (types, contracts, SDK) | GitHub Packages |
-| **tsc-infra** | https://github.com/The-Shakti-Collective/tsc-infra | Private | CI templates, deploy configs, scripts, IaC stubs | â€” |
+| **tsc-infra** | https://github.com/The-Shakti-Collective/tsc-infra | Private | CI templates, deploy configs, scripts, IaC stubs | ? |
 | **tsc-docs** | https://github.com/The-Shakti-Collective/tsc-docs | **Public** | Public API docs, OpenAPI, developer guides | Vercel / static |
 
-> **Bootstrap status (2026-06-12):** Blocked — `gh auth status` reports *not logged into any GitHub hosts* in this environment (CLI installed at `C:\Program Files\GitHub CLI\gh.exe`). Complete `gh auth login` for the same Windows user Cursor uses, or set `GH_TOKEN` with `repo` + org admin scope, then re-run bootstrap per `.agents/production-setup-runbook.md` Appendix.
+> **Bootstrap status (2026-06-12):** Blocked ? `gh auth status` reports *not logged into any GitHub hosts* in this environment (CLI installed at `C:\Program Files\GitHub CLI\gh.exe`). Complete `gh auth login` for the same Windows user Cursor uses, or set `GH_TOKEN` with `repo` + org admin scope, then re-run bootstrap per [.specify/operations/setup-runbook.md](../.specify/operations/setup-runbook.md) Phase 5 and this doc's bootstrap section.
 
 > | Repo | Created | Scaffold pushed | URL |
 > |------|---------|-----------------|-----|
-> | tsc-shared | — | — | https://github.com/The-Shakti-Collective/tsc-shared |
-> | tsc-api | — | — | https://github.com/The-Shakti-Collective/tsc-api |
-> | tsc-coreknot | — | — | https://github.com/The-Shakti-Collective/tsc-coreknot |
-> | tsc-community | — | — | https://github.com/The-Shakti-Collective/tsc-community |
-> | tsc-infra | — | — | https://github.com/The-Shakti-Collective/tsc-infra |
-> | tsc-web | — | — | https://github.com/The-Shakti-Collective/tsc-web |
-> | tsc-docs | — | — | https://github.com/The-Shakti-Collective/tsc-docs |
+> | tsc-shared | ? | ? | https://github.com/The-Shakti-Collective/tsc-shared |
+> | tsc-api | ? | ? | https://github.com/The-Shakti-Collective/tsc-api |
+> | tsc-coreknot | ? | ? | https://github.com/The-Shakti-Collective/tsc-coreknot |
+> | tsc-community | ? | ? | https://github.com/The-Shakti-Collective/tsc-community |
+> | tsc-infra | ? | ? | https://github.com/The-Shakti-Collective/tsc-infra |
+> | tsc-web | ? | ? | https://github.com/The-Shakti-Collective/tsc-web |
+> | tsc-docs | ? | ? | https://github.com/The-Shakti-Collective/tsc-docs |
 
 > Local scaffolds ready under `org-scaffold/` (7 repos).
 
@@ -55,7 +55,7 @@ Last Updated: June 2026
 |------------|-------------------|-----------|
 | tsc-api | **Private** | Business logic, schema, auth integration |
 | tsc-coreknot | **Private** | Internal ops; never public |
-| tsc-community | **Private** â†’ Public at launch | Ecosystem app; open-source optional post-launch |
+| tsc-community | **Private** ? Public at launch | Ecosystem app; open-source optional post-launch |
 | tsc-web | **Public** | Marketing; SEO-friendly |
 | tsc-shared | **Private** | Published via GitHub Packages to org members only |
 | tsc-infra | **Private** | Deploy secrets references, internal runbooks |
@@ -74,7 +74,7 @@ Last Updated: June 2026
 | **Community** | Community product squad | Maintain: `tsc-community`; Read: `tsc-api`, `tsc-shared`, `tsc-docs` |
 | **Operations** | Managers, support leads | Read: `tsc-coreknot`; no write on code repos |
 
-### GitHub team â†’ permission defaults
+### GitHub team ? permission defaults
 
 - **Owners**: `admin` org-wide
 - **Platform**: `maintain` on infra + api; `write` elsewhere
@@ -90,7 +90,7 @@ Enable **branch protection** on `main` and `develop` for all application repos (
 | Subdomain | Repository | Environment examples |
 |-----------|------------|----------------------|
 | `theshakticollective.in` | tsc-web | prod |
-| `www.theshakticollective.in` | tsc-web | prod (redirect â†’ apex) |
+| `www.theshakticollective.in` | tsc-web | prod (redirect ? apex) |
 | `api.theshakticollective.in` | tsc-api | prod |
 | `api-staging.theshakticollective.in` | tsc-api | staging |
 | `community.theshakticollective.in` | tsc-community | prod |
@@ -130,7 +130,7 @@ R2_SECRET_ACCESS_KEY
 R2_BUCKET
 NODE_ENV
 
-# Frontends (Vercel) â€” tsc-coreknot, tsc-community, tsc-web
+# Frontends (Vercel) ? tsc-coreknot, tsc-community, tsc-web
 NEXT_PUBLIC_API_URL
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 CLERK_SECRET_KEY
@@ -144,7 +144,7 @@ Staging uses parallel keys (e.g. `DATABASE_URL` on staging Railway service, `NEX
 
 ## Organization Secrets (GitHub)
 
-Configure at **Organization â†’ Settings â†’ Secrets and variables â†’ Actions**.  
+Configure at **Organization ? Settings ? Secrets and variables ? Actions**.  
 Never store these in code, `.env` committed files, or scaffold templates.
 
 | Secret | Used by | Description |
@@ -181,7 +181,7 @@ Repository-level secrets override org secrets when names collide; prefer org-lev
 | **Analytics** | PostHog | Frontends + API events | Product analytics |
 | **Logs / uptime** | BetterStack | All (optional) | Log aggregation, status |
 
-Data flow: **Frontend â†’ API â†’ Service â†’ Repository â†’ PostgreSQL**. No frontend owns business data.
+Data flow: **Frontend ? API ? Service ? Repository ? PostgreSQL**. No frontend owns business data.
 
 ---
 
@@ -191,7 +191,7 @@ Data flow: **Frontend â†’ API â†’ Service â†’ Repository â†’
 |--------|------------|------------|------------|
 | `main` | Required PR, 1+ review, CI green, no direct push | **prod** | `develop` only (release PR) |
 | `develop` | Required PR, CI green | **staging** | `feature/*` |
-| `feature/*` | None | preview (optional) | â€” |
+| `feature/*` | None | preview (optional) | ? |
 
 Required CI checks: **lint**, **typecheck**, **test**, **build**. Deploy job runs only on `develop` / `main` with environment gates.
 
@@ -199,7 +199,7 @@ Full template: `org-scaffold/tsc-infra/docs/branch-strategy.md`
 
 ---
 
-## Monorepo â†’ Multi-Repo Migration Map
+## Monorepo ? Multi-Repo Migration Map
 
 | Current monorepo path | Target repo | Target path | Notes |
 |----------------------|-------------|-------------|-------|
@@ -214,7 +214,7 @@ Full template: `org-scaffold/tsc-infra/docs/branch-strategy.md`
 | `packages/community-sdk/` | **tsc-shared** | `packages/community-sdk/` | `@tsc/community-sdk` |
 | *(planned)* `packages/constants/` | **tsc-shared** | `packages/constants/` | Not in monorepo yet; add on extract |
 | `packages/ui/` | **tsc-shared** | `packages/ui/` | Shared UI primitives |
-| `packages/analytics/` | **tsc-api** or **tsc-shared** | TBD | API-adjacent jobs â†’ api; pure libs â†’ shared |
+| `packages/analytics/` | **tsc-api** or **tsc-shared** | TBD | API-adjacent jobs ? api; pure libs ? shared |
 | `packages/graph/` | **tsc-api** | `packages/graph/` | Graph engine tied to API |
 | `packages/reputation/` | **tsc-api** | `packages/reputation/` | Reputation jobs |
 | `packages/search/` | **tsc-api** | `packages/search/` | Typesense integration |
@@ -229,7 +229,7 @@ Full template: `org-scaffold/tsc-infra/docs/branch-strategy.md`
 
 ### Packages staying internal to tsc-api (not published)
 
-`@tsc/database`, `@tsc/graph`, `@tsc/analytics`, `@tsc/reputation`, `@tsc/search`, `@tsc/workspace`, `@tsc/projects`, `@tsc/tasks` â€” consumed only by API unless later promoted to shared.
+`@tsc/database`, `@tsc/graph`, `@tsc/analytics`, `@tsc/reputation`, `@tsc/search`, `@tsc/workspace`, `@tsc/projects`, `@tsc/tasks` ? consumed only by API unless later promoted to shared.
 
 ---
 
@@ -267,7 +267,7 @@ In CI, use `secrets.GITHUB_TOKEN` with `packages: read` or a PAT with `read:pack
 
 ### Dependency migration
 
-Monorepo `workspace:*` â†’ published semver:
+Monorepo `workspace:*` ? published semver:
 
 ```json
 "@tsc/types": "^0.1.0"
@@ -279,15 +279,15 @@ During transition, use **git subpath** or **local file:** only in dev; never in 
 
 ## Recommended Migration Order
 
-1. **Fix monorepo build** â€” resolve analytics/api/community blockers (stay in monorepo)
-2. **tsc-infra** â€” create repo; land CI templates, branch docs, local docker
-3. **tsc-shared** â€” extract types, contracts, permissions, community-sdk; publish `@tsc/*`
-4. **tsc-api** â€” extract API + Prisma + internal packages; wire GitHub Packages
-5. **tsc-coreknot** â€” extract; point to published shared + staging API
-6. **tsc-community** â€” extract; same pattern
-7. **tsc-docs** â€” OpenAPI from api; public docs site
-8. **tsc-web** â€” new marketing stub
-9. **Decommission monorepo** â€” archive `tsc-platform` repo after cutover validation
+1. **Fix monorepo build** ? resolve analytics/api/community blockers (stay in monorepo)
+2. **tsc-infra** ? create repo; land CI templates, branch docs, local docker
+3. **tsc-shared** ? extract types, contracts, permissions, community-sdk; publish `@tsc/*`
+4. **tsc-api** ? extract API + Prisma + internal packages; wire GitHub Packages
+5. **tsc-coreknot** ? extract; point to published shared + staging API
+6. **tsc-community** ? extract; same pattern
+7. **tsc-docs** ? OpenAPI from api; public docs site
+8. **tsc-web** ? new marketing stub
+9. **Decommission monorepo** ? archive `tsc-platform` repo after cutover validation
 
 ---
 
@@ -295,7 +295,7 @@ During transition, use **git subpath** or **local file:** only in dev; never in 
 
 Run after `gh auth login` with org admin access. **Do not run from CI without review.**
 
-Full bootstrap script (bash + PowerShell): **`.agents/production-setup-runbook.md` â†’ Appendix**.
+Full bootstrap script (bash + PowerShell): **[`.specify/operations/setup-runbook.md`](../.specify/operations/setup-runbook.md) Phase 5** and **Manual GitHub CLI Commands** below.
 
 ```bash
 ORG=The-Shakti-Collective
@@ -303,14 +303,14 @@ ORG=The-Shakti-Collective
 # Private repos
 for repo in tsc-shared tsc-api tsc-coreknot tsc-community tsc-infra; do
   gh repo create "$ORG/$repo" --private \
-    --description "The Shakti Collective Platform â€” $repo"
+    --description "The Shakti Collective Platform ? $repo"
 done
 
-# Public repos (create public directly â€” do not create private then edit)
+# Public repos (create public directly ? do not create private then edit)
 gh repo create "$ORG/tsc-web" --public \
-  --description "The Shakti Collective Platform â€” tsc-web"
+  --description "The Shakti Collective Platform ? tsc-web"
 gh repo create "$ORG/tsc-docs" --public \
-  --description "The Shakti Collective Platform â€” tsc-docs"
+  --description "The Shakti Collective Platform ? tsc-docs"
 
 # Create teams (requires org admin)
 gh api orgs/$ORG/teams -f name=Platform -f privacy=closed
@@ -338,6 +338,7 @@ git branch -M main && git push -u origin main
 | Path | Purpose |
 |------|---------|
 | `org-scaffold/` | Copy-ready per-repo scaffolds |
-| `context.md` | Executive summary + Organization Architecture section |
-| `.agents/production-setup-runbook.md` | End-to-end production setup + repo bootstrap |
+| `.specify/MASTER.md` | Project memory index + org architecture summary |
+| [.specify/operations/setup-runbook.md](../.specify/operations/setup-runbook.md) | End-to-end production setup + repo bootstrap |
+| [.specify/agents/execution/FOUNDER-TASKS.md](../.specify/agents/execution/FOUNDER-TASKS.md) | Founder-only secrets and provider steps |
 | `.agents/shakti-collective-org-setup.md` | This document |

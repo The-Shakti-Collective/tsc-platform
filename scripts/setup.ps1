@@ -78,7 +78,7 @@ if ($dockerAvailable) {
         Write-Warning "Postgres may not be ready yet. Retry: docker compose up -d"
     }
 } else {
-    Write-Warning "Docker not found. Start Postgres + Redis manually (see STARTUP.md)."
+    Write-Warning "Docker not found. Start Postgres + Redis manually (see .specify/infrastructure/local-dev.md)."
 }
 
 # --- database ---

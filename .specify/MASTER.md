@@ -43,12 +43,10 @@ Production target stack: **Railway (API) + Vercel (frontends) + Neon (Postgres) 
 |------|------|
 | [AGENTS.md](../AGENTS.md) | Cursor entry point for multi-agent hierarchy |
 | [.agents/MEMORY.md](../.agents/MEMORY.md) | Agent continuity — post-R0 backend state |
-
-| File | Role |
-|------|------|
-| [STARTUP.md](../STARTUP.md) | Human-facing startup guide |
+| [.specify/infrastructure/local-dev.md](infrastructure/local-dev.md) | Human-facing local dev guide |
+| [ENVIRONMENT_GUIDE.md](../ENVIRONMENT_GUIDE.md) | Local/staging/prod env matrix and auth modes |
 | [.env.example](../.env.example) | Env template (no secrets) |
-| [.agents/production-setup-runbook.md](../.agents/production-setup-runbook.md) | Multi-repo migration + prod deploy |
+| [.specify/operations/setup-runbook.md](operations/setup-runbook.md) | Multi-repo migration + prod deploy |
 | [org-scaffold/README.md](../org-scaffold/README.md) | Future GitHub org repo templates |
 
 ---
@@ -166,7 +164,7 @@ Implementation: `apps/api/src/modules/health/` — registered in `AppModule`; 10
 | Duplicate API processes | High | Multiple starts / `start:*` + manual `pnpm dev:api` → EADDRINUSE :4000 |
 | Website not in monorepo | Medium | `pnpm dev:website` prints stub message |
 | `setup.ps1` vs `start-infra.ps1` | Medium | Setup always runs `docker compose up`; infra script is smarter |
-| STARTUP.md Render section | Low | Outdated — prod is Railway + Vercel |
+| Removed root STARTUP.md | Low | Canonical local dev: `.specify/infrastructure/local-dev.md` |
 | Port doc conflicts | Low | Runbook env matrix ports ≠ local dev ports |
 | Production DNS/deploy | High | Founder: GitHub push, Railway, Cloudflare |
 | CI lint / audit debt | Medium | Workflows exist; some lint + `pnpm audit` findings remain |

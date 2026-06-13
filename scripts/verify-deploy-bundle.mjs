@@ -18,6 +18,11 @@ const required = [
   'node_modules/@tsc/constants/dist/index.js',
   'node_modules/@tsc/types/dist/index.js',
   'node_modules/@tsc/contracts/dist/index.js',
+  'node_modules/@tsc/permissions/dist/index.js',
+  'node_modules/@tsc/analytics/dist/index.js',
+  'node_modules/@tsc/workspace/dist/index.js',
+  'node_modules/@tsc/projects/dist/index.js',
+  'node_modules/@tsc/tasks/dist/index.js',
 ];
 
 const missing = required.filter((rel) => !existsSync(join(deployDir, rel)));

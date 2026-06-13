@@ -1,8 +1,7 @@
 # TSC Platform — Multi-Agent Operating Model
 
 > Entry point for the platform-responsibility agent hierarchy.  
-> Canonical definitions live in [`.specify/agents/`](.specify/agents/multi-agent-hierarchy.md).  
-> **Full project context:** [`MASTER-CONTEXT.md`](MASTER-CONTEXT.md) — single compressed file (all reports, `.specify`, `.agents`, architecture).
+> Canonical definitions: [`.specify/agents/`](.specify/agents/multi-agent-hierarchy.md) · Architecture index: [`.specify/MASTER.md`](.specify/MASTER.md)
 
 ## Quick links
 
@@ -25,14 +24,7 @@
 
 **Gate:** No Community/CoreKnot/Marketplace feature work until founder completes [FOUNDER-TASKS.md](.specify/agents/execution/FOUNDER-TASKS.md).
 
-| Report | Purpose |
-|--------|---------|
-| [BACKEND-DONE-CHECKLIST](.agents/reports/execution/BACKEND-DONE-CHECKLIST.md) | 15-item API gate — code green; Typesense/R2/prod env founder-dependent |
-| [PHASE-R0-ROADMAP](.agents/reports/execution/PHASE-R0-ROADMAP.md) | Stages 1–9 — all code stages complete |
-| [API_TYPECHECK_BOARD](.agents/reports/execution/API_TYPECHECK_BOARD.md) | 187→0 errors |
-| [PRODUCTION_READINESS_REPORT](.agents/reports/execution/PRODUCTION_READINESS_REPORT.md) | Founder cutover checklist |
-
-Agent memory: [`.agents/MEMORY.md`](.agents/MEMORY.md) · Cursor rule: `.cursor/rules/backend-stabilization-sprint.mdc`
+Agent continuity: [`.agents/MEMORY.md`](.agents/MEMORY.md) · Cursor rule: [`.cursor/rules/backend-stabilization-sprint.mdc`](.cursor/rules/backend-stabilization-sprint.mdc)
 
 ## Execution Agents
 
@@ -44,16 +36,11 @@ Remediation sprint agents — run in order after founder prerequisites where req
 | P1 Completion | [06–12](.specify/agents/execution/execution-agents.md) | — |
 | P2 Hardening | [13–15](.specify/agents/execution/execution-agents.md) | — |
 
-Complete [FOUNDER-TASKS.md](.specify/agents/execution/FOUNDER-TASKS.md) (GitHub, Clerk, Cloudflare, Railway, Vercel, R2, Typesense, Monitoring) before agents that need prod secrets. Reports: `.agents/reports/execution/`.
+Complete [FOUNDER-TASKS.md](.specify/agents/execution/FOUNDER-TASKS.md) (GitHub, Clerk, Cloudflare, Railway, Vercel, R2, Typesense, Monitoring) before agents that need prod secrets.
 
-## Generated reports
+## Agent reports
 
-Agent outputs are written to `.agents/reports/` (gitignored generated artifacts; templates remain in `.specify/agents/reports/templates/`).
-
-**Latest consolidated report:** [`.agents/reports/MASTER-PLATFORM-REPORT.md`](.agents/reports/MASTER-PLATFORM-REPORT.md)  
-**Execution phase:** [`.agents/reports/execution/EXECUTION-STATUS.md`](.agents/reports/execution/EXECUTION-STATUS.md) · [RECOVERY-ROADMAP.md`](.agents/reports/execution/RECOVERY-ROADMAP.md)
-
-**Agent continuity:** [`.agents/MEMORY.md`](.agents/MEMORY.md)
+Sweep and execution agents may write outputs to `.agents/reports/` (gitignored). Templates remain in [`.specify/agents/reports/templates/`](.specify/agents/reports/templates/). Do not treat removed execution status reports as canonical — use this file, `FOUNDER-TASKS.md`, and `.specify/`.
 
 ## Running sweeps
 

@@ -43,4 +43,4 @@ Invoke-RestMethod http://localhost:3001/health.json
 
 ## Note
 
-Monorepo CoreKnot still uses stub API clients in places — fix before production cutover. See `.agents/stage1-step1-monorepo-report.md`.
+Monorepo CoreKnot still uses stub API clients in places — fix before production cutover. See [known-gaps.md](../../../.specify/decisions/known-gaps.md) (Build Blockers).

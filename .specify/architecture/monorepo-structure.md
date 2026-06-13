@@ -13,9 +13,10 @@ packages:
   - "apps/*"
   - "apps/coreknot/client"
   - "packages/*"
+  - "e2e"
 ```
 
-The explicit `apps/coreknot/client` entry is required because the parent `apps/coreknot/` folder is **legacy source** and is not itself a workspace package.
+The explicit `apps/coreknot/client` entry is required because the parent `apps/coreknot/` folder is **legacy source** and is not itself a workspace package. `@tsc/e2e` (Playwright smoke) lives at `e2e/`.
 
 ---
 
@@ -36,7 +37,9 @@ flowchart TB
     APPS --> COMM["community/ @tsc/community"]
     APPS --> CKROOT["coreknot/ legacy sources"]
     CKROOT --> CKCLIENT["client/ @tsc/coreknot-client"]
-    APPS --> WEB["website/ placeholder"]
+    APPS --> WEB["website/ @tsc/website"]
+
+    ROOT --> E2E["e2e/ @tsc/e2e"]
 
     PKGS --> DB["database"]
     PKGS --> SHARED["types, contracts, permissions, ui"]
@@ -47,17 +50,24 @@ flowchart TB
 
 ---
 
-## Workspace Members (16 verified)
+## Workspace Members
 
-Run `pnpm -r list --depth -1` to reproduce this list.
+Run `pnpm m ls --depth -1` to reproduce this list.
 
-### Applications (3)
+### Applications (4)
 
 | Package | Path | Framework | Port |
 |---------|------|-----------|------|
 | `@tsc/api` | `apps/api/` | NestJS 11 | 4000 |
 | `@tsc/community` | `apps/community/` | Next.js 15 | 3000 |
 | `@tsc/coreknot-client` | `apps/coreknot/client/` | Vite 6 + React 19 | 3001 |
+| `@tsc/website` | `apps/website/` | Next.js 15 | 3002 |
+
+### Test package (1)
+
+| Package | Path | Role |
+|---------|------|------|
+| `@tsc/e2e` | `e2e/` | Playwright smoke tests |
 
 ### Shared packages (13)
 
@@ -77,8 +87,6 @@ Run `pnpm -r list --depth -1` to reproduce this list.
 | `@tsc/projects` | `packages/projects/` | Project domain |
 | `@tsc/tasks` | `packages/tasks/` | Task domain |
 
-> **Note:** `.agents/production-setup-runbook.md` references "17 workspace packages." Verified count via pnpm is **16** (3 apps + 13 packages). The discrepancy may reflect a historical package or root workspace counting.
-
 ---
 
 ## Non-workspace paths
@@ -86,7 +94,7 @@ Run `pnpm -r list --depth -1` to reproduce this list.
 | Path | Status |
 |------|--------|
 | `apps/coreknot/` (parent) | Legacy React pages, API libs — not a pnpm package |
-| `apps/website/` | Placeholder; `pnpm dev:website` exits with stub message |
+| `apps/web/` | Deprecated orphan (no `package.json`) — use `apps/website` |
 | `org-scaffold/` | Future multi-repo templates — not part of workspace |
 | `node_modules/` | Hoisted by pnpm |
 
@@ -113,13 +121,34 @@ flowchart BT
     BUILD --> outputs
 ```
 
-Root scripts:
+Root scripts (via `scripts/turbo-or-fallback.mjs` — on Windows Turbo crash, falls back to pnpm filters):
 
 | Script | Behavior |
 |--------|----------|
-| `pnpm build` | `pnpm -r run build` — all packages |
+| `pnpm build` | Turbo → fallback; `@tsc/api...` dependency graph (Railway default) |
+| `pnpm build:api` / `build:fallback` | Direct API graph build (no Turbo) |
+| `pnpm build:all` | All workspace packages (`pnpm -r run build`) |
+| `pnpm ci` / `ci:fallback` | lint → typecheck → test → build (Turbo or explicit fallback) |
+| `pnpm test:e2e` | Playwright via `@tsc/e2e` |
+| `pnpm verify:dist` | Check API deploy bundle artifacts |
 | `pnpm dev` | Turbo parallel: `@tsc/api` + `@tsc/community` only |
-| `pnpm lint` | Turbo lint across workspace |
+| `pnpm dev:api` / `dev:community` / `dev:coreknot` / `dev:website` | Per-app dev (prefer on Windows over `pnpm dev`) |
+| `pnpm lint` / `typecheck` / `test` | Turbo with `:fallback` variants available |
+
+On Windows, native `turbo` may exit `-1073741515` (`STATUS_DLL_NOT_FOUND`). The wrapper runs pnpm filter/recursive equivalents. Prefer `:fallback` scripts when Turbo misbehaves. See [local-dev.md](../infrastructure/local-dev.md).
+
+### Railway / nixpacks
+
+Root [`nixpacks.toml`](../../nixpacks.toml) drives Railway deploy: `pnpm install --frozen-lockfile` → `db:generate` → `build` (API graph) → `verify:dist` → `pnpm --filter @tsc/api --prod deploy` → start via `scripts/railway-start.mjs`. Default `pnpm build` scope is `@tsc/api...` — frontends deploy separately (Vercel).
+
+### Verification
+
+| Check | Command | Pass |
+|-------|---------|------|
+| Workspace | `pnpm m ls --depth -1` | includes `@tsc/e2e`, `@tsc/api`, `@tsc/website` |
+| API dist | `pnpm verify:dist` | `[verify:dist] OK` |
+| API build | `pnpm build:api` | exit `0` |
+| E2E wired | `pnpm --filter @tsc/e2e exec playwright --version` | prints version |
 
 ---
 
@@ -168,6 +197,8 @@ flowchart LR
 | `run-api-dev.ps1` | Spawn API in separate PowerShell window |
 | `run-frontend-dev.ps1` | Spawn frontend window |
 | `kill-port.ps1` / `kill-all-dev-ports.ps1` | Port cleanup |
+| `turbo-or-fallback.mjs` | Turbo wrapper; pnpm filter fallback on Windows |
+| `verify-workspace-dist.mjs` | Pre-deploy dist artifact check |
 | `stop.ps1` | `docker compose down` |
 
 ---

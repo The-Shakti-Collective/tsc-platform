@@ -188,7 +188,7 @@ pnpm build   # full workspace
 
 ## Historical Build Issues
 
-Per `.agents/production-setup-runbook.md` / Stage 1 report:
+Per [.specify/operations/setup-runbook.md](../operations/setup-runbook.md) Phase 4:
 
 | Package | Issue | Status |
 |---------|-------|--------|

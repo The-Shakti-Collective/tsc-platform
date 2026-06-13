@@ -18,6 +18,9 @@
     "test": {
       "dependsOn": ["^build"]
     },
+    "test:e2e": {
+      "cache": false
+    },
     "prisma:validate": {
       "cache": false
     }

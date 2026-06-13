@@ -35,7 +35,7 @@ System-wide governance, roadmap alignment, and security posture.
 | Workspace inventory | `pnpm -r list --depth -1` | Matches documented 16 packages |
 | Turbo graph | `turbo.json` | No orphaned tasks |
 | Doc conflicts | `.specify/decisions/known-gaps.md` | No unresolved High severity |
-| Migration gate | `.agents/production-setup-runbook.md` §2 | Build green before multi-repo split |
+| Migration gate | [setup-runbook.md](../operations/setup-runbook.md) Phase 4 | Build green before multi-repo split |
 | Duplicate API risk | Process list on :4000 | Single listener |
 
 ### Tools / commands

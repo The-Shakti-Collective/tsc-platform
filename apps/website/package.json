@@ -11,11 +11,11 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.9.0",
+    "@clerk/nextjs": "^6.39.5",
+    "@sentry/react": "^10.57.0",
     "@tsc/types": "workspace:*",
     "clsx": "^2.1.1",
     "lucide-react": "^0.468.0",
-    "@sentry/react": "^10.57.0",
     "next": "^15.1.0",
     "posthog-js": "^1.232.7",
     "posthog-node": "^4.10.1",

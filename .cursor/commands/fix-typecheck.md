@@ -21,6 +21,6 @@ pnpm --filter @tsc/database build
 pnpm --filter @tsc/contracts build
 ```
 
-**Output:** `.agents/reports/execution/02-typecheck-status.md` with baseline → final error count.
+**Output:** `.agents/reports/execution/02-typecheck-status.md` (gitignored; optional regen) with baseline → final error count. Canonical status: [AGENTS.md](AGENTS.md), [.agents/MEMORY.md](.agents/MEMORY.md).
 
 **Registry:** [execution-agents.md](.specify/agents/execution/execution-agents.md)

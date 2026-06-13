@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
-import { APP_FILTER } from '@nestjs/core';
-import { SentryGlobalFilter } from '@sentry/nestjs/setup';
+import { getSentryGlobalFilterProvider } from './sentry.bootstrap';
 
 import { AuthModule } from './common/auth/auth.module';
 import { PrismaModule } from './common/database/prisma.module';
@@ -102,9 +101,8 @@ import { WorkspaceModule } from './modules/workspace/workspace.module';
 import { ProjectModule } from './modules/project/project.module';
 import { TaskModule } from './modules/task/task.module';
 
-const sentryProviders = process.env.SENTRY_DSN
-  ? [{ provide: APP_FILTER, useClass: SentryGlobalFilter }]
-  : [];
+const sentryProvider = getSentryGlobalFilterProvider();
+const sentryProviders = sentryProvider ? [sentryProvider] : [];
 
 @Module({
 

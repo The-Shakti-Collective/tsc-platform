@@ -177,7 +177,7 @@ NEXT PRIORITY
 | CI/CD | [operations/ci-cd.md](../operations/ci-cd.md) |
 | Known gaps | [decisions/known-gaps.md](../decisions/known-gaps.md) |
 | Infra runbooks | [.agents/infra/](../../.agents/infra/) |
-| Production setup | [.agents/production-setup-runbook.md](../../.agents/production-setup-runbook.md) |
+| Production setup | [.specify/operations/setup-runbook.md](../operations/setup-runbook.md) |
 
 ---
 

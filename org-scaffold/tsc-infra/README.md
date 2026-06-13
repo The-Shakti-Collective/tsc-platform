@@ -2,7 +2,7 @@
 
 Infrastructure, CI/CD templates, deploy configs, and local dev tooling for The Shakti Collective.
 
-Aligned with `.agents/production-setup-runbook.md` in the TSC Platform monorepo.
+Aligned with [.specify/operations/setup-runbook.md](../../.specify/operations/setup-runbook.md) in the TSC Platform monorepo.
 
 ## Contents
 

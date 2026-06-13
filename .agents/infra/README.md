@@ -1,6 +1,6 @@
 # TSC Platform — Infrastructure (Recovery Sprint)
 
-Production infrastructure definitions for The Shakti Collective. Aligned with [production-setup-runbook.md](../production-setup-runbook.md).
+Production infrastructure definitions for The Shakti Collective. Aligned with [.specify/operations/setup-runbook.md](../../.specify/operations/setup-runbook.md).
 
 **Do not commit secrets.** Set values in Railway, Vercel, GitHub Organization secrets, and Cloudflare dashboard only.
 

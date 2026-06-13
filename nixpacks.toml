@@ -9,8 +9,7 @@ cmds = [
   "pnpm db:generate",
   "pnpm build",
   "pnpm verify:dist",
-  "pnpm --filter @tsc/api --prod deploy /app/deploy",
-  "node scripts/verify-deploy-bundle.mjs",
+  "RAILWAY_DEPLOY_DIR=/app/deploy node scripts/create-deploy-bundle.mjs",
 ]
 
 [start]

@@ -13,7 +13,9 @@ coverage/
 *.tsbuildinfo
 
 # Agent-generated reports (templates live under .specify/)
-.agents/reports/
+.agents/reports/*
+!.agents/reports/.gitkeep
+reports/
 
 # Local provider metadata
 .neon
