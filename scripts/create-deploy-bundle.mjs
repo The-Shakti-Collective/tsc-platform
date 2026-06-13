@@ -135,26 +135,6 @@ function syncPrismaClientToModuleRoots(sourceClientDir) {
   }
 }
 
-function findMonorepoPrismaClientDir() {
-  const candidates = [join(root, 'node_modules/.prisma/client')];
-
-  const pnpmDir = join(root, 'node_modules/.pnpm');
-  if (existsSync(pnpmDir)) {
-    for (const entry of readdirSync(pnpmDir)) {
-      if (!entry.startsWith('@prisma+client@')) continue;
-      candidates.push(join(pnpmDir, entry, 'node_modules/.prisma/client'));
-    }
-  }
-
-  for (const candidate of candidates) {
-    if (isGeneratedPrismaClient(candidate)) {
-      return candidate;
-    }
-  }
-
-  return null;
-}
-
 function ensurePrismaClient() {
   const prismaCli = resolvePrismaCli();
   if (!prismaCli) {
@@ -196,7 +176,6 @@ function ensurePrismaClient() {
     process.exit(result.status ?? 1);
   }
 
-  const generated = join(deployDir, PRISMA_CLIENT_MARKER);
   if (!isGeneratedPrismaClient(join(deployDir, 'node_modules/.prisma/client'))) {
     console.error(`[deploy:bundle] Prisma generate did not create an initialized client at ${PRISMA_CLIENT_MARKER}`);
     process.exit(1);

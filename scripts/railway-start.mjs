@@ -2,7 +2,7 @@
 /**
  * Railway production entrypoint — runs API from pnpm deploy bundle.
  */
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
@@ -28,6 +28,30 @@ function resolveDeployDir() {
   return join(root, 'deploy');
 }
 
+function prismaModuleRoots(baseDir) {
+  const roots = [];
+  const top = join(baseDir, 'node_modules');
+  if (existsSync(join(top, '@prisma/client'))) {
+    roots.push(top);
+  }
+  const pnpmDir = join(top, '.pnpm');
+  if (existsSync(pnpmDir)) {
+    for (const entry of readdirSync(pnpmDir)) {
+      if (entry.startsWith('@prisma+client@')) {
+        roots.push(join(pnpmDir, entry, 'node_modules'));
+      }
+    }
+  }
+  return roots;
+}
+
+function isGeneratedPrismaClient(clientDir) {
+  const marker = join(clientDir, 'default.js');
+  if (!existsSync(marker)) return false;
+  const content = readFileSync(marker, 'utf8');
+  return !content.includes('did not initialize yet');
+}
+
 const deployDir = resolveDeployDir();
 
 const checks = [
@@ -40,9 +64,17 @@ const checks = [
   join(deployDir, 'node_modules/.prisma/client/default.js'),
 ];
 
+for (const modRoot of prismaModuleRoots(deployDir)) {
+  checks.push(join(modRoot, '.prisma/client/default.js'));
+}
+
 for (const path of checks) {
   if (!existsSync(path)) {
     console.error(`FATAL: missing ${path}`);
+    process.exit(1);
+  }
+  if (path.endsWith('.prisma/client/default.js') && !isGeneratedPrismaClient(join(path, '..'))) {
+    console.error(`FATAL: Prisma client not initialized at ${path}`);
     process.exit(1);
   }
 }
