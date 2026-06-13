@@ -3,19 +3,21 @@
  * Create a self-contained pnpm deploy bundle for @tsc/api.
  * Cleans target dir, runs deploy, patches missing dist artifacts, verifies.
  */
-import { cpSync, existsSync, mkdirSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const deployDir = resolve(
+let deployDir = resolve(
   process.env.RAILWAY_DEPLOY_DIR ?? join(root, 'deploy'),
 );
 // pnpm deploy rejects some absolute Windows paths; run from monorepo root with a relative target.
-const deployArg =
+let deployArg =
   process.env.RAILWAY_DEPLOY_DIR ??
   (process.platform === 'win32' ? './deploy' : deployDir);
+
+const PRISMA_CLIENT_MARKER = 'node_modules/.prisma/client/default.js';
 
 const workspacePackages = [
   'analytics',
@@ -43,7 +45,33 @@ function run(command, args, options = {}) {
 
 function removeDir(path) {
   if (!existsSync(path)) return;
-  rmSync(path, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+  const stale = `${path}.old.${Date.now()}`;
+  // Rename first so pnpm deploy gets a clean target even if stale delete is slow (Windows EPERM).
+  renameSync(path, stale);
+  rmSync(stale, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+}
+
+function prepareDeployDir() {
+  if (!existsSync(deployDir)) {
+    mkdirSync(deployDir, { recursive: true });
+    return deployDir;
+  }
+
+  try {
+    removeDir(deployDir);
+    return deployDir;
+  } catch (err) {
+    const code = err && typeof err === 'object' && 'code' in err ? err.code : undefined;
+    if (code !== 'EPERM' && code !== 'EBUSY') {
+      throw err;
+    }
+
+    const alternate = resolve(`${deployDir}.build.${Date.now()}`);
+    console.warn(
+      `[deploy:bundle] ${deployDir} is locked (${code}); using ${alternate}`,
+    );
+    return alternate;
+  }
 }
 
 function ensureApiDist() {
@@ -56,6 +84,133 @@ function ensureApiDist() {
   }
   console.warn('[deploy:bundle] Copying apps/api/dist into deploy bundle (pnpm deploy omitted dist)');
   cpSync(source, target, { recursive: true });
+}
+
+function resolvePrismaCli() {
+  const jsCandidates = [
+    join(root, 'packages/database/node_modules/prisma/build/index.js'),
+    join(root, 'node_modules/prisma/build/index.js'),
+  ];
+  for (const candidate of jsCandidates) {
+    if (existsSync(candidate)) {
+      return { command: process.execPath, args: [candidate] };
+    }
+  }
+
+  return { command: 'pnpm', args: ['exec', 'prisma'] };
+}
+
+function prismaModuleRoots(baseDir) {
+  const roots = [];
+  const top = join(baseDir, 'node_modules');
+  if (existsSync(join(top, '@prisma/client'))) {
+    roots.push(top);
+  }
+
+  const pnpmDir = join(top, '.pnpm');
+  if (existsSync(pnpmDir)) {
+    for (const entry of readdirSync(pnpmDir)) {
+      if (!entry.startsWith('@prisma+client@')) continue;
+      roots.push(join(pnpmDir, entry, 'node_modules'));
+    }
+  }
+
+  return roots;
+}
+
+function syncPrismaClientToModuleRoots(sourceClientDir) {
+  for (const modRoot of prismaModuleRoots(deployDir)) {
+    const target = join(modRoot, '.prisma/client');
+    if (existsSync(join(target, 'default.js'))) continue;
+    console.warn(`[deploy:bundle] Syncing .prisma/client into ${target}`);
+    mkdirSync(join(modRoot, '.prisma'), { recursive: true });
+    cpSync(sourceClientDir, target, { recursive: true });
+  }
+}
+
+function findMonorepoPrismaClientDir() {
+  const rootClient = join(root, 'node_modules/.prisma/client');
+  if (existsSync(join(rootClient, 'default.js'))) {
+    return rootClient;
+  }
+
+  const pnpmDir = join(root, 'node_modules/.pnpm');
+  if (!existsSync(pnpmDir)) return null;
+
+  for (const entry of readdirSync(pnpmDir)) {
+    if (!entry.startsWith('@prisma+client@')) continue;
+    const candidate = join(pnpmDir, entry, 'node_modules/.prisma/client');
+    if (existsSync(join(candidate, 'default.js'))) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
+function ensurePrismaClient() {
+  const marker = join(deployDir, PRISMA_CLIENT_MARKER);
+  if (existsSync(marker)) {
+    syncPrismaClientToModuleRoots(join(deployDir, 'node_modules/.prisma/client'));
+    return;
+  }
+
+  const sourceClient = findMonorepoPrismaClientDir();
+  if (sourceClient) {
+    const target = join(deployDir, 'node_modules/.prisma/client');
+    console.log('[deploy:bundle] Copying generated Prisma client into deploy bundle');
+    mkdirSync(join(deployDir, 'node_modules/.prisma'), { recursive: true });
+    cpSync(sourceClient, target, { recursive: true });
+    syncPrismaClientToModuleRoots(target);
+    if (existsSync(marker)) return;
+  }
+
+  const prismaCli = resolvePrismaCli();
+  if (!prismaCli) {
+    console.error('[deploy:bundle] Prisma CLI not found — run pnpm install && pnpm db:generate first');
+    process.exit(1);
+  }
+
+  const prismaDir = join(deployDir, 'prisma');
+  mkdirSync(prismaDir, { recursive: true });
+
+  const srcSchema = join(root, 'packages/database/prisma/schema.prisma');
+  let schema = readFileSync(srcSchema, 'utf8');
+  if (!/^\s*output\s*=/m.test(schema)) {
+    schema = schema.replace(
+      /generator client \{[^}]*\}/,
+      'generator client {\n  provider = "prisma-client-js"\n  output   = "../node_modules/.prisma/client"\n}',
+    );
+  }
+  writeFileSync(join(prismaDir, 'schema.prisma'), schema);
+
+  console.log('[deploy:bundle] Generating Prisma client in deploy bundle');
+  const generateArgs = [
+    ...prismaCli.args,
+    'generate',
+    '--schema',
+    join(deployDir, 'prisma/schema.prisma'),
+  ];
+  const result = spawnSync(prismaCli.command, generateArgs, {
+    stdio: 'inherit',
+    cwd: prismaCli.command === 'pnpm' ? root : deployDir,
+    shell: false,
+    env: {
+      ...process.env,
+      DATABASE_URL: process.env.DATABASE_URL ?? 'postgresql://tsc:tsc@localhost:5432/tsc_build',
+    },
+  });
+  if ((result.status ?? 1) !== 0) {
+    console.error('[deploy:bundle] prisma generate failed');
+    process.exit(result.status ?? 1);
+  }
+
+  if (!existsSync(marker)) {
+    console.error(`[deploy:bundle] Prisma generate did not create ${PRISMA_CLIENT_MARKER}`);
+    process.exit(1);
+  }
+
+  syncPrismaClientToModuleRoots(join(deployDir, 'node_modules/.prisma/client'));
 }
 
 function ensureWorkspaceDist() {
@@ -81,13 +236,22 @@ function ensureWorkspaceDist() {
   }
 }
 
+deployDir = prepareDeployDir();
+if (!process.env.RAILWAY_DEPLOY_DIR && process.platform === 'win32') {
+  deployArg = `./${deployDir.split(/[/\\]/).pop()}`;
+} else if (process.env.RAILWAY_DEPLOY_DIR) {
+  deployArg = process.env.RAILWAY_DEPLOY_DIR;
+} else {
+  deployArg = deployDir;
+}
+
 console.log(`[deploy:bundle] Target: ${deployDir}`);
-removeDir(deployDir);
 
 run('pnpm', ['--filter', '@tsc/api', '--prod', 'deploy', deployArg]);
 
 ensureApiDist();
 ensureWorkspaceDist();
+ensurePrismaClient();
 
 process.env.RAILWAY_DEPLOY_DIR = deployDir;
 run('node', ['scripts/verify-deploy-bundle.mjs'], { cwd: root });

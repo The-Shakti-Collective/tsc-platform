@@ -14,8 +14,11 @@
     ]
   },
   "deploy": {
+    "preDeployCommand": [
+      "pnpm --filter @tsc/database exec prisma migrate deploy"
+    ],
     "startCommand": "node scripts/railway-start.mjs",
-    "healthcheckPath": "/api/health/ready",
+    "healthcheckPath": "/api/health/live",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3

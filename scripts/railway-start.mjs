@@ -19,6 +19,7 @@ const checks = [
   join(deployDir, 'node_modules/@tsc/constants/dist/index.js'),
   join(deployDir, 'node_modules/@tsc/types/dist/index.js'),
   join(deployDir, 'node_modules/@tsc/contracts/dist/index.js'),
+  join(deployDir, 'node_modules/.prisma/client/default.js'),
 ];
 
 for (const path of checks) {
@@ -27,6 +28,8 @@ for (const path of checks) {
     process.exit(1);
   }
 }
+
+console.log(`[railway-start] Booting API from ${deployDir}`);
 
 const child = spawn(process.execPath, ['dist/main.js'], {
   cwd: deployDir,
