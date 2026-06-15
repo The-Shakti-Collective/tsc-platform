@@ -23,14 +23,8 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
     return nextWithPathname(request);
   }
 
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-pathname', normalizePathname(request.nextUrl.pathname));
-  const requestWithPathname = new NextRequest(request.url, {
-    headers: requestHeaders,
-  });
-
   const { default: clerkMiddleware } = await import('./clerk-middleware');
-  return clerkMiddleware(requestWithPathname, event);
+  return clerkMiddleware(request, event);
 }
 
 export const config = {

@@ -6,7 +6,7 @@ import { SiteChrome } from '@/components/layout/site-chrome';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { AuthTokenProvider } from '@/components/providers/auth-token-provider';
 import { getAppUrl } from '@/lib/app-urls';
-import { BRAND_LOGO_PATH } from '@/lib/brand-assets';
+import { BRAND_LOGO_URL } from '@/lib/brand-assets';
 import { isAuthStubEnabled, isClerkConfigured } from '@/lib/clerk-env';
 import './globals.css';
 
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     type: 'website',
   },
   icons: {
-    icon: BRAND_LOGO_PATH,
+    icon: BRAND_LOGO_URL,
   },
 };
 

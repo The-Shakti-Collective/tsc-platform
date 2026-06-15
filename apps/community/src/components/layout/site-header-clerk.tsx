@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
-import { BRAND_LOGO_PATH } from '@/lib/brand-assets';
+import { BRAND_LOGO_URL } from '@/lib/brand-assets';
 import { Button } from '@/components/ui/button';
 import { ClientOnly } from './client-only';
 import { MobileNav } from './mobile-nav';
@@ -87,7 +87,7 @@ export function SiteHeaderClerk() {
     <header className="sticky top-0 z-40 border-b border-brand-teal-deep/10 bg-brand-cream-wash/90 backdrop-blur">
       <div className="relative mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
-          <Image src={BRAND_LOGO_PATH} alt="" width={88} height={28} className="h-7 w-auto" />
+          <Image src={BRAND_LOGO_URL} alt="" width={88} height={28} unoptimized className="h-7 w-auto" />
           <span className="sr-only">The Shakti Collective</span>
         </Link>
         <nav className="hidden items-center gap-4 md:flex">
