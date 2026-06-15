@@ -3,7 +3,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import { BRAND_LOGO_PATH } from '@/lib/brand-assets';
 import { Button } from '@/components/ui/button';
+import { ClientOnly } from './client-only';
 import { MobileNav } from './mobile-nav';
 
 const navLinks = [
@@ -13,12 +15,79 @@ const navLinks = [
 
 const signedInLinks = [{ href: '/feed', label: 'Feed' }];
 
+function MarketingAuthFallback() {
+  return (
+    <>
+      <Button asChild variant="ghost" size="sm" className="text-brand-teal-deep">
+        <Link href="/sign-in">Sign in</Link>
+      </Button>
+      <Button asChild size="sm" className="cursor-pointer bg-brand-pumpkin hover:bg-brand-amber">
+        <Link href="/sign-up">Create Passport</Link>
+      </Button>
+    </>
+  );
+}
+
+function DesktopAuth() {
+  return (
+    <ClientOnly fallback={<MarketingAuthFallback />}>
+      <>
+        <SignedOut>
+          <MarketingAuthFallback />
+        </SignedOut>
+        <SignedIn>
+          <Button asChild variant="ghost" size="sm" className="text-brand-teal-deep">
+            <Link href="/profile">Profile</Link>
+          </Button>
+          <UserButton afterSignOutUrl="/" />
+        </SignedIn>
+      </>
+    </ClientOnly>
+  );
+}
+
+function MobileAuth() {
+  return (
+    <ClientOnly fallback={<MarketingAuthFallback />}>
+      <>
+        <SignedOut>
+          <MarketingAuthFallback />
+        </SignedOut>
+        <SignedIn>
+          <Button asChild variant="ghost" size="sm" className="text-brand-teal-deep">
+            <Link href="/profile">Profile</Link>
+          </Button>
+          <UserButton afterSignOutUrl="/" />
+        </SignedIn>
+      </>
+    </ClientOnly>
+  );
+}
+
+function SignedInNavLinks() {
+  return (
+    <ClientOnly fallback={null}>
+      <SignedIn>
+        {signedInLinks.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className="text-sm text-brand-teal-deep/70 hover:text-brand-green"
+          >
+            {link.label}
+          </Link>
+        ))}
+      </SignedIn>
+    </ClientOnly>
+  );
+}
+
 export function SiteHeaderClerk() {
   return (
     <header className="sticky top-0 z-40 border-b border-brand-teal-deep/10 bg-brand-cream-wash/90 backdrop-blur">
       <div className="relative mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/brand/tsc-logo.svg" alt="" width={88} height={28} className="h-7 w-auto" />
+          <Image src={BRAND_LOGO_PATH} alt="" width={88} height={28} className="h-7 w-auto" />
           <span className="sr-only">The Shakti Collective</span>
         </Link>
         <nav className="hidden items-center gap-4 md:flex">
@@ -31,56 +100,12 @@ export function SiteHeaderClerk() {
               {link.label}
             </Link>
           ))}
-          <SignedIn>
-            {signedInLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-sm text-brand-teal-deep/70 hover:text-brand-green"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </SignedIn>
+          <SignedInNavLinks />
         </nav>
         <div className="hidden items-center gap-2 md:flex">
-          <SignedOut>
-            <Button asChild variant="ghost" size="sm" className="text-brand-teal-deep">
-              <Link href="/sign-in">Sign in</Link>
-            </Button>
-            <Button asChild size="sm" className="cursor-pointer bg-brand-pumpkin hover:bg-brand-amber">
-              <Link href="/sign-up">Create Passport</Link>
-            </Button>
-          </SignedOut>
-          <SignedIn>
-            <Button asChild variant="ghost" size="sm" className="text-brand-teal-deep">
-              <Link href="/profile">Profile</Link>
-            </Button>
-            <UserButton afterSignOutUrl="/" />
-          </SignedIn>
+          <DesktopAuth />
         </div>
-        <MobileNav
-          links={navLinks}
-          signedInExtras={signedInLinks}
-          authSlot={
-            <>
-              <SignedOut>
-                <Button asChild variant="ghost" size="sm" className="text-brand-teal-deep">
-                  <Link href="/sign-in">Sign in</Link>
-                </Button>
-                <Button asChild size="sm" className="bg-brand-green hover:bg-brand-teal-mid">
-                  <Link href="/sign-up">Join</Link>
-                </Button>
-              </SignedOut>
-              <SignedIn>
-                <Button asChild variant="ghost" size="sm" className="text-brand-teal-deep">
-                  <Link href="/profile">Profile</Link>
-                </Button>
-                <UserButton afterSignOutUrl="/" />
-              </SignedIn>
-            </>
-          }
-        />
+        <MobileNav links={navLinks} signedInExtras={signedInLinks} authSlot={<MobileAuth />} />
       </div>
     </header>
   );

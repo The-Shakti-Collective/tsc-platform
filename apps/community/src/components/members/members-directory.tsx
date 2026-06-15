@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { BadgeCheck, MapPin, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { MOCK_FEATURED_MEMBERS } from '@/lib/mock-data';
 
 export function MembersDirectory() {

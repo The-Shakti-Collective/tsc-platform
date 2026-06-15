@@ -1,6 +1,13 @@
-import { NextResponse } from 'next/server';
-import type { NextFetchEvent, NextRequest } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
+import type { NextFetchEvent } from 'next/server';
 import { isAuthStubEnabled, isPlaceholderClerkKey } from '@/lib/clerk-env';
+import { normalizePathname } from '@/lib/request-pathname';
+
+function nextWithPathname(request: NextRequest): NextResponse {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-pathname', normalizePathname(request.nextUrl.pathname));
+  return NextResponse.next({ request: { headers: requestHeaders } });
+}
 
 function shouldUseClerkMiddleware(): boolean {
   if (isAuthStubEnabled()) return false;
@@ -13,11 +20,17 @@ function shouldUseClerkMiddleware(): boolean {
 
 export async function middleware(request: NextRequest, event: NextFetchEvent) {
   if (!shouldUseClerkMiddleware()) {
-    return NextResponse.next();
+    return nextWithPathname(request);
   }
 
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-pathname', normalizePathname(request.nextUrl.pathname));
+  const requestWithPathname = new NextRequest(request.url, {
+    headers: requestHeaders,
+  });
+
   const { default: clerkMiddleware } = await import('./clerk-middleware');
-  return clerkMiddleware(request, event);
+  return clerkMiddleware(requestWithPathname, event);
 }
 
 export const config = {

@@ -21,6 +21,7 @@ import {
   Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { BRAND_LOGO_PATH } from '@/lib/brand-assets';
 
 const sidebarLinks = [
   { href: '/dashboard', label: 'Home', icon: Home },
@@ -47,7 +48,7 @@ export function AppSidebar() {
     <aside className="hidden w-56 shrink-0 border-r border-brand-teal-deep/10 bg-brand-cream-wash/80 lg:block">
       <div className="sticky top-0 flex h-screen flex-col px-3 py-5">
         <Link href="/dashboard" className="mb-6 flex items-center gap-2 px-2">
-          <Image src="/brand/tsc-logo.svg" alt="" width={88} height={28} className="h-7 w-auto" />
+          <Image src={BRAND_LOGO_PATH} alt="" width={88} height={28} className="h-7 w-auto" />
           <span className="sr-only">The Shakti Collective</span>
         </Link>
         <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto">

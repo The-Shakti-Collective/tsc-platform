@@ -3,7 +3,8 @@
 import { useEffect } from 'react';
 import { UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
-import { isClientAuthStubEnabled, isClerkConfigured } from '@/lib/clerk-env';
+import { ClientOnly } from '@/components/layout/client-only';
+import { isClientAuthStubEnabled, isClerkPublishableConfigured } from '@/lib/clerk-env';
 import { AppRightRail } from './app-right-rail';
 import { AppSidebar } from './app-sidebar';
 import { MobileBottomNav } from './mobile-bottom-nav';
@@ -15,7 +16,7 @@ type AppShellProps = {
 };
 
 export function AppShell({ children }: AppShellProps) {
-  const useStub = isClientAuthStubEnabled() || !isClerkConfigured();
+  const useStub = isClientAuthStubEnabled() || !isClerkPublishableConfigured();
 
   useEffect(() => {
     applyTheme(loadPreferences().theme);
@@ -42,7 +43,13 @@ export function AppShell({ children }: AppShellProps) {
                 <Link href="/profile">Passport</Link>
               </Button>
             ) : (
-              <UserButton afterSignOutUrl="/" />
+              <ClientOnly
+                fallback={
+                  <span className="inline-block h-8 w-8 rounded-full bg-brand-cream-muted" />
+                }
+              >
+                <UserButton afterSignOutUrl="/" />
+              </ClientOnly>
             )}
           </div>
         </header>

@@ -34,15 +34,18 @@ export function isClientAuthStubEnabled(): boolean {
   return isPlaceholderClerkKey(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 }
 
-export function isClerkConfigured(): boolean {
-  if (typeof window !== 'undefined') {
-    const pub = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim();
-    return !!pub && !isPlaceholderClerkKey(pub);
-  }
+/** Publishable key only — safe for client UI (same result on server SSR and browser). */
+export function isClerkPublishableConfigured(): boolean {
   const pub = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim();
+  return !!pub && !isPlaceholderClerkKey(pub);
+}
+
+export function isClerkConfigured(): boolean {
+  if (!isClerkPublishableConfigured()) return false;
+  if (typeof window !== 'undefined') return true;
+
   const secret = process.env.CLERK_SECRET_KEY?.trim();
-  if (!pub || !secret) return false;
-  if (isPlaceholderClerkKey(pub) || isPlaceholderClerkKey(secret)) return false;
+  if (!secret || isPlaceholderClerkKey(secret)) return false;
   return true;
 }
 

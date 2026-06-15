@@ -1,19 +1,17 @@
-'use client';
-
-import { usePathname } from 'next/navigation';
-import { AppShell } from './app-shell';
-import { SiteFooter } from './site-footer';
-import { SiteHeader } from './site-header';
+import { AppShell } from '@/components/layout/app-shell';
+import { SiteFooter } from '@/components/layout/site-footer';
+import { SiteHeader } from '@/components/layout/site-header';
 import { isMemberAppRoute } from '@/lib/member-routes';
+import { resolveRequestPathname } from '@/lib/resolve-request-pathname';
 
 type SiteChromeProps = {
   children: React.ReactNode;
 };
 
-export function SiteChrome({ children }: SiteChromeProps) {
-  const pathname = usePathname();
+export async function SiteChrome({ children }: SiteChromeProps) {
+  const pathname = await resolveRequestPathname();
 
-  if (pathname && isMemberAppRoute(pathname)) {
+  if (isMemberAppRoute(pathname)) {
     return <AppShell>{children}</AppShell>;
   }
 

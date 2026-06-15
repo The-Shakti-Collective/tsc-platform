@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   ArrowRight,
@@ -28,6 +29,11 @@ function getGreeting(): string {
 export function MemberDashboard() {
   const client = useCommunityClient();
   const useMock = shouldUseMockData();
+  const [greeting, setGreeting] = useState('Welcome');
+
+  useEffect(() => {
+    setGreeting(getGreeting());
+  }, []);
 
   const profileQuery = useQuery({
     queryKey: ['dashboard', 'profile'],
@@ -90,7 +96,7 @@ export function MemberDashboard() {
       ) : null}
 
       <section>
-        <p className="text-sm text-brand-teal-deep/60">{getGreeting()},</p>
+        <p className="text-sm text-brand-teal-deep/60">{greeting},</p>
         <h1 className="font-display text-3xl font-light text-brand-teal-deep md:text-4xl">
           {displayName}
         </h1>
