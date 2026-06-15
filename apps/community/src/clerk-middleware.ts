@@ -1,4 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { getAppUrl } from '@/lib/app-urls';
 
 const isPublicRoute = createRouteMatcher([
   '/',
@@ -29,6 +30,7 @@ export default clerkMiddleware(async (auth, request) => {
 
   const { userId, redirectToSignIn } = await auth();
   if (!userId) {
-    return redirectToSignIn({ returnBackUrl: request.url });
+    const returnBackUrl = `${getAppUrl()}${request.nextUrl.pathname}${request.nextUrl.search}`;
+    return redirectToSignIn({ returnBackUrl });
   }
 });
