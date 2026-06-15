@@ -73,9 +73,11 @@ function Write-InfraStatus {
     if ($usesRemoteRedis) {
         Write-Host "  Redis = remote OK  (Upstash/cloud REDIS_URL)" -ForegroundColor Green
     } elseif ($redisEmpty) {
-        Write-Host "  Redis = skipped  (stub queue mode - BullMQ jobs no-op)" -ForegroundColor Yellow
+        Write-Host "  Redis = stub mode  (REDIS_URL unset - BullMQ jobs no-op)" -ForegroundColor DarkGray
+    } elseif ($redisUrl -match 'localhost|127\.0\.0\.1') {
+        Write-Host "  Redis = local URL needs Docker  (or set remote rediss:// Upstash REDIS_URL)" -ForegroundColor Yellow
     } else {
-        Write-Host "  Redis = skipped  (local redis needs Docker - use Upstash or clear REDIS_URL)" -ForegroundColor Yellow
+        Write-Host "  Redis = configured  ($redisUrl)" -ForegroundColor Green
     }
     Write-Host ""
 }

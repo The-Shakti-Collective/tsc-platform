@@ -18,6 +18,9 @@ if (-not (Test-Path (Join-Path $Root ".env"))) {
     Write-Error ".env missing. Run: .\scripts\setup.ps1"
 }
 
+. (Join-Path $ScriptsDir "env-common.ps1")
+Test-RequiredEnvFiles -Root $Root
+
 $stacks = @{
     community = @{
         Label       = 'Community'
@@ -44,22 +47,28 @@ $stacks = @{
 
 $stack = $stacks[$Target]
 
-Copy-Item (Join-Path $Root ".env") (Join-Path $Root "apps\community\.env.local") -Force
-
 Write-Host "Starting $($stack.Label) stack..."
-Write-Host "  API:      http://localhost:4000/api  (CORS: $($stack.CorsOrigin))"
+if ($Target -eq 'coreknot') {
+    Write-Host "  CRM API:  http://localhost:5000/api  (login — Vite /api proxy)"
+    Write-Host "  TSC API:  http://localhost:4000/api  (passport/feed — VITE_TSC_API_URL)"
+} else {
+    Write-Host "  TSC API:  http://localhost:4000/api  (CORS: $($stack.CorsOrigin))"
+}
 Write-Host "  Frontend: $($stack.FrontendUrl)"
 Write-Host ""
 
-Start-ApiDevWindow -ScriptsDir $ScriptsDir -CorsOrigin $stack.CorsOrigin
-$apiReady = Wait-ForApiHealth -TimeoutSeconds 60
+if ($Target -eq 'coreknot') {
+    $null = Start-CoreKnotServerDevIfNeeded -ScriptsDir $ScriptsDir -FrontendOrigin $stack.FrontendUrl -TimeoutSeconds 180
+}
+
+$apiReady = Start-ApiDevIfNeeded -ScriptsDir $ScriptsDir -CorsOrigin $stack.CorsOrigin -TimeoutSeconds 120
 if (-not $apiReady) {
     Write-Host "Starting frontend anyway — API may still be booting." -ForegroundColor Yellow
 }
 
-$feReady = Start-FrontendDevAndWait -ScriptsDir $ScriptsDir -DevScript $stack.DevScript -Port $stack.Port -FrontendUrl $stack.FrontendUrl -TimeoutSeconds 60
+$feReady = Start-FrontendDevAndWait -ScriptsDir $ScriptsDir -DevScript $stack.DevScript -Port $stack.Port -FrontendUrl $stack.FrontendUrl -TimeoutSeconds $(if ($Target -eq 'coreknot') { 90 } else { 120 })
 if (-not $feReady) {
-    Write-Host "Frontend may still be booting - check logs/frontend-dev.log" -ForegroundColor Yellow
+    Write-Host "Frontend may still be booting — dev window stays open. Check logs/frontend-dev-*.log" -ForegroundColor Yellow
 }
 
 Write-Host ""

@@ -96,14 +96,14 @@ function Start-StackDevServers {
         Start-SingleTerminalStack -Root $Root -CorsOrigin $CorsOrigin -DevScript $Stack.DevScript -Label $Stack.Label
     }
 
-    $apiReady = Start-ApiDevIfNeeded -ScriptsDir $ScriptsDir -CorsOrigin $CorsOrigin -TimeoutSeconds 60
+    $apiReady = Start-ApiDevIfNeeded -ScriptsDir $ScriptsDir -CorsOrigin $CorsOrigin -TimeoutSeconds 120
     if (-not $apiReady) {
         Write-Host "Starting frontend anyway - API may still be booting." -ForegroundColor Yellow
     }
 
-    $feReady = Start-FrontendDevAndWait -ScriptsDir $ScriptsDir -DevScript $Stack.DevScript -Port $Stack.Port -FrontendUrl $Stack.FrontendUrl -TimeoutSeconds 60
+    $feReady = Start-FrontendDevAndWait -ScriptsDir $ScriptsDir -DevScript $Stack.DevScript -Port $Stack.Port -FrontendUrl $Stack.FrontendUrl -TimeoutSeconds 120
     if (-not $feReady) {
-        Write-Host "Frontend may still be booting - check logs/frontend-dev.log" -ForegroundColor Yellow
+        Write-Host "Frontend may still be booting — dev window stays open. Check logs/frontend-dev-*.log" -ForegroundColor Yellow
     }
 
     Write-Host ""
@@ -113,10 +113,10 @@ function Start-StackDevServers {
     Write-Host "  $($Stack.Label): $($Stack.FrontendUrl)"
     Write-Host "  API:            http://localhost:4000/api"
     if (-not $apiReady) {
-        Write-Host "  API log:        logs/api-dev.log" -ForegroundColor Yellow
+        Write-Host "  API log:        logs/api-dev-*.log" -ForegroundColor Yellow
     }
     if (-not $feReady) {
-        Write-Host "  Frontend log:   logs/frontend-dev.log" -ForegroundColor Yellow
+        Write-Host "  Frontend log:   logs/frontend-dev-*.log" -ForegroundColor Yellow
     }
 
     if ($feReady) {
@@ -156,8 +156,22 @@ if (-not (Test-Path (Join-Path $Root ".env"))) {
     Write-Error ".env missing. Run: .\scripts\setup.ps1"
 }
 
-Copy-Item (Join-Path $Root ".env") (Join-Path $Root "apps\community\.env.local") -Force
-Copy-Item (Join-Path $Root ".env") (Join-Path $Root "apps\api\.env") -Force
+. (Join-Path $ScriptsDir "env-common.ps1")
+Test-RequiredEnvFiles -Root $Root
+
+if ($Target -match '^(community|website)$') {
+    $frontendEnv = Join-Path $Root "apps\$Target\.env.local"
+    if (-not (Test-Path $frontendEnv)) {
+        Write-Warning "Missing $frontendEnv — copy from apps/$Target/.env.example"
+    }
+}
+
+if ($Target -match '^(coreknot|all)$') {
+    $ckClientEnv = Join-Path $Root "apps\coreknot\client\.env.local"
+    if (-not (Test-Path $ckClientEnv)) {
+        Write-Warning "Missing $ckClientEnv — copy from apps/coreknot/client/.env.example"
+    }
+}
 
 if (-not $PSBoundParameters.ContainsKey('KillPorts')) {
     $killPortsEnv = Read-EnvValue -Root $Root -Key "TSC_KILL_PORTS"
@@ -209,10 +223,10 @@ if ($Target -eq 'all') {
     $allFeReady = $true
     foreach ($key in @('community', 'coreknot', 'website')) {
         $stack = $stacks[$key]
-        $stackReady = Start-FrontendDevAndWait -ScriptsDir $ScriptsDir -DevScript $stack.DevScript -Port $stack.Port -FrontendUrl $stack.FrontendUrl -TimeoutSeconds 60
+        $stackReady = Start-FrontendDevAndWait -ScriptsDir $ScriptsDir -DevScript $stack.DevScript -Port $stack.Port -FrontendUrl $stack.FrontendUrl -TimeoutSeconds 120
         if (-not $stackReady) {
             $allFeReady = $false
-            Write-Host "$($stack.Label) frontend may still be booting - check logs/frontend-dev.log" -ForegroundColor Yellow
+            Write-Host "$($stack.Label) frontend may still be booting — dev window stays open. Check logs/frontend-dev-*.log" -ForegroundColor Yellow
         }
     }
 
@@ -230,6 +244,51 @@ if ($Target -eq 'all') {
 }
 
 $stack = $stacks[$Target]
+
+if ($Target -eq 'coreknot') {
+    Warn-PortConflicts -Ports @(4000, 5000, $stack.Port) -ReuseApi
+
+    Write-Host ""
+    Write-Host "Starting CoreKnot stack..."
+    Write-Host "  CRM API:  http://localhost:5000/api  (login + CoreKnot data — Vite /api proxy)"
+    Write-Host "  TSC API:  http://localhost:4000/api  (passport/feed — VITE_TSC_API_URL)"
+    Write-Host "  Frontend: $($stack.FrontendUrl)"
+    Write-Host ""
+
+    if ($SingleTerminal) {
+        Start-SingleTerminalStack -Root $Root -CorsOrigin $stack.CorsOrigin -DevScript $stack.DevScript -Label $stack.Label
+    }
+
+    # Start CRM before waiting on TSC API — login depends on :5000
+    $crmReady = Start-CoreKnotServerDevIfNeeded -ScriptsDir $ScriptsDir -FrontendOrigin $stack.FrontendUrl -TimeoutSeconds 180
+    if (-not $crmReady) {
+        Write-Host "CRM API did not become healthy — login will fail until :5000 is up. Check logs/coreknot-server-dev.log" -ForegroundColor Red
+    }
+
+    $apiReady = Start-ApiDevIfNeeded -ScriptsDir $ScriptsDir -CorsOrigin $stack.CorsOrigin -TimeoutSeconds 120
+    if (-not $apiReady) {
+        Write-Host "TSC API may still be booting — passport/feed features need :4000." -ForegroundColor Yellow
+    }
+
+    $feReady = Start-FrontendDevAndWait -ScriptsDir $ScriptsDir -DevScript $stack.DevScript -Port $stack.Port -FrontendUrl $stack.FrontendUrl -TimeoutSeconds 90
+    if (-not $feReady) {
+        Write-Host "Frontend may still be booting — dev window stays open. Check logs/frontend-dev-*.log" -ForegroundColor Yellow
+    }
+
+    Write-Host ""
+    Write-Host "--- Ready ---" -ForegroundColor Green
+    Write-Host "  CoreKnot:     $($stack.FrontendUrl)"
+    Write-Host "  CRM API:      http://localhost:5000/api/health"
+    Write-Host "  TSC API:      http://localhost:4000/api"
+    if ($feReady -and $crmReady) {
+        Open-DevBrowser -FrontendUrl $stack.FrontendUrl -Root $Root -OpenApiHealth
+    } elseif (-not $crmReady) {
+        Write-Host "Skipping browser open until CRM API responds on :5000." -ForegroundColor Yellow
+    } else {
+        Write-Host "Skipping browser open until frontend responds on :$($stack.Port)." -ForegroundColor Yellow
+    }
+    exit 0
+}
 
 Warn-PortConflicts -Ports @(4000, $stack.Port) 
 

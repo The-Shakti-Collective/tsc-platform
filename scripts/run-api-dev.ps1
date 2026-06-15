@@ -14,7 +14,10 @@ if (-not $LogFile) {
 $logFile = $LogFile
 
 function Import-DotEnvFile {
-    param([string]$Path)
+    param(
+        [string]$Path,
+        [string[]]$OverrideKeys = @()
+    )
     if (-not (Test-Path $Path)) { return }
     foreach ($line in Get-Content $Path) {
         $trimmed = $line.Trim()
@@ -22,16 +25,23 @@ function Import-DotEnvFile {
         if ($trimmed -notmatch '^\s*([^=]+)=(.*)$') { continue }
         $key = $matches[1].Trim()
         $value = $matches[2].Trim().Trim('"').Trim("'")
-        if (-not (Get-Item -Path "env:$key" -ErrorAction SilentlyContinue)) {
+        if ($OverrideKeys -contains $key -or -not (Get-Item -Path "env:$key" -ErrorAction SilentlyContinue)) {
             Set-Item -Path "env:$key" -Value $value
         }
     }
 }
 
+$sharedInfraKeys = @(
+    'DATABASE_URL',
+    'REDIS_URL',
+    'UPSTASH_REDIS_REST_URL',
+    'UPSTASH_REDIS_REST_TOKEN'
+)
+
 New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 Set-Location $Root
 Import-DotEnvFile (Join-Path $Root "apps\api\.env")
-Import-DotEnvFile (Join-Path $Root ".env")
+Import-DotEnvFile (Join-Path $Root ".env") -OverrideKeys $sharedInfraKeys
 $env:CORS_ORIGIN = $CorsOrigin
 
 Write-Host "TSC API dev - CORS_ORIGIN=$CorsOrigin"

@@ -52,6 +52,27 @@ function Import-RootDotEnv {
     }
 }
 
+function Start-DevPowerShellWindow {
+    param(
+        [string]$Root,
+        [string]$ScriptPath,
+        [hashtable]$ScriptParams = @{}
+    )
+    $paramParts = @()
+    foreach ($key in $ScriptParams.Keys) {
+        $val = [string]$ScriptParams[$key]
+        $val = $val -replace "'", "''"
+        $paramParts += "-$key '$val'"
+    }
+    $paramStr = ($paramParts -join ' ')
+    $rootEsc = $Root -replace "'", "''"
+    $scriptEsc = $ScriptPath -replace "'", "''"
+    $cmd = "& { Set-Location '$rootEsc'; & '$scriptEsc' $paramStr }"
+    Start-Process -FilePath 'powershell.exe' -WorkingDirectory $Root -ArgumentList @(
+        '-NoExit', '-ExecutionPolicy', 'Bypass', '-Command', $cmd
+    ) | Out-Null
+}
+
 function Read-EnvValue {
     param(
         [string]$Root,
@@ -119,7 +140,7 @@ function Wait-ForApiHealth {
         }
     }
     Write-Host ""
-    Write-Warning "API did not respond within ${TimeoutSeconds}s. Check logs/api-dev.log and the API terminal."
+    Write-Warning "API did not respond within ${TimeoutSeconds}s. Check logs/api-dev-*.log and the API terminal."
     return $false
 }
 
@@ -136,13 +157,10 @@ function Start-ApiDevWindow {
     $Root = Split-Path -Parent $ScriptsDir
     $logName = Split-Path -Leaf $LogFile
     Write-Host "Starting API in new window (log: logs/$logName)..."
-    Start-Process -FilePath "powershell.exe" -WorkingDirectory $Root -ArgumentList @(
-        "-NoExit",
-        "-ExecutionPolicy", "Bypass",
-        "-File", $apiScript,
-        "-CorsOrigin", $CorsOrigin,
-        "-LogFile", $LogFile
-    ) | Out-Null
+    Start-DevPowerShellWindow -Root $Root -ScriptPath $apiScript -ScriptParams @{
+        CorsOrigin = $CorsOrigin
+        LogFile    = $LogFile
+    }
 }
 
 function Wait-ForFrontendHealth {
@@ -205,13 +223,10 @@ function Start-FrontendDevWindow {
     }
     $logName = Split-Path -Leaf $LogFile
     Write-Host "Starting frontend ($DevScript) in new window (log: logs/$logName)..."
-    Start-Process -FilePath "powershell.exe" -WorkingDirectory $Root -ArgumentList @(
-        "-NoExit",
-        "-ExecutionPolicy", "Bypass",
-        "-File", $feScript,
-        "-DevScript", $DevScript,
-        "-LogFile", $LogFile
-    ) | Out-Null
+    Start-DevPowerShellWindow -Root $Root -ScriptPath $feScript -ScriptParams @{
+        DevScript = $DevScript
+        LogFile   = $LogFile
+    }
 }
 
 function Test-PortListening {
@@ -291,11 +306,10 @@ function Start-CoreKnotServerDevWindow {
     $Root = Split-Path -Parent $ScriptsDir
     $logName = Split-Path -Leaf $LogFile
     Write-Host "Starting CoreKnot CRM API in new window (log: logs/$logName)..."
-    Start-Process -FilePath "powershell.exe" -WorkingDirectory $Root -ArgumentList @(
-        "-NoExit", "-ExecutionPolicy", "Bypass", "-File", $script,
-        "-FrontendOrigin", $FrontendOrigin,
-        "-LogFile", $LogFile
-    ) | Out-Null
+    Start-DevPowerShellWindow -Root $Root -ScriptPath $script -ScriptParams @{
+        FrontendOrigin = $FrontendOrigin
+        LogFile        = $LogFile
+    }
 }
 
 function Start-CoreKnotServerDevIfNeeded {
