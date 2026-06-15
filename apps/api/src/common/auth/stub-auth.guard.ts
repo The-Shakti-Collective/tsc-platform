@@ -1,3 +1,7 @@
+/**
+ * Local dev auth bypass — never active when NODE_ENV=production.
+ * Enabled via TSC_AUTH_STUB or placeholder CLERK_SECRET_KEY (see clerk-config.ts).
+ */
 import {
   CanActivate,
   ExecutionContext,
@@ -16,14 +20,23 @@ export class StubAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const clerkUserId = this.resolveStubUserId(request);
+    const clerkUserId = this.resolveStubUserIdFromRequest(request);
+
+    if (!clerkUserId) {
+      throw new UnauthorizedException('Authentication required');
+    }
 
     request.clerkUserId = clerkUserId;
-    request.membership = await this.membershipContext.resolve(clerkUserId);
+    try {
+      request.membership = await this.membershipContext.resolve(clerkUserId);
+    } catch {
+      throw new UnauthorizedException('Invalid or unprovisioned stub user');
+    }
     return true;
   }
 
-  private resolveStubUserId(request: AuthenticatedRequest): string {
+  /** Requires explicit stub credentials — no silent env fallback on the request. */
+  private resolveStubUserIdFromRequest(request: AuthenticatedRequest): string | null {
     const authHeader = request.headers?.authorization;
     if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.slice('Bearer '.length).trim();
@@ -40,7 +53,7 @@ export class StubAuthGuard implements CanActivate {
     const fromHeader = Array.isArray(headerUserId) ? headerUserId[0] : headerUserId;
     if (fromHeader?.trim()) return fromHeader.trim();
 
-    return resolveStubUserId();
+    return null;
   }
 }
 
