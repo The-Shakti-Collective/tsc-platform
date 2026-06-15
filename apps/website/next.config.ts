@@ -1,22 +1,18 @@
 import type { NextConfig } from 'next';
 
-const artistPathUrl = process.env.NEXT_PUBLIC_ARTIST_PATH_URL ?? 'https://theartistpath.in';
-
 const nextConfig: NextConfig = {
+  reactStrictMode: true,
   transpilePackages: ['@tsc/types'],
-  async redirects() {
-    return [
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  images: {
+    remotePatterns: [
       {
-        source: '/programs/artist-path',
-        destination: artistPathUrl,
-        permanent: false,
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
       },
-      {
-        source: '/artist-path',
-        destination: artistPathUrl,
-        permanent: false,
-      },
-    ];
+    ],
   },
 };
 

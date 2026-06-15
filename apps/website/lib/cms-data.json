@@ -1,0 +1,366 @@
+{
+  "ips": [
+    {
+      "id": "main-bhi-artist",
+      "slug": "main-bhi-artist",
+      "title": "Main Bhi Artist",
+      "subtitle": "Community Platform",
+      "type": "Platform",
+      "status": "Active",
+      "logline": "A global community platform for emerging artists to connect, collaborate, and monetize their craft.",
+      "heroImage": "/assets/banner.jpg",
+      "description": "Main Bhi Artist is TSC's flagship community platform that brings together thousands of emerging artists from around the world. It's a space where artists can showcase work, find mentorship, collaborate on projects, and access opportunities for monetization and growth.",
+      "culturalRootedness": "Deeply rooted in South Asian artistic traditions while embracing global contemporary forms. The platform celebrates the diversity of cultural expression and provides space for artists from all backgrounds.",
+      "contemporaryFormat": "Web and mobile application with real-time collaboration tools, live streaming capabilities, and integrated marketplace for artist services.",
+      "partnerships": [
+        "Spotify for music integration",
+        "YouTube for video hosting",
+        "PayPal for payments",
+        "Instagram for social sharing"
+      ],
+      "monetisationTags": [
+        "Direct artist payments",
+        "Subscription model",
+        "Marketplace commissions",
+        "Sponsorships"
+      ],
+      "tags": [
+        "Community",
+        "Artists",
+        "Collaboration",
+        "Monetization"
+      ],
+      "ctaLabel": "Join Community",
+      "ctaLink": "/contact?type=artist"
+    },
+    {
+      "id": "tsc-academy",
+      "slug": "tsc-academy",
+      "title": "TSC Academy",
+      "subtitle": "Mentorship Program",
+      "type": "Educational",
+      "status": "Active",
+      "logline": "Industry-mentored courses designed to take emerging talent from foundation skills to professional income.",
+      "heroImage": "/assets/tsc academy.png",
+      "description": "TSC Academy offers structured mentorship programs led by industry veterans. From music production to storytelling, digital design to artist branding, we provide comprehensive courses that combine theory, practice, and real-world collaboration opportunities.",
+      "culturalRootedness": "Built on the principle that great artists come from all cultures. Our mentors represent diverse artistic traditions and contemporary creative disciplines.",
+      "contemporaryFormat": "Live online courses with weekly mentorship sessions, collaborative projects, demo days, and lifetime community access.",
+      "partnerships": [
+        "Industry mentors and practitioners",
+        "Studio partners for production",
+        "Venue partners for demo days",
+        "Distribution platforms"
+      ],
+      "monetisationTags": [
+        "Course enrollment",
+        "Accelerator premium tier",
+        "Certification programs",
+        "Masterclass series"
+      ],
+      "tags": [
+        "Education",
+        "Mentorship",
+        "Skills",
+        "Career Development"
+      ],
+      "ctaLabel": "Explore Courses",
+      "ctaLink": "/academy"
+    },
+    {
+      "id": "creation-cafes",
+      "slug": "creation-cafes",
+      "title": "Creation Cafés",
+      "subtitle": "Community Spaces",
+      "type": "Physical Space",
+      "status": "Expanded",
+      "logline": "Open-access creative spaces in cities worldwide where artists meet, collaborate, and create together.",
+      "heroImage": "/assets/BLU01769.jpg",
+      "description": "Creation Cafés are physical spaces in major cities where artists gather to create, collaborate, and build community. Each café is equipped with production tools, collaborative spaces, and hosts regular events, workshops, and artist gatherings.",
+      "culturalRootedness": "Grounded in the principle of democratizing access to creative tools and spaces. We believe great art emerges from community, not isolation.",
+      "contemporaryFormat": "Hybrid physical spaces with digital extensions, featuring production studios, creative commons, event venues, and online booking systems.",
+      "partnerships": [
+        "Local cultural institutions",
+        "Equipment manufacturers",
+        "Event venues",
+        "Artist collectives"
+      ],
+      "monetisationTags": [
+        "Space rentals",
+        "Membership fees",
+        "Event hosting",
+        "Workshop fees"
+      ],
+      "tags": [
+        "Community",
+        "Collaboration",
+        "Space",
+        "Events"
+      ],
+      "ctaLabel": "Find a Café",
+      "ctaLink": "/contact?type=brand"
+    },
+    {
+      "id": "unfold-manifesto",
+      "slug": "unfold-manifesto",
+      "title": "The UNFOLD Manifesto",
+      "subtitle": "Cultural Movement",
+      "type": "Philosophical",
+      "status": "Ongoing",
+      "logline": "A cultural movement redefining how emerging talent and brands collaborate on authentic, culturally-rooted creative expression.",
+      "heroImage": "/assets/only-logo.svg",
+      "description": "The UNFOLD Manifesto is TSC's philosophical foundation and cultural movement. It represents a commitment to authentic artistic expression, cultural integrity, and sustainable models of creative empowerment that honor both heritage and innovation.",
+      "culturalRootedness": "At the heart of UNFOLD is the conviction that culture is not a commodity—it's a living expression of identity. We champion work that's culturally authentic while remaining contemporary and global.",
+      "contemporaryFormat": "Multi-media movement including published manifestos, films, exhibitions, podcasts, and community initiatives that embody UNFOLD principles.",
+      "partnerships": [
+        "Cultural organizations globally",
+        "Academic institutions",
+        "Media partners",
+        "Artist networks"
+      ],
+      "monetisationTags": [
+        "Brand partnerships",
+        "Content licensing",
+        "Speaking engagements",
+        "Research collaborations"
+      ],
+      "tags": [
+        "Philosophy",
+        "Culture",
+        "Movement",
+        "Authenticity"
+      ],
+      "ctaLabel": "Learn More",
+      "ctaLink": "/ecosystem"
+    }
+  ],
+  "artists": [
+    {
+      "id": "amaey",
+      "slug": "amaey",
+      "name": "Amaey",
+      "roles": [
+        "Music Producer",
+        "Sound Designer",
+        "Composer"
+      ],
+      "location": "Mumbai, India",
+      "bioShort": "Experimental music producer pushing boundaries between traditional and digital soundscapes.",
+      "bioLong": "Amaey is an innovative music producer and composer known for blending classical Indian instruments with contemporary electronic production. With a background in both classical training and digital sound design, Amaey creates immersive sonic experiences that bridge cultural traditions with cutting-edge production. Their work has been featured in documentaries, brand campaigns, and independent films, establishing them as a creative force in the emerging music scene.",
+      "image": "/assets/amaey.jpeg",
+      "bookingEnabled": true,
+      "genres": [
+        "Experimental",
+        "Electronic",
+        "Fusion",
+        "Cinematic"
+      ],
+      "social": {
+        "instagram": "https://instagram.com/amaey",
+        "spotify": "https://open.spotify.com/artist/amaey"
+      }
+    },
+    {
+      "id": "deepank",
+      "slug": "deepank",
+      "name": "Deepank",
+      "roles": [
+        "Filmmaker",
+        "Director",
+        "Cinematographer"
+      ],
+      "location": "Bangalore, India",
+      "bioShort": "Visionary filmmaker crafting narratives that celebrate cultural identity and contemporary storytelling.",
+      "bioLong": "Deepank is an acclaimed filmmaker and director whose work explores the intersection of cultural identity, social change, and human connection. Through documentary and narrative filmmaking, Deepank tells stories of emergence—journey of artists, communities, and cultures finding their voice. Their films have premiered at international film festivals and been broadcast on major platforms, establishing a distinctive visual language grounded in authenticity and cultural sensitivity.",
+      "image": "/assets/deepank.jpg",
+      "bookingEnabled": true,
+      "genres": [
+        "Documentary",
+        "Narrative",
+        "Experimental",
+        "Cultural"
+      ],
+      "social": {
+        "instagram": "https://instagram.com/deepank.films"
+      }
+    },
+    {
+      "id": "laksh",
+      "slug": "laksh",
+      "name": "Laksh",
+      "roles": [
+        "Visual Artist",
+        "Digital Creator",
+        "Installation Artist"
+      ],
+      "location": "Delhi, India",
+      "bioShort": "Digital artist creating immersive visual experiences that merge traditional aesthetics with technology.",
+      "bioLong": "Laksh is a digital artist and creative technologist exploring the boundaries between traditional visual arts and new media. Their installations and digital artworks combine intricate patterns from Indian design traditions with cutting-edge technology, creating immersive experiences that challenge perceptions of space, identity, and culture. Work includes digital installations, interactive experiences, and commissioned pieces for cultural institutions.",
+      "image": "/assets/laksh.jpg",
+      "bookingEnabled": true,
+      "genres": [
+        "Digital Art",
+        "Installation",
+        "Interactive",
+        "Visual Design"
+      ],
+      "social": {
+        "instagram": "https://instagram.com/laksh.visual"
+      }
+    }
+  ],
+  "courses": [
+    {
+      "id": "music-prod-1",
+      "slug": "music-production-fundamentals",
+      "title": "Music Production Fundamentals",
+      "mentor": "Amaey",
+      "price": 4999,
+      "description": "Learn the foundations of modern music production from concept to mastering. This comprehensive course covers DAW basics, sound design, mixing, and production workflows used by professionals.",
+      "outcomes": [
+        "Complete a full original track from concept to final mix",
+        "Master core production techniques and workflows",
+        "Build a professional home studio setup",
+        "Understand industry-standard mixing practices"
+      ],
+      "modules": [
+        "DAW Fundamentals & Setup",
+        "Sound Design Essentials",
+        "Composition & Arrangement",
+        "Mixing Techniques",
+        "Mastering for Distribution",
+        "Capstone Project: Create & Release"
+      ],
+      "startDate": "2024-04-15",
+      "ctaLabel": "Enroll Now",
+      "image": "/assets/only-logo.svg"
+    },
+    {
+      "id": "storytelling-1",
+      "slug": "storytelling-through-film",
+      "title": "Storytelling Through Film",
+      "mentor": "Deepank",
+      "price": 5999,
+      "description": "Master narrative techniques and visual storytelling for the digital age. Learn from an acclaimed filmmaker about crafting compelling stories across formats.",
+      "outcomes": [
+        "Write, shoot, and edit a short documentary (5-10 min)",
+        "Develop your unique visual language and style",
+        "Understand narrative structure and emotional storytelling",
+        "Build professional portfolio pieces"
+      ],
+      "modules": [
+        "Screenwriting & Story Development",
+        "Visual Language & Cinematography",
+        "Directing Actors & Production",
+        "Documentary Technique",
+        "Editing & Post-Production",
+        "Exhibition & Distribution"
+      ],
+      "startDate": "2024-05-01",
+      "ctaLabel": "Enroll Now",
+      "image": "/assets/Movie_images_117.jpg"
+    }
+  ],
+  "articles": [
+    {
+      "id": "unfold-motion",
+      "slug": "unfold-motion",
+      "title": "The UNFOLD Philosophy: Motion as Meaning",
+      "category": "Brand",
+      "excerpt": "How subtle animation and interaction design communicate TSC's brand values and create immersive user experiences.",
+      "date": "March 2024",
+      "author": "Design Team",
+      "image": "/assets/only-logo.svg",
+      "content": "The UNFOLD design system uses motion not as decoration, but as a primary storytelling tool. Every animation—from fade-ins to scroll reveals to interactive elements—reinforces our belief that emergence is a journey, not a destination.\n\nIn product design, motion serves three critical functions: it guides attention, confirms interaction, and communicates meaning. When a user scrolls and content unfolds on screen, the motion itself narrates the UNFOLD philosophy.\n\nOur design language embraces complexity that emerges from simplicity. A single element can transform through motion to reveal multiple states. This metaphorically represents how artists emerge—complex, multifaceted, yet following clear paths.\n\nKey principles:\n- Purposeful movement: Every motion has narrative meaning\n- Reduced motion support: Accessibility built in from the start\n- Spatial clarity: Motion establishes relationships between elements\n- Cultural resonance: Animation pacing reflects musical and cultural traditions"
+    },
+    {
+      "id": "emerging-talent",
+      "slug": "emerging-talent-investment",
+      "title": "The Business Case for Investing in Emerging Talent",
+      "category": "Insights",
+      "excerpt": "Why forward-thinking brands are building direct relationships with emerging artists and creators.",
+      "date": "February 2024",
+      "author": "Business Team",
+      "image": "/assets/banner.jpg",
+      "content": "The traditional artist discovery model is broken. Gatekeepers, algorithms, and intermediaries create friction between creators and audiences. Forward-thinking brands are inverting this model—going directly to emerging talent for authentic partnerships.\n\nThe numbers tell the story:\n- 73% of Gen Z prefers brands that support emerging creators\n- Authentic artist collaborations outperform traditional ads by 3-4x\n- Direct creator relationships reduce time-to-market by 50%\n- Emerging talent brings cultural credibility traditional agencies can't buy\n\nBut the opportunity goes beyond marketing. Brands investing in emerging talent are:\n\n1. Building authentic cultural connections in target markets\n2. Accessing diverse voices and perspectives\n3. Creating more sustainable partnership models\n4. Positioning themselves as cultural champions, not exploiters\n\nTSC's approach matches this emerging business reality. Rather than extracting value from artists, we build structures where value is co-created and shared. This isn't just better for artists—it's better for brands, more authentic for audiences, and ultimately, more profitable.\n\nThe future belongs to brands that empower emerging talent, not those that exploit it."
+    },
+    {
+      "id": "global-culture",
+      "slug": "cultural-production-hyperlocal",
+      "title": "Cultural Production in a Hyperlocal World",
+      "category": "Culture",
+      "excerpt": "Exploring how global platforms enable deeply local creative expression and cultural authenticity.",
+      "date": "January 2024",
+      "author": "Editorial",
+      "image": "/assets/BLU01769.jpg",
+      "content": "Globalization was supposed to homogenize culture. Instead, it's doing the opposite—creating space for hyperlocal creative expression to thrive globally.\n\nThink about contemporary music: A producer in Chennai might sample classical raag, layer it with drill beats from the UK, add lyrics in Tamil, and distribute to millions worldwide. This is contemporary culture. It's rooted, it's authentic, yet entirely global.\n\nThis shift changes everything about how we think about cultural production:\n\nTraditional Model:\n- Top-down cultural gatekeeping\n- Local culture must 'go global' by abandoning roots\n- Homogenization as success\n\nEmerging Model:\n- Bottom-up, community-driven cultural creation\n- Local authenticity becomes a global asset\n- Hyper-specific as universal appeal\n\nWe're seeing this across art forms:\n- Documentary filmmakers telling deeply local stories that resonate globally\n- Visual artists creating hyperlocal aesthetic expressions\n- Musicians building genre fusions rooted in place\n\nTSC's philosophy mirrors this reality. We believe the most globally relevant culture emerges from the deepest cultural roots. An artist from any geography, any tradition, any background can create work that moves world.\n\nThe future of culture isn't about going bigger—it's about going deeper, more authentic, more rooted. And in that depth, we find universal resonance."
+    },
+    {
+      "id": "ecosystem-impact",
+      "slug": "ecosystem-impact-one-year",
+      "title": "The TSC Ecosystem: One Year In",
+      "category": "Ecosystem",
+      "excerpt": "Key metrics and learnings from our first year building a talent-centric platform.",
+      "date": "December 2023",
+      "author": "Research Team",
+      "image": "/assets/tsc academy.png",
+      "content": "Twelve months ago, TSC launched with a simple belief: the future of culture belongs to emerging talent. Today, we're seeing that belief validated in the numbers and stories emerging from our ecosystem.\n\nKey Metrics:\n- 2,500+ artists joined our community\n- 450+ paid course enrollments\n- 12+ Creation Café locations\n- 50+ brand partnerships initiated\n- 15+ original IP projects in development\n\nBut numbers don't tell the full story. The real impact is happening in the stories:\n\n- An artist from a tier-2 city gets mentorship from an international collaborator\n- A brand finds authentic creative voices instead of chasing trends\n- A filmmaker finds their audience and begins building a sustainable career\n- Communities of practice form around shared artistic values\n\nWhat we've learned:\n\n1. Artists want structure + autonomy. Mentorship works when it provides frameworks without constraining voice.\n\n2. Collaboration is currency. Artists aren't competing in zero-sum games—they're building together.\n\n3. Local authenticity is globally valuable. The most authentic work finds the widest audiences.\n\n4. Sustainability matters. Artists aren't interested in opportunities that exploit their labor.\n\n5. Community is essential. Isolation is the biggest barrier to emerging talent.\n\nYear two is about scaling these learnings, expanding to new geographies, and deepening the partnerships that create real career opportunities. But the foundation—belief in emerging talent, commitment to authentic creation, and structures that sustain—that's what drives everything."
+    }
+  ],
+  "proofTiles": [
+    {
+      "id": "academy-proof",
+      "title": "450+ Artists Trained",
+      "category": "Academy",
+      "image": "/assets/tsc academy.png",
+      "summary": "Industry mentors guiding the next generation of creators through structured, practical courses.",
+      "link": "/academy"
+    },
+    {
+      "id": "community-proof",
+      "title": "Main Bhi Artist",
+      "category": "Community",
+      "image": "/assets/banner.jpg",
+      "summary": "A global platform connecting 2,500+ emerging artists for collaboration and growth.",
+      "link": "/ecosystem"
+    },
+    {
+      "id": "creation-cafes-proof",
+      "title": "12+ Creation Cafés",
+      "category": "Spaces",
+      "image": "/assets/BLU01769.jpg",
+      "summary": "Open-access creative spaces where artists gather, collaborate, and create together.",
+      "link": "/contact"
+    },
+    {
+      "id": "collaborations-proof",
+      "title": "50+ Brand Partnerships",
+      "category": "Partnerships",
+      "image": "/assets/Movie_images_117.jpg",
+      "summary": "Forward-thinking brands creating cultural IP with authentic emerging talent.",
+      "link": "/collaborations"
+    }
+  ],
+  "team": [
+    {
+      "id": "rohit",
+      "name": "Rohit Sharma",
+      "role": "Founder & CEO",
+      "bio": "Cultural entrepreneur with 10+ years in artist development and brand collaborations. Rohit founded TSC to reimagine how emerging talent finds opportunity and sustains creative careers.",
+      "image": "/assets/rohit.png"
+    },
+    {
+      "id": "sandesh",
+      "name": "Sandesh Kumar",
+      "role": "Chief Creative Officer",
+      "bio": "Award-winning filmmaker and creative director who leads TSC's original content production and cultural strategy. Sandesh ensures every project embodies UNFOLD principles.",
+      "image": "/assets/sandesh.jpg"
+    },
+    {
+      "id": "shakti",
+      "name": "Shakti Anand",
+      "role": "Director of Programs",
+      "bio": "Mentorship and curriculum expert with background in arts education. Shakti designs and manages TSC Academy programs, ensuring mentors and students experience meaningful growth.",
+      "image": "/assets/shakti 2.png"
+    }
+  ]
+}

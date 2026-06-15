@@ -1,0 +1,8 @@
+<svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- TSC Logo Placeholder -->
+  <text x="10" y="45" font-family="Signika, sans-serif" font-size="40" font-weight="bold" fill="#0B5147">
+    TSC
+  </text>
+  <circle cx="190" cy="30" r="15" fill="none" stroke="#0B5147" stroke-width="2"/>
+  <circle cx="190" cy="30" r="8" fill="#0B5147" opacity="0.5"/>
+</svg>
