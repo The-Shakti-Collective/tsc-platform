@@ -1,16 +1,56 @@
--- CoreKnot domain backend Phases 1–3
+-- CoreKnot domain backend Phases 1-3
 
--- CreateEnum
-CREATE TYPE "PlatformRole" AS ENUM ('SUPER_ADMIN', 'ORG_OWNER', 'MANAGER', 'ARTIST', 'TEAM_MEMBER', 'CLIENT', 'FAN');
-CREATE TYPE "LeadPipelineStage" AS ENUM ('new', 'contacted', 'qualified', 'proposal', 'won', 'lost');
-CREATE TYPE "InquiryStatus" AS ENUM ('open', 'in_progress', 'resolved', 'closed');
-CREATE TYPE "GigStatus" AS ENUM ('tentative', 'confirmed', 'completed', 'cancelled');
-CREATE TYPE "ExpenseStatus" AS ENUM ('draft', 'approved', 'paid', 'void');
-CREATE TYPE "ReleaseStatus" AS ENUM ('draft', 'scheduled', 'released', 'archived');
-CREATE TYPE "RoyaltyStatus" AS ENUM ('pending', 'accrued', 'paid');
-CREATE TYPE "MarketplaceListingStatus" AS ENUM ('draft', 'active', 'paused', 'closed');
-CREATE TYPE "DomainNotificationType" AS ENUM ('system', 'inquiry', 'gig', 'invoice', 'message');
-CREATE TYPE "AuditAction" AS ENUM ('create', 'update', 'delete', 'status_change');
+-- CreateEnum (idempotent: types are new in this migration; wrap for partial-apply / pre-existing DB state)
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'PlatformRole') THEN
+    CREATE TYPE "PlatformRole" AS ENUM ('SUPER_ADMIN', 'ORG_OWNER', 'MANAGER', 'ARTIST', 'TEAM_MEMBER', 'CLIENT', 'FAN');
+  END IF;
+END $$;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'LeadPipelineStage') THEN
+    CREATE TYPE "LeadPipelineStage" AS ENUM ('new', 'contacted', 'qualified', 'proposal', 'won', 'lost');
+  END IF;
+END $$;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'InquiryStatus') THEN
+    CREATE TYPE "InquiryStatus" AS ENUM ('open', 'in_progress', 'resolved', 'closed');
+  END IF;
+END $$;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'GigStatus') THEN
+    CREATE TYPE "GigStatus" AS ENUM ('tentative', 'confirmed', 'completed', 'cancelled');
+  END IF;
+END $$;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'ExpenseStatus') THEN
+    CREATE TYPE "ExpenseStatus" AS ENUM ('draft', 'approved', 'paid', 'void');
+  END IF;
+END $$;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'ReleaseStatus') THEN
+    CREATE TYPE "ReleaseStatus" AS ENUM ('draft', 'scheduled', 'released', 'archived');
+  END IF;
+END $$;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'RoyaltyStatus') THEN
+    CREATE TYPE "RoyaltyStatus" AS ENUM ('pending', 'accrued', 'paid');
+  END IF;
+END $$;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'MarketplaceListingStatus') THEN
+    CREATE TYPE "MarketplaceListingStatus" AS ENUM ('draft', 'active', 'paused', 'closed');
+  END IF;
+END $$;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'DomainNotificationType') THEN
+    CREATE TYPE "DomainNotificationType" AS ENUM ('system', 'inquiry', 'gig', 'invoice', 'message');
+  END IF;
+END $$;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'AuditAction') THEN
+    CREATE TYPE "AuditAction" AS ENUM ('create', 'update', 'delete', 'status_change');
+  END IF;
+END $$;
 
 -- AlterTable Organization
 ALTER TABLE "Organization" ADD COLUMN "slug" TEXT;
