@@ -13,6 +13,6 @@
       "destination": "/index.html"
     }
   ],
-  "buildCommand": "npm run vercel-build",
-  "installCommand": "HUSKY=0 node scripts/generateVercelConfig.cjs && npm install"
+  "buildCommand": "cd ../../.. && pnpm exec turbo run build --filter=@tsc/coreknot-client",
+  "installCommand": "cd ../../.. && HUSKY=0 pnpm install --frozen-lockfile"
 }
