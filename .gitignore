@@ -27,8 +27,11 @@ reports/
 .env.local
 .env.*
 !.env.example
+!.env.*.example
 **/.env
 apps/**/.env
 apps/**/.env.local
 packages/**/.env
 node_modules
+
+.vercel

@@ -2,7 +2,9 @@
 
 The Shakti Collective monorepo — Platform API, Website, Community, and shared packages.
 
-**Architecture (canonical):** [docs/architecture/MASTER-PRODUCTION-ARCHITECTURE.md](./docs/architecture/MASTER-PRODUCTION-ARCHITECTURE.md)  
+**Architecture (canonical):** [docs/architecture/](./docs/architecture/) · [MASTER-PRODUCTION-ARCHITECTURE.md](./docs/architecture/MASTER-PRODUCTION-ARCHITECTURE.md)  
+**Production readiness:** [docs/readiness/](./docs/readiness/) · [verdict: NOT READY](./docs/readiness/MASTER-PRODUCTION-READINESS-REPORT.md)  
+**Tech debt elimination:** [docs/elimination/](./docs/elimination/) · [master report (Agent 18)](./docs/elimination/MASTER-TECH-DEBT-ELIMINATION-REPORT.md)  
 **Agent entry point:** [AGENTS.md](./AGENTS.md) · **Developer index:** [.specify/MASTER.md](./.specify/MASTER.md)  
 **Setup / deploy / ops:** [docs/SETUP.md](./docs/SETUP.md) · [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) · [docs/RUNBOOK.md](./docs/RUNBOOK.md)  
 **Env vars:** [ENV-STANDARD.md](./docs/architecture/ENV-STANDARD.md) · [ENVIRONMENT_GUIDE.md](./ENVIRONMENT_GUIDE.md)
@@ -19,8 +21,6 @@ The Shakti Collective monorepo — Platform API, Website, Community, and shared 
 | **Clerk** | Authentication and identity |
 
 Deprecated standalone repos (`tsc-api`, `tsc-community`, `tsc-web`) — see [REPOSITORY-GOVERNANCE.md](./docs/architecture/REPOSITORY-GOVERNANCE.md).
-
-Tech debt elimination: [docs/elimination/README.md](./docs/elimination/README.md).
 
 ## TL;DR
 
