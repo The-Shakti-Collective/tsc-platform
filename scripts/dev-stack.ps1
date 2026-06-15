@@ -1,4 +1,4 @@
-# TSC Platform — unified dev stack launcher (API + frontend)
+# TSC Platform  -  unified dev stack launcher (API + frontend)
 # Usage: .\scripts\dev-stack.ps1 -Target community|coreknot|website
 
 param(
@@ -49,8 +49,8 @@ $stack = $stacks[$Target]
 
 Write-Host "Starting $($stack.Label) stack..."
 if ($Target -eq 'coreknot') {
-    Write-Host "  CRM API:  http://localhost:5000/api  (login — Vite /api proxy)"
-    Write-Host "  TSC API:  http://localhost:4000/api  (passport/feed — VITE_TSC_API_URL)"
+    Write-Host "  CRM API:  http://localhost:5000/api  (login  -  Vite /api proxy)"
+    Write-Host "  TSC API:  http://localhost:4000/api  (passport/feed  -  VITE_TSC_API_URL)"
 } else {
     Write-Host "  TSC API:  http://localhost:4000/api  (CORS: $($stack.CorsOrigin))"
 }
@@ -63,12 +63,12 @@ if ($Target -eq 'coreknot') {
 
 $apiReady = Start-ApiDevIfNeeded -ScriptsDir $ScriptsDir -CorsOrigin $stack.CorsOrigin -TimeoutSeconds 120
 if (-not $apiReady) {
-    Write-Host "Starting frontend anyway — API may still be booting." -ForegroundColor Yellow
+    Write-Host "Starting frontend anyway  -  API may still be booting." -ForegroundColor Yellow
 }
 
 $feReady = Start-FrontendDevAndWait -ScriptsDir $ScriptsDir -DevScript $stack.DevScript -Port $stack.Port -FrontendUrl $stack.FrontendUrl -TimeoutSeconds $(if ($Target -eq 'coreknot') { 90 } else { 120 })
 if (-not $feReady) {
-    Write-Host "Frontend may still be booting — dev window stays open. Check logs/frontend-dev-*.log" -ForegroundColor Yellow
+    Write-Host "Frontend may still be booting  -  dev window stays open. Check logs/frontend-dev-*.log" -ForegroundColor Yellow
 }
 
 Write-Host ""

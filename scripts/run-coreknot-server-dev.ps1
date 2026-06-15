@@ -1,4 +1,4 @@
-# Start CoreKnot CRM Express API (MongoDB) — logs to logs/coreknot-server-dev-<timestamp>.log
+# Start CoreKnot CRM Express API (MongoDB)  -  logs to logs/coreknot-server-dev-<timestamp>.log
 param(
     [string]$FrontendOrigin = "http://localhost:3001",
     [string]$LogFile
@@ -30,7 +30,7 @@ New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 Set-Location $Root
 
 if (-not (Test-Path $serverEnv)) {
-    Write-Host "Missing $serverEnv — copy from apps/coreknot/server/.env.example" -ForegroundColor Red
+    Write-Host "Missing $serverEnv  -  copy from apps/coreknot/server/.env.example" -ForegroundColor Red
     exit 1
 }
 
@@ -41,7 +41,7 @@ if (-not $env:CLIENT_URL) { $env:CLIENT_URL = $FrontendOrigin }
 if (-not $env:FRONTEND_URL) { $env:FRONTEND_URL = $FrontendOrigin }
 $env:NODE_ENV = if ($env:NODE_ENV) { $env:NODE_ENV } else { "development" }
 
-Write-Host "CoreKnot CRM API dev — PORT=$($env:PORT) CLIENT_URL=$($env:CLIENT_URL)"
+Write-Host "CoreKnot CRM API dev  -  PORT=$($env:PORT) CLIENT_URL=$($env:CLIENT_URL)"
 Write-Host "Health:   http://localhost:5000/api/health"
 Write-Host "Log file: $logFile"
 Write-Host ""
