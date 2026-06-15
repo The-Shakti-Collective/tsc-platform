@@ -1,3 +1,4 @@
+/** @deprecated Debug utility — archived. See scripts/MONGO-LEGACY-README.md. */
 const mongoose = require('mongoose');
 const fs = require('fs');
 require('dotenv').config();

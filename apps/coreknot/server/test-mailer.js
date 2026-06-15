@@ -1,3 +1,4 @@
+/** @deprecated Manual test — archived. See scripts/MONGO-LEGACY-README.md. */
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const { sendCampaign } = require('./services/mailService');

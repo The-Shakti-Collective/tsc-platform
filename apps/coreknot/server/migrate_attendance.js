@@ -1,3 +1,7 @@
+/**
+ * @deprecated One-off migration — archived. See scripts/MONGO-LEGACY-README.md.
+ * Do not run; use scripts/migrations/coreknot/ for ETL.
+ */
 const mongoose = require('mongoose');
 require('dotenv').config();
 const Attendance = require('./models/Attendance'); // Using relative path for the script in root

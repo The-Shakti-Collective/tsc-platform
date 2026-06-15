@@ -1,3 +1,4 @@
+/** @deprecated Ad-hoc query — archived. See scripts/MONGO-LEGACY-README.md. */
 const mongoose = require('mongoose');
 require('dotenv').config();
 

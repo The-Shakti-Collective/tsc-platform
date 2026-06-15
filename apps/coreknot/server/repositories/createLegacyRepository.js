@@ -1,4 +1,4 @@
-const { getPrismaClient, isPostgresStoreEnabled } = require('./prismaClient');
+const { getPrismaClient, isPostgresStoreEnabled } = require('../infrastructure/postgres/prismaClient');
 const { createTenantRepository } = require('./createTenantRepository');
 const { getTenantId } = require('../utils/tenantContext');
 const {

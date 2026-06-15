@@ -1,3 +1,6 @@
+/**
+ * @deprecated One-off migration — archived. See scripts/MONGO-LEGACY-README.md.
+ */
 require('dotenv').config();
 const mongoose = require('mongoose');
 const Artist = require('./models/Artist');
