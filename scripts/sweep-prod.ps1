@@ -62,7 +62,7 @@ Test-ProdUrl -Label "Railway API health" -Url "$ApiUrl/api/feed/health"
 Test-ProdUrl -Label "Vercel Community health" -Url "$CommunityUrl/api/health"
 Test-ProdUrl -Label "Vercel CoreKnot health" -Url "$CoreknotUrl/health.json"
 Test-ProdUrl -Label "Website root" -Url $WebsiteUrl
-Test-ProdUrl -Label "Community feed" -Url "$CommunityUrl/feed"
+Test-ProdUrl -Label "Community feed (auth redirect)" -Url "$CommunityUrl/feed"
 
 # Items requiring manual / agent follow-up
 $missing.Add("Graph integrity queries - run Graph Agent against Neon (read-only)")
