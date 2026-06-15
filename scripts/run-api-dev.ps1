@@ -1,13 +1,17 @@
-# Start NestJS API with CORS + tee logs to logs/api-dev.log
+# Start NestJS API with CORS + log to logs/api-dev-<timestamp>.log
 param(
     [Parameter(Mandatory = $true)]
-    [string]$CorsOrigin
+    [string]$CorsOrigin,
+    [string]$LogFile
 )
 
 $ErrorActionPreference = "Continue"
 $Root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $logDir = Join-Path $Root "logs"
-$logFile = Join-Path $logDir "api-dev.log"
+if (-not $LogFile) {
+    $LogFile = Join-Path $logDir "api-dev-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
+}
+$logFile = $LogFile
 
 function Import-DotEnvFile {
     param([string]$Path)
@@ -32,11 +36,20 @@ $env:CORS_ORIGIN = $CorsOrigin
 
 Write-Host "TSC API dev - CORS_ORIGIN=$CorsOrigin"
 Write-Host "REDIS_URL=$($env:REDIS_URL)"
-Write-Host "Log file: $logFile"
 Write-Host "Health:   http://localhost:4000/api/health/ready"
+Write-Host "Log file: $logFile"
 Write-Host ""
 
-$header = "===== $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') API dev start CORS_ORIGIN=$CorsOrigin REDIS_URL=$($env:REDIS_URL) ====="
-Add-Content -Path $logFile -Value $header
+try {
+    $fs = [System.IO.File]::Open($logFile, [System.IO.FileMode]::Append, [System.IO.FileAccess]::Write, [System.IO.FileShare]::ReadWrite)
+    $sw = New-Object System.IO.StreamWriter($fs)
+    $sw.WriteLine("===== $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') TSC API dev start =====")
+    $sw.Close()
+    $fs.Close()
+} catch {
+    # Non-fatal
+}
 
-pnpm dev:api 2>&1 | Tee-Object -FilePath $logFile -Append
+# Redirect output to log; window stays open until closed
+pnpm dev:api *>> $logFile
+exit $LASTEXITCODE

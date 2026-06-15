@@ -11,6 +11,7 @@
     "predev": "node scripts/freePort.js 5000 --wait",
     "dev": "node --watch server.js",
     "test": "node scripts/runJest.js",
+    "test:ci": "node scripts/runJest.js --config jest.ci.config.js --forceExit",
     "postinstall": "node scripts/linkJestSourceMap.js",
     "test:migration-stores": "jest --config jest.migration.config.js",
     "sync-db": "node scripts/syncProdToLocal.js --yes",

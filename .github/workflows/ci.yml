@@ -58,3 +58,19 @@ jobs:
 
       - name: Build
         run: pnpm turbo run build
+
+  coreknot-server:
+    name: CoreKnot server · unit smoke
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm monorepo
+        uses: ./.github/actions/setup-pnpm
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+
+      - name: CoreKnot unit tests (CI-safe subset)
+        run: pnpm --filter @tsc/coreknot-server test:ci
