@@ -4,7 +4,7 @@ import { useProjectAnalytics } from '../../hooks/queries/projects';
 import { DataLoading, Badge, UserLabel, DataOverviewSection } from '../ui';
 import ProjectReportRangeControls from './ProjectReportRangeControls';
 import { useProjectReportRangeState } from '../../hooks/useProjectReportRangeState';
-import DailyLogHoursChart from '../admin/reports/DailyLogHoursChart';
+import DailyLogHoursChart from './DailyLogHoursChart';
 import DailyLogsTable from '../admin/DailyLogsTable';
 import {
   TaskStatusPie,
