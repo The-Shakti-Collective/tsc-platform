@@ -44,21 +44,31 @@ export default function HomePage() {
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
-          {programs.map((program) => (
-            <Card key={program.slug}>
-              <CardHeader>
-                <CardTitle>{program.title}</CardTitle>
-                <CardDescription>{program.summary}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-1 text-sm text-muted-foreground">
-                  {program.highlights.map((item) => (
-                    <li key={item}>• {item}</li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          ))}
+          {programs.map((program) => {
+            const externalUrl =
+              'externalUrl' in program && program.externalUrl ? program.externalUrl : undefined;
+            return (
+              <Card key={program.slug}>
+                <CardHeader>
+                  <CardTitle>{program.title}</CardTitle>
+                  <CardDescription>{program.summary}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <ul className="space-y-1 text-sm text-muted-foreground">
+                    {program.highlights.map((item) => (
+                      <li key={item}>• {item}</li>
+                    ))}
+                  </ul>
+                  {externalUrl ? (
+                    <ButtonLink href={externalUrl} variant="outline" size="sm">
+                      Learn more
+                      <ArrowRight className="h-4 w-4" />
+                    </ButtonLink>
+                  ) : null}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </section>
 

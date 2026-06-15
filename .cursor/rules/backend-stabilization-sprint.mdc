@@ -1,11 +1,13 @@
 ---
-description: Backend Stabilization Sprint (Phase R0) completion state — API health, auth, Swagger, observability, CI, Railway
-alwaysApply: true
+description: Backend Stabilization Sprint (Phase R0) — COMPLETE, superseded by production-architecture.mdc
+alwaysApply: false
 ---
 
-# Backend Stabilization Sprint — 2026-06-13 (COMPLETE)
+# Backend Stabilization Sprint — 2026-06-13 (COMPLETE — ARCHIVED)
 
-Phase R0 code work is **done**. Domain apps (Community, CoreKnot, Marketplace) stay gated until founder production cutover.
+> **Superseded by:** [production-architecture.mdc](./production-architecture.mdc) and [docs/architecture/MASTER-PRODUCTION-ARCHITECTURE.md](../../docs/architecture/MASTER-PRODUCTION-ARCHITECTURE.md)
+
+Phase R0 code work is **done**. See production architecture rule for current gates.
 
 ## Completed (code)
 

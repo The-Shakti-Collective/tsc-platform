@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import tailwindcssAnimate from 'tailwindcss-animate';
 
 const config: Config = {
   darkMode: ['class'],
@@ -31,15 +32,35 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        brand: {
+          'teal-deep': 'var(--brand-teal-deep)',
+          green: 'var(--brand-green)',
+          'teal-mid': 'var(--brand-teal-mid)',
+          cream: 'var(--brand-cream)',
+          'cream-muted': 'var(--brand-cream-muted)',
+          'cream-wash': 'var(--brand-cream-wash)',
+          pumpkin: 'var(--brand-pumpkin)',
+          espresso: 'var(--brand-espresso)',
+          burgundy: 'var(--brand-burgundy)',
+          rust: 'var(--brand-rust)',
+          amber: 'var(--brand-amber)',
+          charcoal: 'var(--brand-charcoal)',
+          'green-soft': 'var(--brand-green-soft)',
+          'pumpkin-soft': 'var(--brand-pumpkin-soft)',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      fontFamily: {
+        display: ['var(--font-display)', 'system-ui', 'sans-serif'],
+        body: ['var(--font-body)', 'system-ui', 'sans-serif'],
+      },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [tailwindcssAnimate],
 };
 
 export default config;

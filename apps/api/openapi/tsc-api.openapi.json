@@ -119,6 +119,32 @@
         ]
       }
     },
+    "/api/identity/platform/me": {
+      "get": {
+        "operationId": "PlatformIdentityController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PlatformIdentity"
+        ]
+      },
+      "post": {
+        "operationId": "PlatformIdentityController_upsertMe",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PlatformIdentity"
+        ]
+      }
+    },
     "/api/profile/{slug}/public": {
       "get": {
         "operationId": "PublicProfileController_getPublicProfile",
@@ -486,10 +512,22 @@
     },
     "/api/marketplace/listings": {
       "get": {
-        "operationId": "MarketplaceController_browseListings",
+        "operationId": "MarketplaceController_list",
         "parameters": [],
         "responses": {
           "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Marketplace"
+        ]
+      },
+      "post": {
+        "operationId": "MarketplaceController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
             "description": ""
           }
         },
@@ -1457,6 +1495,94 @@
         ]
       }
     },
+    "/api/intelligence/automation/rules/{id}/run": {
+      "post": {
+        "operationId": "AutomationController_runRule",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Automation"
+        ]
+      }
+    },
+    "/api/agents/automation-v2/rules": {
+      "get": {
+        "operationId": "AutomationV2AliasController_listRules",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AutomationV2Alias"
+        ]
+      }
+    },
+    "/api/agents/automation-v2/runs/recent": {
+      "get": {
+        "operationId": "AutomationV2AliasController_listRecentRuns",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AutomationV2Alias"
+        ]
+      }
+    },
+    "/api/agents/automation-v2/evaluate": {
+      "post": {
+        "operationId": "AutomationV2AliasController_evaluateAll",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AutomationV2Alias"
+        ]
+      }
+    },
+    "/api/agents/automation-v2/rules/{id}/run": {
+      "post": {
+        "operationId": "AutomationV2AliasController_runRule",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "AutomationV2Alias"
+        ]
+      }
+    },
     "/api/intelligence/goals/dashboard": {
       "get": {
         "operationId": "GoalController_getDashboard",
@@ -2098,6 +2224,98 @@
         },
         "tags": [
           "EventAgent"
+        ]
+      }
+    },
+    "/api/agents/events/{eventId}/insights": {
+      "get": {
+        "operationId": "EventAgentAliasController_getInsights",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventAgentAlias"
+        ]
+      }
+    },
+    "/api/agents/events/{eventId}/run": {
+      "post": {
+        "operationId": "EventAgentAliasController_run",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventAgentAlias"
+        ]
+      }
+    },
+    "/api/agents/events/suggestions/{id}/approve": {
+      "post": {
+        "operationId": "EventAgentAliasController_approveSuggestion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventAgentAlias"
+        ]
+      }
+    },
+    "/api/agents/events/suggestions/{id}/dismiss": {
+      "post": {
+        "operationId": "EventAgentAliasController_dismissSuggestion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventAgentAlias"
         ]
       }
     },
@@ -3024,6 +3242,140 @@
         ]
       }
     },
+    "/api/event-intelligence/insights/city-fan-density": {
+      "get": {
+        "operationId": "EventIntelligenceAliasController_getCityFanDensity",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventIntelligenceAlias"
+        ]
+      }
+    },
+    "/api/event-intelligence/insights/conversion-leaders": {
+      "get": {
+        "operationId": "EventIntelligenceAliasController_getConversionLeaders",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventIntelligenceAlias"
+        ]
+      }
+    },
+    "/api/event-intelligence/insights/repeat-attendance": {
+      "get": {
+        "operationId": "EventIntelligenceAliasController_getRepeatAttendance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventIntelligenceAlias"
+        ]
+      }
+    },
+    "/api/event-intelligence/{id}/intelligence/recommendations": {
+      "get": {
+        "operationId": "EventIntelligenceAliasController_getRecommendations",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventIntelligenceAlias"
+        ]
+      }
+    },
+    "/api/event-intelligence/{id}/intelligence/predict": {
+      "get": {
+        "operationId": "EventIntelligenceAliasController_getPredict",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventIntelligenceAlias"
+        ]
+      }
+    },
+    "/api/event-intelligence/{id}/intelligence": {
+      "get": {
+        "operationId": "EventIntelligenceAliasController_getIntelligence",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventIntelligenceAlias"
+        ]
+      }
+    },
+    "/api/event-intelligence/{id}/intelligence/refresh": {
+      "post": {
+        "operationId": "EventIntelligenceAliasController_refreshIntelligence",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "EventIntelligenceAlias"
+        ]
+      }
+    },
     "/api/events/{id}/register": {
       "post": {
         "operationId": "EventController_register",
@@ -3237,6 +3589,122 @@
         },
         "tags": [
           "AdminIdentity"
+        ]
+      }
+    },
+    "/api/tsc-identity/person/{personId}/network": {
+      "get": {
+        "operationId": "TscIdentityAliasController_getPersonNetwork",
+        "parameters": [
+          {
+            "name": "personId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TscIdentityAlias"
+        ]
+      }
+    },
+    "/api/tsc-identity/admin/{entityType}/{entityId}/badges": {
+      "post": {
+        "operationId": "TscIdentityAliasController_setVerificationBadge",
+        "parameters": [
+          {
+            "name": "entityType",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TscIdentityAlias"
+        ]
+      }
+    },
+    "/api/tsc-identity/{namespace}/{slug}/public": {
+      "get": {
+        "operationId": "TscIdentityAliasController_getPublicIdentity",
+        "parameters": [
+          {
+            "name": "namespace",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TscIdentityAlias"
+        ]
+      }
+    },
+    "/api/tsc-identity/{entityType}/{entityId}/badges": {
+      "get": {
+        "operationId": "TscIdentityAliasController_getVerificationBadges",
+        "parameters": [
+          {
+            "name": "entityType",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TscIdentityAlias"
         ]
       }
     },
@@ -4885,6 +5353,18 @@
       }
     },
     "/api/contracts": {
+      "get": {
+        "operationId": "ContractController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Contract"
+        ]
+      },
       "post": {
         "operationId": "ContractController_create",
         "parameters": [],
@@ -5063,6 +5543,121 @@
         "summary": "Readiness probe — verifies PostgreSQL and Redis connectivity",
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/api/health/database": {
+      "get": {
+        "operationId": "HealthController_database",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DependencyProbeDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "PostgreSQL connectivity probe",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/health/redis": {
+      "get": {
+        "operationId": "HealthController_redis",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DependencyProbeDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Redis connectivity probe",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/health/storage": {
+      "get": {
+        "operationId": "HealthController_storage",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageProbeDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "R2/object storage configuration probe",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/artists": {
+      "get": {
+        "operationId": "ArtistController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Artist"
+        ]
+      },
+      "post": {
+        "operationId": "ArtistController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Artist"
+        ]
+      }
+    },
+    "/api/artists/{id}": {
+      "get": {
+        "operationId": "ArtistController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Artist"
         ]
       }
     },
@@ -5321,6 +5916,32 @@
         ]
       }
     },
+    "/api/notifications": {
+      "get": {
+        "operationId": "NotificationController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Notification"
+        ]
+      },
+      "post": {
+        "operationId": "NotificationController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Notification"
+        ]
+      }
+    },
     "/api/communities/{id}/memberships": {
       "get": {
         "operationId": "MembershipCommunityController_listPrograms",
@@ -5480,6 +6101,131 @@
         },
         "tags": [
           "Graph"
+        ]
+      }
+    },
+    "/api/finance/expenses": {
+      "get": {
+        "operationId": "FinanceController_listExpenses",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Finance"
+        ]
+      },
+      "post": {
+        "operationId": "FinanceController_createExpense",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Finance"
+        ]
+      }
+    },
+    "/api/finance/summary": {
+      "get": {
+        "operationId": "FinanceController_summary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Finance"
+        ]
+      }
+    },
+    "/api/finance/invoices": {
+      "get": {
+        "operationId": "FinanceController_listInvoices",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Finance"
+        ]
+      }
+    },
+    "/api/invoices": {
+      "get": {
+        "operationId": "InvoicesController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Invoices"
+        ]
+      },
+      "post": {
+        "operationId": "InvoicesController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Invoices"
+        ]
+      }
+    },
+    "/api/analytics/cumulative": {
+      "get": {
+        "operationId": "AnalyticsController_getCumulative",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Cumulative dashboard metrics (stub until warehouse sync)",
+        "tags": [
+          "analytics"
+        ]
+      }
+    },
+    "/api/analytics/compare": {
+      "get": {
+        "operationId": "AnalyticsController_compare",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Compare metric between two periods",
+        "tags": [
+          "analytics"
+        ]
+      }
+    },
+    "/api/analytics/sparkline": {
+      "get": {
+        "operationId": "AnalyticsController_sparkline",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Sparkline data for a metric",
+        "tags": [
+          "analytics"
         ]
       }
     },
@@ -6111,6 +6857,101 @@
         ]
       }
     },
+    "/api/booking": {
+      "post": {
+        "operationId": "BookingAliasController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "BookingAlias"
+        ]
+      },
+      "get": {
+        "operationId": "BookingAliasController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "BookingAlias"
+        ]
+      }
+    },
+    "/api/booking/{id}": {
+      "get": {
+        "operationId": "BookingAliasController_getDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "BookingAlias"
+        ]
+      }
+    },
+    "/api/booking/{id}/advance": {
+      "patch": {
+        "operationId": "BookingAliasController_advance",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "BookingAlias"
+        ]
+      }
+    },
+    "/api/booking/{id}/convert-to-deal": {
+      "post": {
+        "operationId": "BookingAliasController_convertToDeal",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "BookingAlias"
+        ]
+      }
+    },
     "/api/payments/dashboard": {
       "get": {
         "operationId": "PaymentController_dashboard",
@@ -6265,6 +7106,36 @@
         },
         "tags": [
           "Payment"
+        ]
+      }
+    },
+    "/api/search": {
+      "get": {
+        "operationId": "SearchController_search",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Unified search (Typesense scaffold)",
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/api/search/health": {
+      "get": {
+        "operationId": "SearchController_health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Typesense connectivity / configuration status",
+        "tags": [
+          "search"
         ]
       }
     },
@@ -7073,6 +7944,1361 @@
           "Task"
         ]
       }
+    },
+    "/api/users": {
+      "get": {
+        "operationId": "UsersController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "post": {
+        "operationId": "UsersController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "operationId": "UsersController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/organizations": {
+      "get": {
+        "operationId": "OrganizationsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Organizations"
+        ]
+      },
+      "post": {
+        "operationId": "OrganizationsController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Organizations"
+        ]
+      }
+    },
+    "/api/organizations/{id}": {
+      "get": {
+        "operationId": "OrganizationsController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Organizations"
+        ]
+      }
+    },
+    "/api/teams": {
+      "get": {
+        "operationId": "TeamsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Teams"
+        ]
+      },
+      "post": {
+        "operationId": "TeamsController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Teams"
+        ]
+      }
+    },
+    "/api/crm/leads": {
+      "get": {
+        "operationId": "CrmLegacyController_listLeads",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CrmLegacy"
+        ]
+      },
+      "post": {
+        "operationId": "CrmLegacyController_createLead",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CrmLegacy"
+        ]
+      }
+    },
+    "/api/inquiries": {
+      "get": {
+        "operationId": "InquiriesController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Inquiries"
+        ]
+      },
+      "post": {
+        "operationId": "InquiriesController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Inquiries"
+        ]
+      }
+    },
+    "/api/calendar/events": {
+      "get": {
+        "operationId": "CalendarController_events",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Calendar"
+        ]
+      }
+    },
+    "/api/gigs": {
+      "get": {
+        "operationId": "GigsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Gigs"
+        ]
+      },
+      "post": {
+        "operationId": "GigsController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Gigs"
+        ]
+      }
+    },
+    "/api/releases": {
+      "get": {
+        "operationId": "ReleasesController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "List releases for an organization",
+        "tags": [
+          "releases"
+        ]
+      },
+      "post": {
+        "operationId": "ReleasesController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Create a release with optional tracks",
+        "tags": [
+          "releases"
+        ]
+      }
+    },
+    "/api/releases/{id}": {
+      "get": {
+        "operationId": "ReleasesController_getById",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get release by id",
+        "tags": [
+          "releases"
+        ]
+      },
+      "patch": {
+        "operationId": "ReleasesController_patch",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Update release metadata",
+        "tags": [
+          "releases"
+        ]
+      }
+    },
+    "/api/royalties": {
+      "get": {
+        "operationId": "RoyaltiesController_listRoyalties",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "List royalty accruals (per release)",
+        "tags": [
+          "royalties"
+        ]
+      }
+    },
+    "/api/royalties/statements": {
+      "get": {
+        "operationId": "RoyaltiesController_listStatements",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "List royalty statements for an organization",
+        "tags": [
+          "royalties"
+        ]
+      },
+      "post": {
+        "operationId": "RoyaltiesController_createStatement",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Create a royalty statement with optional line items",
+        "tags": [
+          "royalties"
+        ]
+      }
+    },
+    "/api/royalties/statements/{id}": {
+      "get": {
+        "operationId": "RoyaltiesController_getStatement",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Royalty statement with line items"
+          }
+        },
+        "summary": "Get royalty statement by id",
+        "tags": [
+          "royalties"
+        ]
+      }
+    },
+    "/api/content/assets": {
+      "get": {
+        "operationId": "ContentController_listAssets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "List content assets for an artist",
+        "tags": [
+          "content"
+        ]
+      },
+      "post": {
+        "operationId": "ContentController_createAsset",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Register a content asset (R2/storage key or URL)",
+        "tags": [
+          "content"
+        ]
+      }
+    },
+    "/api/content/items": {
+      "get": {
+        "operationId": "ContentController_listItems",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "List content items for an artist",
+        "tags": [
+          "content"
+        ]
+      },
+      "post": {
+        "operationId": "ContentController_createItem",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Create a content item",
+        "tags": [
+          "content"
+        ]
+      }
+    },
+    "/api/content/items/{id}": {
+      "patch": {
+        "operationId": "ContentController_patchItem",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Update a content item",
+        "tags": [
+          "content"
+        ]
+      }
+    },
+    "/api/distribution/channels": {
+      "get": {
+        "operationId": "DistributionController_listChannels",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "List distribution channels (DistroKid, manual, etc.)",
+        "tags": [
+          "distribution"
+        ]
+      },
+      "post": {
+        "operationId": "DistributionController_createChannel",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Create a distribution channel for an artist",
+        "tags": [
+          "distribution"
+        ]
+      }
+    },
+    "/api/distribution/submissions": {
+      "get": {
+        "operationId": "DistributionController_listSubmissions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "List distribution submissions",
+        "tags": [
+          "distribution"
+        ]
+      },
+      "post": {
+        "operationId": "DistributionController_createSubmission",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Submit release to distributor (stub when not configured)",
+        "tags": [
+          "distribution"
+        ]
+      }
+    },
+    "/api/integrations/oauth-readiness": {
+      "get": {
+        "operationId": "IntegrationsController_getOAuthReadiness",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Pre-flight OAuth credential check (admin/ops)",
+        "tags": [
+          "integrations"
+        ]
+      }
+    },
+    "/api/integrations/connections": {
+      "get": {
+        "operationId": "IntegrationsController_listConnections",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "List integration connections",
+        "tags": [
+          "integrations"
+        ]
+      },
+      "post": {
+        "operationId": "IntegrationsController_createConnection",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Register integration connection stub",
+        "tags": [
+          "integrations"
+        ]
+      }
+    },
+    "/api/audit/logs": {
+      "get": {
+        "operationId": "AuditController_listLogs",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "List audit log entries",
+        "tags": [
+          "audit"
+        ]
+      },
+      "post": {
+        "operationId": "AuditController_record",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Record an audit log entry",
+        "tags": [
+          "audit"
+        ]
+      }
+    },
+    "/api/messaging/threads": {
+      "get": {
+        "operationId": "MessagingController_listThread",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Messaging"
+        ]
+      }
+    },
+    "/api/messaging/messages": {
+      "post": {
+        "operationId": "MessagingController_send",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Messaging"
+        ]
+      }
+    },
+    "/api/ai/capabilities": {
+      "get": {
+        "operationId": "AiController_getCapabilities",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "List AI copilot service capabilities (stub until LLM keys configured)",
+        "tags": [
+          "ai"
+        ]
+      }
+    },
+    "/api/ai/proposal": {
+      "post": {
+        "operationId": "AiController_generateProposal",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Generate a proposal draft (stub)",
+        "tags": [
+          "ai"
+        ]
+      }
+    },
+    "/api/ai/pitch": {
+      "post": {
+        "operationId": "AiController_writePitch",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Generate a pitch draft (stub)",
+        "tags": [
+          "ai"
+        ]
+      }
+    },
+    "/api/ai/email": {
+      "post": {
+        "operationId": "AiController_writeEmail",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Generate an email draft (stub)",
+        "tags": [
+          "ai"
+        ]
+      }
+    },
+    "/api/admin/system-health": {
+      "get": {
+        "operationId": "AdminController_getSystemHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Admin system health probe (CoreKnot compat)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/roles": {
+      "get": {
+        "operationId": "AdminController_listRoles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "List org and project roles (stub catalog)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/scripts": {
+      "get": {
+        "operationId": "AdminController_listScripts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "List admin scripts (stub catalog)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/queues/status": {
+      "get": {
+        "operationId": "AdminController_getQueueStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Queue status summary (stub)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/crm/leads/audit-logs": {
+      "get": {
+        "operationId": "CrmLegacyController_listAuditLogs",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CrmLegacy"
+        ]
+      }
+    },
+    "/api/crm/leads/{id}": {
+      "get": {
+        "operationId": "CrmLegacyController_getLead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CrmLegacy"
+        ]
+      },
+      "put": {
+        "operationId": "CrmLegacyController_updateLead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CrmLegacy"
+        ]
+      },
+      "delete": {
+        "operationId": "CrmLegacyController_deleteLead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CrmLegacy"
+        ]
+      }
+    },
+    "/api/crm/leads/{id}/notes": {
+      "post": {
+        "operationId": "CrmLegacyController_addNote",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CrmLegacy"
+        ]
+      }
+    },
+    "/api/crm/leads/{id}/lock-heartbeat": {
+      "post": {
+        "operationId": "CrmLegacyController_lockHeartbeat",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CrmLegacy"
+        ]
+      }
+    },
+    "/api/crm/leads/{id}/unlock": {
+      "post": {
+        "operationId": "CrmLegacyController_unlock",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CrmLegacy"
+        ]
+      }
+    },
+    "/api/crm/leads/{leadId}/audit": {
+      "get": {
+        "operationId": "CrmLegacyController_leadAudit",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CrmLegacy"
+        ]
+      }
+    },
+    "/api/crm/stats": {
+      "get": {
+        "operationId": "CrmLegacyController_stats",
+        "parameters": [
+          {
+            "name": "timeframe",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CrmLegacy"
+        ]
+      }
+    },
+    "/api/crm/config": {
+      "get": {
+        "operationId": "CrmLegacyController_config",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CrmLegacy"
+        ]
+      }
+    },
+    "/api/crm/imports": {
+      "get": {
+        "operationId": "CrmLegacyController_imports",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CrmLegacy"
+        ]
+      }
+    },
+    "/api/crm/rep-summary": {
+      "get": {
+        "operationId": "CrmLegacyController_repSummary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CrmLegacy"
+        ]
+      }
+    },
+    "/api/crm/followups": {
+      "get": {
+        "operationId": "CrmLegacyController_followups",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CrmLegacy"
+        ]
+      }
+    },
+    "/api/crm/unsubscribe": {
+      "post": {
+        "operationId": "CrmLegacyController_unsubscribe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CrmLegacy"
+        ]
+      }
+    },
+    "/api/projects": {
+      "get": {
+        "operationId": "ProjectsLegacyController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ProjectsLegacy"
+        ]
+      },
+      "post": {
+        "operationId": "ProjectsLegacyController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ProjectsLegacy"
+        ]
+      }
+    },
+    "/api/projects/workspaces": {
+      "get": {
+        "operationId": "ProjectsLegacyController_workspaces",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ProjectsLegacy"
+        ]
+      },
+      "post": {
+        "operationId": "ProjectsLegacyController_createWorkspace",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ProjectsLegacy"
+        ]
+      },
+      "put": {
+        "operationId": "ProjectsLegacyController_reorderWorkspaces",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ProjectsLegacy"
+        ]
+      }
+    },
+    "/api/projects/workspaces/{name}": {
+      "get": {
+        "operationId": "ProjectsLegacyController_workspaceByName",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ProjectsLegacy"
+        ]
+      },
+      "delete": {
+        "operationId": "ProjectsLegacyController_deleteWorkspace",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ProjectsLegacy"
+        ]
+      }
+    },
+    "/api/projects/analytics-summary": {
+      "get": {
+        "operationId": "ProjectsLegacyController_analyticsSummary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ProjectsLegacy"
+        ]
+      }
+    },
+    "/api/projects/{id}": {
+      "get": {
+        "operationId": "ProjectsLegacyController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ProjectsLegacy"
+        ]
+      },
+      "put": {
+        "operationId": "ProjectsLegacyController_updateById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ProjectsLegacy"
+        ]
+      }
+    },
+    "/api/projects/{id}/analytics": {
+      "get": {
+        "operationId": "ProjectsLegacyController_projectAnalytics",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ProjectsLegacy"
+        ]
+      }
+    },
+    "/api/projects/{id}/workload": {
+      "get": {
+        "operationId": "ProjectsLegacyController_workload",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ProjectsLegacy"
+        ]
+      }
+    },
+    "/api/projects/{id}/hours-summary": {
+      "get": {
+        "operationId": "ProjectsLegacyController_hoursSummary",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ProjectsLegacy"
+        ]
+      }
+    },
+    "/api/projects/{id}/remove-member": {
+      "put": {
+        "operationId": "ProjectsLegacyController_removeMember",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ProjectsLegacy"
+        ]
+      }
+    },
+    "/api/tasks": {
+      "get": {
+        "operationId": "TasksLegacyController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TasksLegacy"
+        ]
+      },
+      "post": {
+        "operationId": "TasksLegacyController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TasksLegacy"
+        ]
+      }
+    },
+    "/api/tasks/bug": {
+      "post": {
+        "operationId": "TasksLegacyController_reportBug",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TasksLegacy"
+        ]
+      }
+    },
+    "/api/tasks/{id}": {
+      "get": {
+        "operationId": "TasksLegacyController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TasksLegacy"
+        ]
+      },
+      "put": {
+        "operationId": "TasksLegacyController_updateById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TasksLegacy"
+        ]
+      },
+      "delete": {
+        "operationId": "TasksLegacyController_deleteById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TasksLegacy"
+        ]
+      }
+    },
+    "/api/tasks/{id}/activity": {
+      "get": {
+        "operationId": "TasksLegacyController_listActivity",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TasksLegacy"
+        ]
+      },
+      "post": {
+        "operationId": "TasksLegacyController_addActivity",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "TasksLegacy"
+        ]
+      }
+    },
+    "/api/campaigns": {
+      "get": {
+        "operationId": "CampaignsLegacyController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CampaignsLegacy"
+        ]
+      }
+    },
+    "/api/media/readiness": {
+      "get": {
+        "operationId": "MediaController_readiness",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "R2 storage configuration and bucket probe",
+        "tags": [
+          "media"
+        ]
+      }
+    },
+    "/api/media/presign": {
+      "post": {
+        "operationId": "MediaController_presign",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Create a presigned PUT URL for direct R2 upload",
+        "tags": [
+          "media"
+        ]
+      }
     }
   },
   "info": {
@@ -7081,7 +9307,52 @@
     "version": "0.0.0",
     "contact": {}
   },
-  "tags": [],
+  "tags": [
+    {
+      "name": "health",
+      "description": "Liveness, readiness, and dependency probes"
+    },
+    {
+      "name": "royalties",
+      "description": "Royalty statements and accruals"
+    },
+    {
+      "name": "distribution",
+      "description": "DistroKid and distribution channel submissions"
+    },
+    {
+      "name": "releases",
+      "description": "Release catalog and tracks"
+    },
+    {
+      "name": "content",
+      "description": "Artist content assets and items"
+    },
+    {
+      "name": "ai",
+      "description": "CoreKnot AI copilot stubs (proposal, pitch, email)"
+    },
+    {
+      "name": "analytics",
+      "description": "Dashboard and metric comparisons"
+    },
+    {
+      "name": "search",
+      "description": "Typesense unified search scaffold"
+    },
+    {
+      "name": "integrations",
+      "description": "OAuth and third-party connection stubs"
+    },
+    {
+      "name": "audit",
+      "description": "Audit log read/write"
+    },
+    {
+      "name": "admin",
+      "description": "Admin system health, roles, scripts"
+    }
+  ],
   "servers": [
     {
       "url": "http://localhost:4000/api",
@@ -7171,7 +9442,8 @@
             "enum": [
               "ok",
               "degraded",
-              "unavailable"
+              "unavailable",
+              "not_configured"
             ]
           },
           "redis": {
@@ -7180,7 +9452,8 @@
             "enum": [
               "ok",
               "degraded",
-              "unavailable"
+              "unavailable",
+              "not_configured"
             ]
           }
         },
@@ -7217,6 +9490,73 @@
           "service",
           "checks",
           "timestamp"
+        ]
+      },
+      "DependencyProbeDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ok",
+            "enum": [
+              "ok",
+              "degraded",
+              "unavailable",
+              "not_configured"
+            ]
+          },
+          "service": {
+            "type": "string",
+            "example": "tsc-api"
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2026-06-13T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "status",
+          "service",
+          "timestamp"
+        ]
+      },
+      "StorageProbeDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ok",
+            "enum": [
+              "ok",
+              "degraded",
+              "unavailable",
+              "not_configured"
+            ]
+          },
+          "service": {
+            "type": "string",
+            "example": "tsc-api"
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2026-06-13T12:00:00.000Z"
+          },
+          "bucket": {
+            "type": "object",
+            "example": "tsc-assets",
+            "nullable": true
+          },
+          "configured": {
+            "type": "boolean",
+            "example": false
+          }
+        },
+        "required": [
+          "status",
+          "service",
+          "timestamp",
+          "bucket",
+          "configured"
         ]
       }
     }

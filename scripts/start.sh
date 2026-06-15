@@ -21,7 +21,9 @@ done
 command -v pnpm >/dev/null 2>&1 || { echo "pnpm not found. Run ./scripts/setup.sh first." >&2; exit 1; }
 [[ -f .env ]] || { echo ".env missing. Run ./scripts/setup.sh first." >&2; exit 1; }
 
-cp .env apps/community/.env.local
+if [[ ! -f apps/community/.env.local ]]; then
+  echo "Warning: missing apps/community/.env.local — cp apps/community/.env.example apps/community/.env.local" >&2
+fi
 
 if [[ "$SKIP_INFRA" -eq 0 ]] && command -v docker >/dev/null 2>&1; then
   echo "Starting Postgres + Redis..."

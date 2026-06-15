@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
-import { PersonPassport } from '@/components/passport/person-passport';
+import { MemberProfileView } from '@/components/profile/member-profile-view';
 import { Button } from '@/components/ui/button';
 import { useCommunityClient } from '@/hooks/use-community-client';
 
@@ -23,7 +23,7 @@ export default function ProfilePage() {
         <p className="mb-4 text-muted-foreground">
           Complete onboarding or ensure the API is running with your Clerk user linked.
         </p>
-        <Button asChild>
+        <Button asChild className="bg-brand-green hover:bg-brand-teal-mid">
           <Link href="/onboarding">Finish onboarding</Link>
         </Button>
       </div>
@@ -31,9 +31,9 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-6 px-4 py-12">
-      <PersonPassport data={data} />
-      <div className="mx-auto flex max-w-xl justify-center gap-3">
+    <div className="space-y-6">
+      <MemberProfileView data={data} />
+      <div className="mx-auto flex max-w-4xl justify-center gap-3 px-4 pb-12">
         {data.username ? (
           <Button asChild variant="outline">
             <Link href={`/u/${data.username}`}>Public view</Link>

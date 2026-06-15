@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* TSC Brand Book — TSC_BrandBook.pdf */
+@layer base {
+  :root {
+    --brand-teal-deep: #083d3a;
+    --brand-green: #126d5e;
+    --brand-teal-mid: #08525f;
+    --brand-cream: #ffecd1;
+    --brand-cream-muted: #f4eee3;
+    --brand-cream-wash: #fcf8f2;
+    --brand-pumpkin: #b74b02;
+    --brand-espresso: #592314;
+    --brand-burgundy: #6d2034;
+    --brand-rust: #88281c;
+    --brand-mustard: #ad6517;
+    --brand-green-soft: #e6f4f1;
+    --brand-pumpkin-soft: #fef7e0;
+
+    --background: 40 33% 98%;
+    --foreground: 174 77% 14%;
+    --card: 40 33% 99%;
+    --card-foreground: 174 77% 14%;
+    --primary: 25 98% 36%;
+    --primary-foreground: 40 33% 98%;
+    --muted: 38 25% 94%;
+    --muted-foreground: 174 30% 35%;
+    --accent: 168 40% 92%;
+    --accent-foreground: 174 77% 14%;
+    --border: 174 20% 85%;
+    --radius: 0.75rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans), system-ui, sans-serif;
+  }
+
+  .font-display {
+    font-family: var(--font-display), system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .bg-brand-teal-deep {
+    background-color: var(--brand-teal-deep);
+  }
+  .bg-brand-green {
+    background-color: var(--brand-green);
+  }
+  .bg-brand-teal-mid {
+    background-color: var(--brand-teal-mid);
+  }
+  .bg-brand-cream {
+    background-color: var(--brand-cream);
+  }
+  .bg-brand-cream-wash {
+    background-color: var(--brand-cream-wash);
+  }
+  .bg-brand-cream-muted {
+    background-color: var(--brand-cream-muted);
+  }
+  .bg-brand-green-soft {
+    background-color: var(--brand-green-soft);
+  }
+  .bg-brand-pumpkin {
+    background-color: var(--brand-pumpkin);
+  }
+  .bg-brand-pumpkin-soft {
+    background-color: var(--brand-pumpkin-soft);
+  }
+  .text-brand-teal-deep {
+    color: var(--brand-teal-deep);
+  }
+  .text-brand-green {
+    color: var(--brand-green);
+  }
+  .text-brand-cream {
+    color: var(--brand-cream);
+  }
+  .text-brand-pumpkin {
+    color: var(--brand-pumpkin);
+  }
+  .border-brand-teal-deep\/10 {
+    border-color: rgb(8 61 58 / 0.1);
+  }
+  .border-brand-teal-deep\/15 {
+    border-color: rgb(8 61 58 / 0.15);
+  }
+  .border-brand-cream\/20 {
+    border-color: rgb(255 236 209 / 0.2);
+  }
+}

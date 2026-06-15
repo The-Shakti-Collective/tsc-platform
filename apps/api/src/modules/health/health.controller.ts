@@ -16,6 +16,8 @@ import {
   HealthSummaryDto,
   LivenessDto,
   ReadinessDto,
+  DependencyProbeDto,
+  StorageProbeDto,
 } from './dto/health-response.dto';
 import { HealthService } from './health.service';
 
@@ -57,5 +59,29 @@ export class HealthController {
     }
 
     return body;
+  }
+
+  @Get('database')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'PostgreSQL connectivity probe' })
+  @ApiOkResponse({ type: DependencyProbeDto })
+  async database(): Promise<DependencyProbeDto> {
+    return this.healthService.checkDatabase();
+  }
+
+  @Get('redis')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Redis connectivity probe' })
+  @ApiOkResponse({ type: DependencyProbeDto })
+  async redis(): Promise<DependencyProbeDto> {
+    return this.healthService.checkRedis();
+  }
+
+  @Get('storage')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'R2/object storage configuration probe' })
+  @ApiOkResponse({ type: StorageProbeDto })
+  async storage(): Promise<StorageProbeDto> {
+    return this.healthService.checkStorage();
   }
 }

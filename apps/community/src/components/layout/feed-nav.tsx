@@ -5,8 +5,10 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 const feedLinks = [
+  { href: '/dashboard', label: 'Dashboard' },
   { href: '/feed', label: 'Feed' },
   { href: '/discover', label: 'Discover' },
+  { href: '/opportunities', label: 'Opportunities' },
   { href: '/messages', label: 'Messages' },
   { href: '/notifications', label: 'Notifications' },
   { href: '/bookmarks', label: 'Bookmarks' },

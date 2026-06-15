@@ -6,6 +6,7 @@ export const siteConfig = {
     'The Shakti Collective connects artists, fans, curators, and communities through identity, events, opportunities, and intelligence — one ecosystem, many journeys.',
   url: process.env.NEXT_PUBLIC_WEBSITE_URL ?? 'http://localhost:3002',
   communityUrl: process.env.NEXT_PUBLIC_COMMUNITY_URL ?? 'http://localhost:3000',
+  artistPathUrl: process.env.NEXT_PUBLIC_ARTIST_PATH_URL ?? 'https://theartistpath.in',
   apiUrl: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api',
   locale: 'en_IN',
   twitterHandle: '@theshakticollective',
@@ -23,8 +24,9 @@ export const programs = [
     slug: 'artist-path',
     title: 'Artist Path',
     summary:
-      'Build your creative identity, passport, and reputation while unlocking bookings, collaborations, and fan intelligence.',
-    highlights: ['Unified artist passport', 'Opportunity pipeline', 'Event intelligence'],
+      'A 9-month accelerator for independent artists ready to move from skill to career — identity, craft, audience, industry, and opportunity.',
+    highlights: ['9-month accelerator', '30 artists selected', 'Hybrid format'],
+    externalUrl: process.env.NEXT_PUBLIC_ARTIST_PATH_URL ?? 'https://theartistpath.in',
   },
   {
     slug: 'community-leaders',

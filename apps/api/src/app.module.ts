@@ -107,6 +107,7 @@ import { OrganizationsModule } from './modules/organizations/organizations.modul
 import { TeamsModule } from './modules/teams/teams.module';
 import { CrmModule } from './modules/crm/crm.module';
 import { InquiriesModule } from './modules/inquiries/inquiries.module';
+import { ArtistPathModule } from './modules/artist-path/artist-path.module';
 import { CalendarModule } from './modules/calendar/calendar.module';
 import { GigsModule } from './modules/gigs/gigs.module';
 import { InvoicesModule } from './modules/invoices/invoices.module';
@@ -246,6 +247,7 @@ const sentryProviders = sentryProvider ? [sentryProvider] : [];
     CrmModule,
 
     InquiriesModule,
+    ArtistPathModule,
 
     ClerkWebhookModule,
 

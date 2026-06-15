@@ -5,6 +5,7 @@ import { CollaborationModule } from '../collaboration/collaboration.module';
 import { EventIntelligenceModule } from '../event-intelligence/event-intelligence.module';
 import { EventModule } from '../event/event.module';
 import { TrustModule } from '../trust/trust.module';
+import { EventAgentAliasController } from './event-agent-alias.controller';
 import {
   AgentsController,
   BrandMatchAgentController,
@@ -43,6 +44,7 @@ import { OpportunityGenerationService } from './opportunity-generation.service';
     CareerAgentController,
     CommunityAgentController,
     EventAgentController,
+    EventAgentAliasController,
     BrandMatchAgentController,
     TalentDiscoveryAgentController,
     ForecastAgentController,

@@ -53,8 +53,8 @@ export function PersonPassport({ data, reputation, className }: PersonPassportPr
       transition={{ duration: 0.35 }}
       className={cn('mx-auto w-full max-w-xl', className)}
     >
-      <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-background via-background to-primary/5">
-        <div className="h-2 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-amber-400" />
+      <Card className="overflow-hidden border-brand-teal-deep/20 bg-gradient-to-br from-brand-cream-wash via-background to-brand-green-soft/30">
+        <div className="h-2 bg-gradient-to-r from-brand-teal-deep via-brand-green to-brand-pumpkin" />
         <CardHeader className="space-y-3">
           <div className="flex items-start justify-between gap-4">
             <div>

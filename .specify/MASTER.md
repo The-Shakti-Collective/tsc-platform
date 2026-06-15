@@ -1,6 +1,6 @@
 # TSC Platform — Project Memory (Master Index)
 
-> Canonical project memory for **The Shakti Collective (TSC) Platform** monorepo.  
+> Agent and developer index. **Production architecture authority:** [docs/architecture/MASTER-PRODUCTION-ARCHITECTURE.md](../docs/architecture/MASTER-PRODUCTION-ARCHITECTURE.md)  
 > Last verified against codebase: June 2026.
 
 ## Purpose
@@ -20,7 +20,8 @@ Production target stack: **Railway (API) + Vercel (frontends) + Neon (Postgres) 
 
 | Area | File | Summary |
 |------|------|---------|
-| **Architecture** | [system-overview.md](architecture/system-overview.md) | Full system diagram, runtime boundaries |
+| **Architecture (canonical)** | [docs/architecture/README.md](../docs/architecture/README.md) | Production architecture — **prefer over .specify/architecture/** |
+| **Architecture (legacy index)** | [system-overview.md](architecture/system-overview.md) | Historical — defer to docs/architecture/ |
 | | [monorepo-structure.md](architecture/monorepo-structure.md) | Workspaces, apps, packages, tooling |
 | | [data-flow.md](architecture/data-flow.md) | API ↔ DB ↔ Redis ↔ frontends |
 | **Apps** | [api.md](apps/api.md) | NestJS modules, health, queues |

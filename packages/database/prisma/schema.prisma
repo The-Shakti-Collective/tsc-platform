@@ -458,6 +458,7 @@ model Person {
   organizationTeamMemberships    OrganizationTeamMember[]
   assignedLeads                  Lead[]                      @relation("LeadAssignee")
   assignedInquiries              Inquiry[]                   @relation("InquiryAssignee")
+  artistPathApplications         ArtistPathApplication[]
   sentMessages                   Message[]                   @relation("MessageSender")
   notifications                  Notification[]              @relation("NotificationRecipient")
   auditLogs                      AuditLog[]                  @relation("AuditActor")
@@ -1252,6 +1253,7 @@ model Organization {
   royaltyStatements        RoyaltyStatement[]
   integrationConnections   IntegrationConnection[]
   analyticsMetricSnapshots AnalyticsMetricSnapshot[]
+  artistPathApplications   ArtistPathApplication[]
 
   @@index([type])
 }
@@ -2803,6 +2805,42 @@ model Inquiry {
   @@index([organizationId, status])
   @@index([artistId])
   @@index([assignedPersonId])
+}
+
+enum ArtistPathApplicationStatus {
+  submitted
+  under_review
+  shortlisted
+  selected
+  rejected
+}
+
+model ArtistPathApplication {
+  id             String                        @id @default(cuid())
+  organizationId String
+  status         ArtistPathApplicationStatus   @default(submitted)
+  fullName       String
+  email          String
+  phone          String?
+  city           String?
+  stageName      String?
+  answers        Json                          @default("{}")
+  rawPayload     Json                          @default("{}")
+  source         String                        @default("theartistpath.in")
+  externalRowId  String?                       @unique
+  personId       String?
+  submittedAt    DateTime                      @default(now())
+  createdAt      DateTime                      @default(now())
+  updatedAt      DateTime                      @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  person       Person?      @relation(fields: [personId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, submittedAt])
+  @@index([organizationId, status])
+  @@index([email])
+  @@index([phone])
+  @@index([personId])
 }
 
 model Gig {

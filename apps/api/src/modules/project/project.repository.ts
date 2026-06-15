@@ -64,6 +64,17 @@ export class ProjectRepository {
     });
   }
 
+  findById(projectId: string) {
+    const project = this.client('project') as {
+      findFirst: (args: unknown) => Promise<ProjectRow | null>;
+    } | null;
+    if (!project) return Promise.resolve(null);
+    return project.findFirst({
+      where: { id: projectId },
+      include: projectInclude,
+    });
+  }
+
   listByWorkspace(workspaceId: string) {
     const project = this.client('project') as {
       findMany: (args: unknown) => Promise<ProjectRow[]>;

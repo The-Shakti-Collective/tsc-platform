@@ -30,7 +30,14 @@ export class QueueRegistryService implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
-    this.connection = new IORedis(redisUrl, { maxRetriesPerRequest: null });
+    this.connection = new IORedis(redisUrl, {
+      maxRetriesPerRequest: null,
+      connectTimeout: 2_000,
+      commandTimeout: 2_000,
+      lazyConnect: false,
+      enableOfflineQueue: false,
+      retryStrategy: () => null,
+    });
     const connection = this.connection as unknown as ConnectionOptions;
     this.feed = new Queue(QUEUE_NAMES.feed, { connection });
     this.reputation = new Queue(QUEUE_NAMES.reputation, {

@@ -20,23 +20,32 @@ export default function ProgramsPage() {
         </p>
       </div>
       <div className="grid gap-6">
-        {programs.map((program) => (
-          <Card key={program.slug} id={program.slug}>
-            <CardHeader>
-              <CardTitle>{program.title}</CardTitle>
-              <CardDescription>{program.summary}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <ul className="grid gap-2 text-sm text-muted-foreground md:grid-cols-3">
-                {program.highlights.map((item) => (
-                  <li key={item} className="rounded-md border px-3 py-2">
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        ))}
+        {programs.map((program) => {
+          const externalUrl =
+            'externalUrl' in program && program.externalUrl ? program.externalUrl : undefined;
+          return (
+            <Card key={program.slug} id={program.slug}>
+              <CardHeader>
+                <CardTitle>{program.title}</CardTitle>
+                <CardDescription>{program.summary}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ul className="grid gap-2 text-sm text-muted-foreground md:grid-cols-3">
+                  {program.highlights.map((item) => (
+                    <li key={item} className="rounded-md border px-3 py-2">
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                {externalUrl ? (
+                  <ButtonLink href={externalUrl}>
+                    Visit {program.title}
+                  </ButtonLink>
+                ) : null}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
       <div className="mt-12 rounded-lg border bg-muted/30 p-8">
         <h2 className="text-xl font-semibold">Ready to participate?</h2>

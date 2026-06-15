@@ -13,6 +13,7 @@ export function SiteFooter() {
           <p className="font-medium">Explore</p>
           <div className="flex flex-col gap-1 text-muted-foreground">
             <Link href="/programs">Programs</Link>
+            <a href={siteConfig.artistPathUrl}>Artist Path</a>
             <Link href="/discover">Discover</Link>
             <Link href="/blog">Blog</Link>
             <Link href="/about">About</Link>

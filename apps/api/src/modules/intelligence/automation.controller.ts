@@ -87,4 +87,18 @@ export class AutomationController {
   trigger(@Body() body: unknown) {
     return this.automationService.trigger(parseSchema(AutomationTriggerSchema, body));
   }
+
+  @Post('rules/:id/run')
+  runRule(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @Req() req: { user?: { personId?: string; userId?: string } },
+  ) {
+    const actorPersonId = req.user?.personId ?? req.user?.userId ?? null;
+    const payload =
+      body && typeof body === 'object' && !Array.isArray(body)
+        ? (body as Record<string, unknown>)
+        : {};
+    return this.automationEngineV2.evaluateRule(id, actorPersonId, payload);
+  }
 }

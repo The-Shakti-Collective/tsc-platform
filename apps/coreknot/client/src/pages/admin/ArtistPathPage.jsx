@@ -55,7 +55,7 @@ export default function ArtistPathPage() {
       />
 
       <p className="text-xs text-[var(--color-text-muted)] -mt-2">
-        Live submissions arrive via website webhook. HolySheet remains the source of truth; use sync only to backfill.
+        Submissions from theartistpath.in are stored in the Platform database. HolySheet sync remains for legacy backfill only.
       </p>
 
       <div className="max-w-md">

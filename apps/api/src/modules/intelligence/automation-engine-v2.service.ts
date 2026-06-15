@@ -85,6 +85,28 @@ export class AutomationEngineV2Service {
     return this.buildEvaluatePayload(items, artistId);
   }
 
+  async evaluateRule(
+    ruleId: string,
+    actorPersonId?: string | null,
+    payload?: Record<string, unknown>,
+  ): Promise<AutomationEvaluatePayload> {
+    this.assertAvailable();
+
+    const rule = await this.repository.findRuleById(ruleId);
+    if (!rule) throw new NotFoundException(`Automation rule ${ruleId} not found`);
+
+    const artistId =
+      typeof payload?.artistId === 'string' ? payload.artistId : undefined;
+    const matches = await this.findMatches(rule, artistId);
+    const items: AutomationEvaluateResultItem[] = [];
+
+    for (const match of matches) {
+      items.push(await this.fireRule(rule, match, actorPersonId));
+    }
+
+    return this.buildEvaluatePayload(items, artistId);
+  }
+
   async listRecentRuns(limit = 20): Promise<AutomationRunDto[]> {
     this.assertAvailable();
     const rows = await this.repository.listRecentRuns(limit);

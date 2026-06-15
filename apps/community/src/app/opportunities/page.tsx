@@ -1,5 +1,5 @@
-import { PlaceholderPage } from '@/components/layout/placeholder-page';
+import { OpportunitiesList } from '@/components/opportunities/opportunities-list';
 
 export default function OpportunitiesPage() {
-  return <PlaceholderPage title="Opportunities" description="Brand deals and open calls." />;
+  return <OpportunitiesList />;
 }

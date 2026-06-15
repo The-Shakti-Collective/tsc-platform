@@ -137,6 +137,21 @@ export class AutomationEngineV2Repository {
     >;
   }
 
+  findRuleById(id: string) {
+    if (!this.ruleClient) return Promise.resolve(null);
+    return this.ruleClient.findFirst({
+      where: { id },
+    }) as Promise<{
+      id: string;
+      name: string;
+      workflowType: string;
+      triggerType: string;
+      trigger: unknown;
+      steps: unknown;
+      metadata: unknown;
+    } | null>;
+  }
+
   findRuleByCatalogId(catalogId: string) {
     if (!this.ruleClient) return Promise.resolve(null);
     return this.ruleClient.findFirst({

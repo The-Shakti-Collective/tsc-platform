@@ -27,6 +27,11 @@ export class ContractController {
     return this.contractService.listTemplates();
   }
 
+  @Get()
+  list(@Query() query: Record<string, unknown>) {
+    return this.contractService.list(parseSchema(ContractListQuerySchema, query));
+  }
+
   @Post()
   create(@Body() body: unknown) {
     return this.contractService.create(parseSchema(ContractCreateSchema, body));

@@ -32,7 +32,12 @@ esac
 command -v pnpm >/dev/null 2>&1 || { echo "pnpm not found. Run ./scripts/setup.sh first." >&2; exit 1; }
 [[ -f .env ]] || { echo ".env missing. Run ./scripts/setup.sh first." >&2; exit 1; }
 
-cp .env apps/community/.env.local
+if [[ ! -f apps/api/.env ]]; then
+  echo "Warning: missing apps/api/.env — run ./scripts/setup.sh or cp apps/api/.env.example apps/api/.env" >&2
+fi
+if [[ "$TARGET" == "community" || "$TARGET" == "all" ]] && [[ ! -f apps/community/.env.local ]]; then
+  echo "Warning: missing apps/community/.env.local — cp apps/community/.env.example apps/community/.env.local" >&2
+fi
 
 if [[ "$SKIP_INFRA" -eq 0 ]]; then
   if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then

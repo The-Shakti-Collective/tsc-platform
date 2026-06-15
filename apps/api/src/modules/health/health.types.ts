@@ -1,6 +1,6 @@
 export type HealthStatus = 'ok' | 'degraded';
 
-export type DependencyStatus = 'ok' | 'degraded' | 'unavailable';
+export type DependencyStatus = 'ok' | 'degraded' | 'unavailable' | 'not_configured';
 
 export type HealthSummaryResponse = {
   status: HealthStatus;
@@ -23,4 +23,15 @@ export type ReadinessResponse = {
     redis: DependencyStatus;
   };
   timestamp: string;
+};
+
+export type DependencyProbeResponse = {
+  status: DependencyStatus;
+  service: string;
+  timestamp: string;
+};
+
+export type StorageProbeResponse = DependencyProbeResponse & {
+  bucket: string | null;
+  configured: boolean;
 };

@@ -1,8 +1,11 @@
 packages:
   - "apps/*"
   - "apps/coreknot/client"
+  - "apps/coreknot/server"
+  - "apps/coreknot/shared/contracts"
   - "packages/*"
   - "e2e"
+  - "scripts/migrations/coreknot"
 
 # Hard-link workspace deps so pnpm deploy copies dist into the bundle (not monorepo symlinks).
 injectWorkspacePackages: true

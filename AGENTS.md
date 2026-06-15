@@ -1,7 +1,8 @@
 # TSC Platform — Multi-Agent Operating Model
 
 > Entry point for the platform-responsibility agent hierarchy.  
-> Canonical definitions: [`.specify/agents/`](.specify/agents/multi-agent-hierarchy.md) · Architecture index: [`.specify/MASTER.md`](.specify/MASTER.md)
+> **Production architecture (canonical):** [docs/architecture/MASTER-PRODUCTION-ARCHITECTURE.md](docs/architecture/MASTER-PRODUCTION-ARCHITECTURE.md)  
+> Agent definitions: [`.specify/agents/`](.specify/agents/multi-agent-hierarchy.md) · Index: [`.specify/MASTER.md`](.specify/MASTER.md)
 
 ## Quick links
 
@@ -18,13 +19,24 @@
 | [Execution agents](.specify/agents/execution/execution-agents.md) | 15 remediation agents (P0 → P1 → P2) |
 | [Founder tasks](.specify/agents/execution/FOUNDER-TASKS.md) | Secrets and provider setup agents cannot complete |
 
+## Production architecture (2026-06-15)
+
+Two products on shared infra:
+
+| Product | API | Apps |
+|---------|-----|------|
+| **TSC Platform** | `api.theshakticollective.in` | Website, Community, Platform API |
+| **CoreKnot** | `api.coreknot.in` | CoreKnot client, server, workers |
+
+Full spec: [docs/architecture/](docs/architecture/README.md) · Setup: [docs/SETUP.md](docs/SETUP.md) · Deploy: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+
 ## Phase R0 — Backend Stabilization (code complete · 2026-06-13)
 
-**Sprint status:** R0 **code work done** — typecheck 0, health endpoints, Swagger `/api/docs`, unified `ClerkAuthGuard`, observability scaffold, CI workflows, Railway config. **Production cutover** still blocked on founder tasks (Clerk keys, Neon/Redis prod URLs, GitHub push, Railway deploy, Cloudflare DNS).
+R0 **code work done** — typecheck 0, health, Swagger, ClerkAuthGuard, CI, Railway config. **Production cutover** blocked on founder tasks + CoreKnot Mongo sunset.
 
-**Gate:** No Community/CoreKnot/Marketplace feature work until founder completes [FOUNDER-TASKS.md](.specify/agents/execution/FOUNDER-TASKS.md).
+**Gate:** Founder [FOUNDER-TASKS.md](.specify/agents/execution/FOUNDER-TASKS.md) + [TECH-DEBT-ROADMAP.md](docs/architecture/TECH-DEBT-ROADMAP.md) P0 items.
 
-Agent continuity: [`.agents/MEMORY.md`](.agents/MEMORY.md) · Cursor rule: [`.cursor/rules/backend-stabilization-sprint.mdc`](.cursor/rules/backend-stabilization-sprint.mdc)
+Agent continuity: [`.agents/MEMORY.md`](.agents/MEMORY.md) · Cursor rule: [`.cursor/rules/production-architecture.mdc`](.cursor/rules/production-architecture.mdc)
 
 ## Execution Agents
 

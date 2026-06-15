@@ -1,0 +1,46 @@
+---
+description: Production architecture authority — Platform vs CoreKnot boundaries, deploy targets, Mongo sunset
+alwaysApply: true
+---
+
+# Production Architecture — canonical (2026-06-15)
+
+**Authority:** [docs/architecture/MASTER-PRODUCTION-ARCHITECTURE.md](../../docs/architecture/MASTER-PRODUCTION-ARCHITECTURE.md)
+
+## Products
+
+| Product | API | Frontends |
+|---------|-----|-----------|
+| **TSC Platform** | `api.theshakticollective.in` (NestJS, Railway) | Website + Community (Vercel) |
+| **CoreKnot** | `api.coreknot.in` (Express + workers, Railway) | CoreKnot client (Vercel) |
+
+## Shared infra
+
+Neon PostgreSQL · Redis · Clerk · PostHog · Sentry · Cloudflare (DNS + R2)
+
+## Rules for agents
+
+1. **Website/Community → Platform API only.** No CoreKnot API from public frontends.
+2. **CoreKnot Client → CoreKnot API only.** No new CRM/task writes via Platform API.
+3. **No new Mongo dependencies.** CoreKnot Mongo is sunset — see [MONGO-SUNSET-REPORT.md](../../docs/architecture/MONGO-SUNSET-REPORT.md).
+4. **Deploy target:** Railway (APIs) + Vercel (frontends). Not Render.
+5. **Repos:** `tsc-platform`, `tsc-coreknot`, `tsc-shared`, `tsc-infra`, `tsc-docs`. Deprecate `tsc-api`, `tsc-community`, `tsc-web`.
+6. **Env templates:** `.env.platform.example`, `.env.coreknot.example`, `.env.shared.example`.
+
+## Phase R0 (complete)
+
+Platform API health, Swagger, ClerkAuthGuard scaffold, CI, Railway config — done. See archived [backend-stabilization-sprint.mdc](./backend-stabilization-sprint.mdc).
+
+## Production blockers
+
+Founder [FOUNDER-TASKS.md](../../.specify/agents/execution/FOUNDER-TASKS.md) · CoreKnot Mongo cutover · Clerk webhooks · [TECH-DEBT-ROADMAP.md](../../docs/architecture/TECH-DEBT-ROADMAP.md)
+
+## Org / domains
+
+| Resource | Value |
+|----------|-------|
+| GitHub org | `TheShaktiCollective` |
+| Platform API | `api.theshakticollective.in` |
+| Website | `theshakticollective.in` |
+| Community | `theshakticollective.in/community` |
+| CoreKnot | `coreknot.in` / `api.coreknot.in` |

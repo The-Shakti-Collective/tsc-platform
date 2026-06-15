@@ -5,6 +5,8 @@ $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 Set-Location $Root
 
+. (Join-Path $Root "scripts\env-common.ps1")
+
 function Require-Command($Name, $InstallHint) {
     if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
         Write-Error "$Name not found. $InstallHint"
@@ -30,33 +32,18 @@ if (-not (Get-Command pnpm -ErrorAction SilentlyContinue)) {
 
 Require-Command "pnpm" "Run: corepack enable && corepack prepare pnpm@9.15.0 --activate"
 
-# --- env files ---
-$envExample = Join-Path $Root ".env.example"
-$envRoot = Join-Path $Root ".env"
-$envCommunity = Join-Path $Root "apps\community\.env.local"
-$envWebsite = Join-Path $Root "apps\website\.env.local"
+Write-Host "Creating env files from per-app .env.example (existing files are never overwritten)...`n"
 
-if (-not (Test-Path $envRoot)) {
-    if (-not (Test-Path $envExample)) {
-        Write-Error ".env.example missing at repo root."
-    }
-    Copy-Item $envExample $envRoot
-    Write-Host "Created .env from .env.example — edit Clerk keys before using auth." -ForegroundColor Yellow
-} else {
-    Write-Host ".env already exists — skipping."
-}
+Ensure-EnvFromExample -ExamplePath (Join-Path $Root ".env.example") -TargetPath (Join-Path $Root ".env") -Label "root .env"
+Ensure-EnvFromExample -ExamplePath (Join-Path $Root "apps\api\.env.example") -TargetPath (Join-Path $Root "apps\api\.env") -Label "apps/api/.env"
+Ensure-EnvFromExample -ExamplePath (Join-Path $Root "apps\community\.env.example") -TargetPath (Join-Path $Root "apps\community\.env.local") -Label "apps/community/.env.local"
+Ensure-EnvFromExample -ExamplePath (Join-Path $Root "apps\website\.env.example") -TargetPath (Join-Path $Root "apps\website\.env.local") -Label "apps/website/.env.local"
+Ensure-EnvFromExample -ExamplePath (Join-Path $Root "apps\coreknot\client\.env.example") -TargetPath (Join-Path $Root "apps\coreknot\client\.env.local") -Label "apps/coreknot/client/.env.local"
+Ensure-EnvFromExample -ExamplePath (Join-Path $Root "apps\coreknot\server\.env.example") -TargetPath (Join-Path $Root "apps\coreknot\server\.env") -Label "apps/coreknot/server/.env"
 
-# Next.js reads apps/community/.env.local and apps/website/.env.local
-$envApi = Join-Path $Root "apps\api\.env"
-Copy-Item $envRoot $envCommunity -Force
-Copy-Item $envRoot $envWebsite -Force
-Copy-Item $envRoot $envApi -Force
-$envCoreknot = Join-Path $Root "apps\coreknot\client\.env.local"
-Copy-Item $envRoot $envCoreknot -Force
-Write-Host "Synced .env -> apps/api/.env"
-Write-Host "Synced .env -> apps/community/.env.local"
-Write-Host "Synced .env -> apps/website/.env.local"
-Write-Host "Synced .env -> apps/coreknot/client/.env.local"
+Sync-SharedInfraToDatabaseEnv -Root $Root
+
+Write-Host "`nSee ENVIRONMENT_GUIDE.md for load order and Clerk/auth setup."
 
 # --- dependencies ---
 Write-Host "`nInstalling dependencies (pnpm install)..."
@@ -95,3 +82,4 @@ Write-Host "`nSetup complete." -ForegroundColor Green
 Write-Host "Next: pnpm start   (or pnpm dev:api + pnpm dev:community in separate terminals)"
 Write-Host "Community: http://localhost:3000"
 Write-Host "API:       http://localhost:4000/api"
+Write-Host "CoreKnot:  http://localhost:3001  (CRM API :5000)"

@@ -30,6 +30,17 @@ export function createOpenApiDocument(app: INestApplication): OpenAPIObject {
     .setTitle(API_TITLE)
     .setDescription(API_DESCRIPTION)
     .setVersion(process.env.npm_package_version ?? '0.0.0')
+    .addTag('health', 'Liveness, readiness, and dependency probes')
+    .addTag('royalties', 'Royalty statements and accruals')
+    .addTag('distribution', 'DistroKid and distribution channel submissions')
+    .addTag('releases', 'Release catalog and tracks')
+    .addTag('content', 'Artist content assets and items')
+    .addTag('ai', 'CoreKnot AI copilot stubs (proposal, pitch, email)')
+    .addTag('analytics', 'Dashboard and metric comparisons')
+    .addTag('search', 'Typesense unified search scaffold')
+    .addTag('integrations', 'OAuth and third-party connection stubs')
+    .addTag('audit', 'Audit log read/write')
+    .addTag('admin', 'Admin system health, roles, scripts')
     .addBearerAuth(
       {
         type: 'http',

@@ -3,7 +3,13 @@
   "private": true,
   "scripts": {
     "test": "playwright test",
-    "test:ui": "playwright test --ui"
+    "test:ui": "playwright test --ui",
+    "test:migration:api-smoke": "playwright test -c playwright.migration.config.ts migration/api-smoke.spec.ts",
+    "test:coreknot": "playwright test -c playwright/playwright.coreknot.config.ts",
+    "test:coreknot:audit": "playwright test -c playwright/playwright.coreknot.config.ts coreknot-pages-audit",
+    "test:website:audit": "playwright test -c playwright/playwright.frontend-audit.config.ts --project=website",
+    "test:community:audit": "playwright test -c playwright/playwright.frontend-audit.config.ts --project=community",
+    "test:frontend:audit": "playwright test -c playwright/playwright.frontend-audit.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0"

@@ -1,6 +1,8 @@
 ﻿# Environment Guide
 
-
+> **Canonical env standard:** [docs/architecture/ENV-STANDARD.md](docs/architecture/ENV-STANDARD.md)  
+> **Templates:** `.env.shared.example`, `.env.platform.example`, `.env.coreknot.example`  
+> Architecture: [docs/architecture/MASTER-PRODUCTION-ARCHITECTURE.md](docs/architecture/MASTER-PRODUCTION-ARCHITECTURE.md)
 
 How TSC Platform separates **local**, **staging**, and **production** configuration. Never commit `.env`, `.env.local`, or secret values.
 
@@ -568,4 +570,20 @@ Per-app .env.example  →  gitignored secret file  →  app runtime
 - [CoreKnot production runbook](docs/coreknot-production-runbook.md) — deploy API, worker, Vercel, DNS
 - [CoreKnot observability setup](docs/coreknot-observability-setup.md) — Sentry, PostHog, BetterStack
 
+
+
+### CoreKnot server dev on Windows
+
+Default dev uses Node built-in watch (no 
+odemon / windows-kill.exe):
+
+`powershell
+pnpm dev:coreknot:server
+# or: cd apps/coreknot/server && pnpm dev
+`
+
+If you need nodemon: pnpm --filter @tsc/coreknot-server run dev:nodemon. After pnpm install, windows-kill.exe lives under 
+odemon/bin/; a missing-file dialog usually means a broken pnpm link — reinstall with pnpm install at repo root.
+
+Postgres auth store needs DATABASE_URL in pps/coreknot/server/.env and a generated client: pnpm db:generate from repo root.
 

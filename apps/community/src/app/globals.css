@@ -2,23 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+/* TSC Brand Book — swatches from TSC_BrandBook.pdf */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --primary: 262 83% 58%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 262 83% 58%;
+    --brand-teal-deep: #083d3a;
+    --brand-green: #126d5e;
+    --brand-teal-mid: #08525f;
+    --brand-cream: #ffecd1;
+    --brand-cream-muted: #f4eee3;
+    --brand-cream-wash: #fcf8f2;
+    --brand-pumpkin: #b74b02;
+    --brand-espresso: #592314;
+    --brand-burgundy: #6d2039;
+    --brand-rust: #88281c;
+    --brand-amber: #b56f1c;
+    --brand-charcoal: #2d2d2d;
+    --brand-green-soft: #e6f4f1;
+    --brand-pumpkin-soft: #fef7e0;
+
+    --background: 40 33% 98%;
+    --foreground: 174 77% 14%;
+    --card: 40 33% 99%;
+    --card-foreground: 174 77% 14%;
+    --primary: 168 71% 25%;
+    --primary-foreground: 40 33% 98%;
+    --secondary: 38 30% 92%;
+    --secondary-foreground: 174 77% 14%;
+    --muted: 38 25% 94%;
+    --muted-foreground: 174 30% 35%;
+    --accent: 168 40% 92%;
+    --accent-foreground: 174 77% 14%;
+    --border: 174 20% 85%;
+    --input: 174 20% 85%;
+    --ring: 168 71% 25%;
     --radius: 0.75rem;
   }
 
@@ -28,5 +44,95 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body), system-ui, sans-serif;
+  }
+
+  .font-display {
+    font-family: var(--font-display), system-ui, sans-serif;
+  }
+
+  .tm-marketing-page {
+    @apply bg-brand-cream-wash text-brand-teal-deep;
+  }
+}
+
+@layer utilities {
+  .bg-brand-teal-deep {
+    background-color: var(--brand-teal-deep);
+  }
+  .bg-brand-green {
+    background-color: var(--brand-green);
+  }
+  .bg-brand-teal-mid {
+    background-color: var(--brand-teal-mid);
+  }
+  .bg-brand-cream-wash {
+    background-color: var(--brand-cream-wash);
+  }
+  .bg-brand-cream-muted {
+    background-color: var(--brand-cream-muted);
+  }
+  .bg-brand-green-soft {
+    background-color: var(--brand-green-soft);
+  }
+  .bg-brand-pumpkin {
+    background-color: var(--brand-pumpkin);
+  }
+  .bg-brand-pumpkin-soft {
+    background-color: var(--brand-pumpkin-soft);
+  }
+  .bg-brand-amber {
+    background-color: var(--brand-amber);
+  }
+  .text-brand-teal-deep {
+    color: var(--brand-teal-deep);
+  }
+  .text-brand-green {
+    color: var(--brand-green);
+  }
+  .text-brand-teal-mid {
+    color: var(--brand-teal-mid);
+  }
+  .text-brand-pumpkin {
+    color: var(--brand-pumpkin);
+  }
+  .text-brand-espresso {
+    color: var(--brand-espresso);
+  }
+  .border-brand-teal-deep\/10 {
+    border-color: rgb(8 61 58 / 0.1);
+  }
+  .border-brand-teal-deep\/15 {
+    border-color: rgb(8 61 58 / 0.15);
+  }
+  .border-brand-teal-deep\/20 {
+    border-color: rgb(8 61 58 / 0.2);
+  }
+  .hover\:bg-brand-teal-mid:hover {
+    background-color: var(--brand-teal-mid);
+  }
+  .hover\:bg-brand-amber:hover {
+    background-color: var(--brand-amber);
+  }
+  .hover\:bg-brand-cream-muted:hover {
+    background-color: var(--brand-cream-muted);
+  }
+  .hover\:bg-brand-green-soft\/50:hover {
+    background-color: rgb(230 244 241 / 0.5);
+  }
+  .from-brand-cream-wash {
+    --tw-gradient-from: var(--brand-cream-wash);
+  }
+  .to-brand-green-soft\/40 {
+    --tw-gradient-to: rgb(230 244 241 / 0.4);
+  }
+  .from-brand-teal-deep {
+    --tw-gradient-from: var(--brand-teal-deep);
+  }
+  .via-brand-teal-mid {
+    --tw-gradient-via: var(--brand-teal-mid);
+  }
+  .to-brand-green {
+    --tw-gradient-to: var(--brand-green);
   }
 }

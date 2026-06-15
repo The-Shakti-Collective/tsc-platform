@@ -1,12 +1,38 @@
 import type { CommunityRole } from '@tsc/types';
 
+export type PlatformRole =
+  | 'SUPER_ADMIN'
+  | 'ORG_OWNER'
+  | 'MANAGER'
+  | 'ARTIST'
+  | 'TEAM_MEMBER'
+  | 'CLIENT'
+  | 'FAN';
+
+export const PLATFORM_ROLES: readonly PlatformRole[] = [
+  'SUPER_ADMIN',
+  'ORG_OWNER',
+  'MANAGER',
+  'ARTIST',
+  'TEAM_MEMBER',
+  'CLIENT',
+  'FAN',
+] as const;
+
+export interface OrganizationMembership {
+  organizationId: string;
+  role: PlatformRole;
+}
+
 export interface MembershipContext {
   userId: string;
   /** Resolved TSC person id when linked to Clerk/coreknot user. */
   personId?: string;
   roles: string[];
+  /** Platform-wide role when linked via User table. */
+  platformRole?: PlatformRole;
   artistMemberships: string[];
-  organizationMemberships: string[];
+  organizationMemberships: OrganizationMembership[];
   communityMemberships?: Array<{
     communityId: string;
     role: CommunityRole;
@@ -86,7 +112,42 @@ export function canManageArtist(
 }
 
 export function isAdmin(ctx: MembershipContext): boolean {
-  return ctx.roles.includes('admin');
+  return (
+    ctx.roles.includes('admin') ||
+    ctx.platformRole === 'SUPER_ADMIN'
+  );
+}
+
+export function hasPlatformRole(
+  ctx: MembershipContext,
+  ...roles: PlatformRole[]
+): boolean {
+  if (isAdmin(ctx)) return true;
+  if (ctx.platformRole && roles.includes(ctx.platformRole)) return true;
+  return ctx.organizationMemberships.some((m) => roles.includes(m.role));
+}
+
+export function canAccessOrganization(
+  ctx: MembershipContext,
+  organizationId: string,
+): boolean {
+  if (isAdmin(ctx)) return true;
+  if (ctx.platformRole === 'SUPER_ADMIN') return true;
+  return ctx.organizationMemberships.some(
+    (m) => m.organizationId === organizationId,
+  );
+}
+
+export function canManageOrganization(
+  ctx: MembershipContext,
+  organizationId: string,
+): boolean {
+  if (isAdmin(ctx)) return true;
+  return ctx.organizationMemberships.some(
+    (m) =>
+      m.organizationId === organizationId &&
+      ['ORG_OWNER', 'MANAGER', 'SUPER_ADMIN'].includes(m.role),
+  );
 }
 
 export function isCommunityModeratorOrAbove(

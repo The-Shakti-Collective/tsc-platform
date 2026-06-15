@@ -19,7 +19,6 @@ if ($ApiOnly -or $CommunityOnly) {
     if (-not (Test-Path (Join-Path $Root ".env"))) {
         Write-Error ".env missing. Run: .\scripts\setup.ps1"
     }
-    Copy-Item (Join-Path $Root ".env") (Join-Path $Root "apps\community\.env.local") -Force
 
     if (-not $SkipInfra) {
         & (Join-Path $Root "scripts\start-infra.ps1")
