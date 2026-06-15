@@ -59,6 +59,11 @@ const BANNED_PROXY_HOSTS = new Set([
   'your-render-service.onrender.com',
 ]);
 
+const allowedHosts = [
+  'api.coreknot.in',
+  'api.theshakticollective.in',
+];
+
 const normalizeProxyUrl = (raw) => String(raw || '').trim().replace(/\/$/, '');
 
 const pickProxyUrl = () => {
@@ -91,10 +96,11 @@ const readExistingClientVercelJson = () => {
 const existingRewritesLookValid = (existing) => {
   const apiRule = existing?.rewrites?.find((rule) => rule.source === '/api/(.*)');
   const dest = String(apiRule?.destination || '');
-  if (!dest.includes('.onrender.com') || dest.includes('YOUR-RENDER-SERVICE')) return false;
+  if (dest.includes('YOUR-RENDER-SERVICE')) return false;
   try {
     const host = new URL(dest.replace('/$1', '/')).hostname.toLowerCase();
-    return !BANNED_PROXY_HOSTS.has(host);
+    if (BANNED_PROXY_HOSTS.has(host)) return false;
+    return allowedHosts.includes(host) || host.endsWith('.onrender.com');
   } catch {
     return false;
   }
@@ -130,9 +136,15 @@ if (proxyUrl) {
     console.error('[generateVercelConfig] Invalid RENDER_API_PROXY_URL:', proxyUrl);
     process.exit(1);
   }
-  if (!parsed.hostname.endsWith('.onrender.com')) {
-    console.error('[generateVercelConfig] Host must be *.onrender.com');
-    process.exit(1);
+  if (
+    process.env.RENDER_API_PROXY_URL
+    && !allowedHosts.some(
+      (host) => process.env.RENDER_API_PROXY_URL.includes(host),
+    )
+  ) {
+    console.warn(
+      '[generateVercelConfig] Non-standard API host detected',
+    );
   }
   if (BANNED_PROXY_HOSTS.has(parsed.hostname.toLowerCase())) {
     console.error('[generateVercelConfig] Refusing banned proxy host:', parsed.hostname);
