@@ -20,7 +20,7 @@ coverage/
 # Agent-generated reports (templates live under .specify/)
 .agents/reports/*
 !.agents/reports/.gitkeep
-reports/
+/reports/
 
 # Local provider metadata
 .neon

@@ -74,6 +74,8 @@
                     "db:migrate":  "pnpm --filter @tsc/database exec prisma migrate dev",
                     "db:studio":  "pnpm --filter @tsc/database exec prisma studio",
                     "seed:dev-user":  "pnpm --filter @tsc/database seed:dev-user",
+                    "seed:community-demo":  "pnpm --filter @tsc/database seed:community-demo",
+                    "smoke:community":  "node scripts/community/ecosystem-smoke.mjs",
                     "kill:ports":  "powershell -ExecutionPolicy Bypass -File scripts/kill-all-dev-ports.ps1",
                     "clean:ports":  "pnpm kill:ports",
                     "sweep:local":  "powershell -ExecutionPolicy Bypass -File scripts/sweep-local.ps1",
@@ -89,6 +91,7 @@
                 },
     "devDependencies":  {
                             "concurrently":  "^9.1.2",
+                            "dotenv":  "^16.6.1",
                             "@eslint/js":  "^9.17.0",
                             "@turbo/windows-64":  "2.9.18",
                             "@typescript-eslint/eslint-plugin":  "^8.18.0",
