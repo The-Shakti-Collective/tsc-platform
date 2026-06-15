@@ -2,8 +2,9 @@
 #   1. Web API  — node server.js          (RUN_WORKERS=false)
 #   2. Worker   — node workers/startWorkers.js (RUN_WORKERS=true)
 #
-# Health: GET /api/health (liveness) · GET /api/health/ready (readiness)
-# Docs: docs/coreknot-production-runbook.md · docs/migration/mail-campaign-workers.md
+# Health: GET /api/health (liveness) · GET /api/health/ready (readiness — Postgres + optional Mongo)
+# Postgres cutover env: docs/migration/PRODUCTION-CUTOVER.md
+# Required Dashboard secrets: DATABASE_URL (Neon), MONGODB_URI_PROD (parallel run), REDIS_URL, JWT_SECRET
 [build]
 builder = "NIXPACKS"
 

@@ -3,6 +3,11 @@
  * Requires DATABASE_URL and `pnpm db:generate`.
  */
 
+const { createRequire } = require('module');
+
+/** Resolve @prisma/client via @tsc/database so pnpm links the generated client. */
+const requirePrismaClient = createRequire(require.resolve('@tsc/database/client'));
+
 /** @type {import('@prisma/client').PrismaClient | null} */
 let client = null;
 /** @type {Promise<import('@prisma/client').PrismaClient> | null} */

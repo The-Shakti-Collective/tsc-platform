@@ -5,7 +5,14 @@ const { isPostgresTasksEnabled } = require('../infrastructure/postgres/prismaCli
 const {
   mirrorTaskFromMongo,
   deleteTaskMirror,
+  upsertTaskFromMongo,
+  deleteTaskMirrorSync,
 } = require('../infrastructure/postgres/postgresEntityWrites');
+const {
+  shouldWritePostgresFirst,
+  shouldMirrorMongo,
+  asMongoDoc,
+} = require('../infrastructure/postgres/writeStrategy');
 const {
   resolveTscId,
   resolveMongoId,
@@ -287,35 +294,57 @@ const taskRepository = {
   },
 
   async create(doc) {
+    if (shouldWritePostgresFirst(isPostgresTasksEnabled)) {
+      const created = shouldMirrorMongo() ? await mongoRepo.create(doc) : asMongoDoc(doc);
+      await upsertTaskFromMongo(created);
+      return created;
+    }
     const created = await mongoRepo.create(doc);
     if (isPostgresTasksEnabled()) {
-      await mirrorTaskFromMongo(created);
+      await upsertTaskFromMongo(created);
     }
     return created;
   },
 
   async findOneAndUpdate(filter, update, options = {}) {
+    if (shouldWritePostgresFirst(isPostgresTasksEnabled)) {
+      let updated;
+      if (shouldMirrorMongo()) {
+        updated = await mongoRepo.findOneAndUpdate(filter, update, options);
+      } else {
+        const existing = await this.findOne(filter, options);
+        if (!existing) return null;
+        updated = { ...existing, ...(update.$set || update) };
+      }
+      if (updated) await upsertTaskFromMongo(asMongoDoc(updated));
+      return updated;
+    }
     const updated = await mongoRepo.findOneAndUpdate(filter, update, options);
     if (updated && isPostgresTasksEnabled()) {
-      await mirrorTaskFromMongo(updated);
+      await upsertTaskFromMongo(updated);
     }
     return updated;
   },
 
   async findByIdAndUpdate(id, update, options = {}) {
-    const updated = await mongoRepo.findByIdAndUpdate(id, update, options);
-    if (updated && isPostgresTasksEnabled()) {
-      await mirrorTaskFromMongo(updated);
-    }
-    return updated;
+    return this.findOneAndUpdate({ _id: id }, update, options);
   },
 
   async deleteOne(filter, options = {}) {
     const doc = await mongoRepo.findOne(filter, options);
-    if (!doc) return null;
+    if (!doc && !usePostgres(options)) return null;
+    const target = doc || await this.findOne(filter, options);
+    if (!target) return null;
+    if (shouldWritePostgresFirst(isPostgresTasksEnabled)) {
+      await deleteTaskMirrorSync(target._id);
+      if (shouldMirrorMongo()) {
+        return mongoRepo.deleteOne(filter, options);
+      }
+      return { deletedCount: 1 };
+    }
     const result = await mongoRepo.deleteOne(filter, options);
     if (isPostgresTasksEnabled()) {
-      await deleteTaskMirror(doc._id);
+      await deleteTaskMirrorSync(doc._id);
     }
     return result;
   },

@@ -3,7 +3,6 @@ const router = express.Router();
 const Task = require('../models/Task');
 const TaskAssignment = require('../models/TaskAssignment');
 const Lead = require('../models/Lead');
-const CalendarEvent = require('../models/CalendarEvent');
 const calendarRepository = require('../repositories/calendarRepository');
 const User = require('../models/User');
 const { protect } = require('../middleware/authMiddleware');
@@ -82,15 +81,10 @@ router.get('/status-counts', protect, async (req, res) => {
     const overdueFollowupsCount = followupAgg?.overdue || 0;
     const todayFollowupsCount = followupAgg?.today || 0;
 
-    const todayCalendarCount = calendarRepository.isPostgresEnabled()
-      ? await calendarRepository.countDocuments({
-        $or: [{ createdBy: req.user._id }, { visibility: 'public' }],
-        date: { $gte: todayStart, $lte: todayEnd },
-      })
-      : await CalendarEvent.countDocuments({
-        $or: [{ createdBy: req.user._id }, { visibility: 'public' }],
-        date: { $gte: todayStart, $lte: todayEnd },
-      });
+    const todayCalendarCount = await calendarRepository.countDocuments({
+      $or: [{ createdBy: req.user._id }, { visibility: 'public' }],
+      date: { $gte: todayStart, $lte: todayEnd },
+    });
 
     const inReviewTasksCount = await Task.countDocuments({
       ...taskScope,

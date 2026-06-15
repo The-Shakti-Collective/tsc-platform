@@ -1,7 +1,11 @@
-const { getPrismaClient, isPostgresStoreEnabled } = require('../infrastructure/postgres/prismaClient');
+const { getPrismaClient, isPostgresStoreEnabled } = require('./prismaClient');
 const { createTenantRepository } = require('./createTenantRepository');
 const { getTenantId } = require('../utils/tenantContext');
-const { idFilter } = require('../utils/mongoId');
+const {
+  shouldWritePostgresFirst,
+  shouldMirrorMongo,
+  asMongoDoc,
+} = require('../infrastructure/postgres/writeStrategy');
 
 /**
  * Factory for Wave 2 domains — mirrors Mongo docs into ck_legacy_documents when flag=postgres.
@@ -25,6 +29,11 @@ function createLegacyRepository({ MongoModel, entityType, flagName }) {
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
       _readSource: 'postgres',
+      toObject() {
+        const obj = { ...payload, _id: row.mongoId, id: row.mongoId };
+        delete obj.toObject;
+        return obj;
+      },
     };
   }
 
@@ -45,7 +54,48 @@ function createLegacyRepository({ MongoModel, entityType, flagName }) {
       skip: options.skip,
     });
 
-    return rows.map(toMongoShape);
+    let shaped = rows.map(toMongoShape);
+
+    if (filter.userId) {
+      const uidFilter = filter.userId;
+      if (uidFilter.$in && Array.isArray(uidFilter.$in)) {
+        const set = new Set(uidFilter.$in.map((id) => String(id)));
+        shaped = shaped.filter((row) => set.has(String(row.userId)));
+      } else {
+        const uid = String(uidFilter);
+        shaped = shaped.filter((row) => String(row.userId) === uid);
+      }
+    }
+    if (filter.createdAt && typeof filter.createdAt === 'object') {
+      const { $gte, $lte } = filter.createdAt;
+      shaped = shaped.filter((row) => {
+        const rd = row.createdAt ? new Date(row.createdAt) : null;
+        if (!rd) return false;
+        if ($gte && rd < new Date($gte)) return false;
+        if ($lte && rd > new Date($lte)) return false;
+        return true;
+      });
+    }
+    if (filter.issueId) {
+      const issueId = String(filter.issueId);
+      shaped = shaped.filter((row) => String(row.issueId) === issueId);
+    }
+    if (filter.included !== undefined) {
+      shaped = shaped.filter((row) => row.included === filter.included);
+    }
+
+    if (options.sortField) {
+      const field = options.sortField;
+      const dir = options.sortOrder === 'asc' ? 1 : -1;
+      shaped.sort((a, b) => {
+        const av = a[field];
+        const bv = b[field];
+        if (av === bv) return 0;
+        return (av > bv ? 1 : -1) * dir;
+      });
+    }
+
+    return shaped;
   }
 
   async function mirrorToPostgres(mongoDoc) {
@@ -85,7 +135,58 @@ function createLegacyRepository({ MongoModel, entityType, flagName }) {
   }
 
   function hasComplexMongoFilter(filter = {}) {
-    return Boolean(filter.$or || filter.$and || filter.date || filter.$gte || filter.$lte);
+    if (filter.$or || filter.$and || filter.date || filter.$gte || filter.$lte) return true;
+    if (filter.userId && typeof filter.userId === 'object' && !filter.userId.$in) return true;
+    if (filter.createdAt && typeof filter.createdAt === 'object') return false;
+    return false;
+  }
+
+  function chainableQuery(rowsOrPromise, defaultSort = null) {
+    let sortSpec = defaultSort;
+    let limitVal;
+    let skipVal;
+    const promise = () => Promise.resolve(rowsOrPromise).then((rows) => {
+      let list = Array.isArray(rows) ? [...rows] : (rows ? [rows] : []);
+      if (sortSpec) {
+        const [[field, dir]] = Object.entries(sortSpec);
+        list.sort((a, b) => {
+          const av = a[field];
+          const bv = b[field];
+          if (av === bv) return 0;
+          return (av > bv ? 1 : -1) * (dir === -1 ? -1 : 1);
+        });
+      }
+      if (skipVal) list = list.slice(skipVal);
+      if (limitVal) list = list.slice(0, limitVal);
+      return Array.isArray(rows) ? list : (list[0] || null);
+    });
+
+    const chain = {
+      lean: () => promise(),
+      select: () => chain,
+      populate: () => chain,
+      sort: (spec) => { sortSpec = spec; return chain; },
+      skip: (n) => { skipVal = n; return chain; },
+      limit: (n) => { limitVal = n; return chain; },
+      session: () => chain,
+      then: (resolve, reject) => promise().then(resolve, reject),
+    };
+    return chain;
+  }
+
+  async function writePrimary(doc) {
+    const mongoDoc = asMongoDoc(doc);
+    await mirrorToPostgres(mongoDoc);
+    if (shouldMirrorMongo()) {
+      return mongoRepo.create({ ...doc, _id: mongoDoc._id });
+    }
+    return toMongoShape({
+      mongoId: mongoDoc._id,
+      tenantId: mongoDoc.tenantId,
+      payload: mongoDoc.toObject ? mongoDoc.toObject() : { ...mongoDoc },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
   }
 
   return {
@@ -97,14 +198,16 @@ function createLegacyRepository({ MongoModel, entityType, flagName }) {
       if (!usePostgres(options) || hasComplexMongoFilter(filter)) {
         return mongoRepo.find(filter, options);
       }
-      return findPostgresDocs(filter, options);
+      return chainableQuery(findPostgresDocs(filter, options));
     },
 
     findOne(filter = {}, options = {}) {
       if (!usePostgres(options) || hasComplexMongoFilter(filter)) {
         return mongoRepo.findOne(filter, options);
       }
-      return findPostgresDocs(filter, { ...options, limit: 1 }).then((r) => r[0] || null);
+      return chainableQuery(
+        findPostgresDocs(filter, { ...options, limit: 1 }).then((r) => r[0] || null),
+      );
     },
 
     findById(id, options = {}) {
@@ -119,28 +222,72 @@ function createLegacyRepository({ MongoModel, entityType, flagName }) {
     },
 
     async create(doc) {
+      if (shouldWritePostgresFirst(isPostgresEnabled)) {
+        return writePrimary(doc);
+      }
       const created = await mongoRepo.create(doc);
       await mirrorToPostgres(created);
       return created;
     },
 
     async findOneAndUpdate(filter, update, options = {}) {
+      if (shouldWritePostgresFirst(isPostgresEnabled)) {
+        const existing = await this.findOne(filter, options);
+        if (!existing) return null;
+        const merged = { ...existing.toObject?.() || existing, ...update.$set, ...update };
+        delete merged._id;
+        await mirrorToPostgres(asMongoDoc({ ...merged, _id: existing._id }));
+        if (shouldMirrorMongo()) {
+          return mongoRepo.findOneAndUpdate(filter, update, options);
+        }
+        return { ...existing, ...merged };
+      }
       const updated = await mongoRepo.findOneAndUpdate(filter, update, options);
       if (updated) await mirrorToPostgres(updated);
       return updated;
     },
 
     async findByIdAndUpdate(id, update, options = {}) {
-      const updated = await mongoRepo.findByIdAndUpdate(id, update, options);
-      if (updated) await mirrorToPostgres(updated);
-      return updated;
+      return this.findOneAndUpdate({ _id: id }, update, options);
+    },
+
+    async updateOne(filter, update, options = {}) {
+      return this.findOneAndUpdate(filter, update, options);
     },
 
     async deleteOne(filter, options = {}) {
-      const doc = await mongoRepo.findOne(filter, options);
+      const doc = await this.findOne(filter, options);
       if (!doc) return null;
+      if (shouldWritePostgresFirst(isPostgresEnabled)) {
+        await deleteMirror(doc._id);
+        if (shouldMirrorMongo()) {
+          return mongoRepo.deleteOne(filter, options);
+        }
+        return { deletedCount: 1 };
+      }
       const result = await mongoRepo.deleteOne(filter, options);
       await deleteMirror(doc._id);
+      return result;
+    },
+
+    async deleteMany(filter = {}, options = {}) {
+      if (shouldWritePostgresFirst(isPostgresEnabled) && !shouldMirrorMongo()) {
+        const docs = await findPostgresDocs(filter, options);
+        for (const doc of docs) {
+          // eslint-disable-next-line no-await-in-loop
+          await deleteMirror(doc._id);
+        }
+        return { deletedCount: docs.length };
+      }
+      const result = await mongoRepo.deleteMany(filter, options);
+      if (isPostgresEnabled()) {
+        const docs = await mongoRepo.find(filter, options);
+        const list = await Promise.resolve(docs);
+        for (const doc of list) {
+          // eslint-disable-next-line no-await-in-loop
+          await deleteMirror(doc._id);
+        }
+      }
       return result;
     },
 

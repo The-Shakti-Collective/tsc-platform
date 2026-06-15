@@ -11,6 +11,8 @@ function readResetMeta(metadata) {
     passwordResetExpires: meta.passwordResetExpires ?? null,
     teams: meta.teams ?? [],
     googleAccounts: meta.googleAccounts ?? [],
+    googleAccessToken: meta.googleAccessToken ?? null,
+    googleRefreshToken: meta.googleRefreshToken ?? null,
     lastOnline: meta.lastOnline ?? null,
   };
 }
@@ -45,6 +47,9 @@ function buildStaffUserData(mongoDoc, { passwordHash } = {}) {
     metadata: {
       ...meta,
       teams: mongoDoc.teams ?? [],
+      googleAccounts: mongoDoc.googleAccounts ?? meta.googleAccounts ?? [],
+      googleAccessToken: mongoDoc.googleAccessToken ?? meta.googleAccessToken ?? null,
+      googleRefreshToken: mongoDoc.googleRefreshToken ?? meta.googleRefreshToken ?? null,
       lastOnline: mongoDoc.lastOnline ? new Date(mongoDoc.lastOnline).toISOString() : null,
     },
   };
@@ -106,6 +111,9 @@ async function updateStaffUserFromMongo(mongoDoc) {
   data.metadata = {
     ...prevMeta,
     teams: mongoDoc.teams ?? prevMeta.teams,
+    googleAccounts: mongoDoc.googleAccounts ?? prevMeta.googleAccounts,
+    googleAccessToken: mongoDoc.googleAccessToken ?? prevMeta.googleAccessToken,
+    googleRefreshToken: mongoDoc.googleRefreshToken ?? prevMeta.googleRefreshToken,
     lastOnline: mongoDoc.lastOnline ? new Date(mongoDoc.lastOnline).toISOString() : prevMeta.lastOnline,
   };
 

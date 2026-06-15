@@ -9,7 +9,7 @@
     "start": "node server.js",
     "start:workers": "node workers/startWorkers.js",
     "predev": "node scripts/freePort.js 5000 --wait",
-    "dev": "nodemon server.js",
+    "dev": "node --watch server.js",
     "test": "node scripts/runJest.js",
     "postinstall": "node scripts/linkJestSourceMap.js",
     "test:migration-stores": "jest --config jest.migration.config.js",
@@ -53,7 +53,8 @@
     "supabase:backfill": "node scripts/supabaseBackfill.js",
     "supabase:migrate": "node scripts/supabaseFastMigrate.js --prod",
     "supabase:migrate:local": "node scripts/supabaseFastMigrate.js",
-    "backup:verify-supabase": "node scripts/verifySupabaseBackup.js"
+    "backup:verify-supabase": "node scripts/verifySupabaseBackup.js",
+    "dev:nodemon": "nodemon server.js"
   },
   "dependencies": {
     "@clerk/clerk-sdk-node": "^5.1.6",

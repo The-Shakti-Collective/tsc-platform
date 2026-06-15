@@ -9,6 +9,12 @@ const {
 } = require('../infrastructure/postgres/postgresStaffUserWrites');
 const User = require('../models/User');
 const { idFilter } = require('../utils/mongoId');
+const {
+  shouldWritePostgresFirst,
+  shouldMirrorMongo,
+  asMongoDoc,
+  newLegacyMongoId,
+} = require('../infrastructure/postgres/writeStrategy');
 
 const DEPARTMENT_POPULATE = 'name slug signupAllowed permissionPreset pagePermissions';
 const BYPASS = { bypassTenant: true };
@@ -45,6 +51,9 @@ function readResetMeta(metadata) {
     passwordResetExpires: meta.passwordResetExpires
       ? new Date(meta.passwordResetExpires)
       : undefined,
+    googleAccounts: meta.googleAccounts ?? [],
+    googleAccessToken: meta.googleAccessToken ?? undefined,
+    googleRefreshToken: meta.googleRefreshToken ?? undefined,
   };
 }
 
@@ -68,6 +77,9 @@ function toAuthUserShape(row, department) {
     passwordChangedAt: row.passwordChangedAt ?? undefined,
     googleId: row.googleId ?? undefined,
     googleCalendarLinked: row.googleCalendarLinked ?? false,
+    googleAccounts: resetMeta.googleAccounts ?? [],
+    googleAccessToken: resetMeta.googleAccessToken,
+    googleRefreshToken: resetMeta.googleRefreshToken,
     exp: row.exp ?? 0,
     level: row.level ?? 1,
     dailyStreak: row.dailyStreak ?? 0,
@@ -123,6 +135,9 @@ function toAuthUserShape(row, department) {
           ? this.passwordResetExpires.toISOString()
           : null;
       }
+      if (this.googleAccounts !== undefined) resetMeta.googleAccounts = this.googleAccounts;
+      if (this.googleAccessToken !== undefined) resetMeta.googleAccessToken = this.googleAccessToken;
+      if (this.googleRefreshToken !== undefined) resetMeta.googleRefreshToken = this.googleRefreshToken;
       const existing = await prisma.ckLegacyStaffUser.findUnique({
         where: { mongoId: row.mongoId },
         select: { metadata: true },
@@ -306,6 +321,18 @@ async function findStaffUserByEmailForReset(email) {
 }
 
 async function createStaffUser(doc, options = {}) {
+  if (shouldWritePostgresFirst(isPostgresAuthEnabled)) {
+    const mongoDoc = shouldMirrorMongo()
+      ? await User.create(doc)
+      : asMongoDoc({ ...doc, _id: doc._id || newLegacyMongoId() });
+    if (options.mirrorPostgres !== false) {
+      await createStaffUserFromMongo(mongoDoc);
+    }
+    if (isPostgresAuthEnabled()) {
+      return findPostgresStaffUser({ mongoId: String(mongoDoc._id) }, { withPassword: false });
+    }
+    return mongoDoc;
+  }
   const user = await User.create(doc);
   if (options.mirrorPostgres !== false) {
     await createStaffUserFromMongo(user);

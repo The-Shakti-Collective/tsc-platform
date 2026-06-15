@@ -1,4 +1,3 @@
-const User = require('../../../models/User');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { google } = require('googleapis');
@@ -28,6 +27,8 @@ const {
   findStaffUserWithPassword,
   findStaffUserByResetToken,
   findStaffUserByEmailForReset,
+  createStaffUser,
+  findStaffUserById,
 } = require('../../../repositories/staffUserRepository');
 const { findDepartmentById } = require('../../../repositories/departmentRepository');
 
@@ -142,7 +143,7 @@ exports.register = async (req, res) => {
       return res.status(400).json({ error: deptCheck.error });
     }
 
-    const userExists = await User.findOne({ email: emailLower });
+    const userExists = await findStaffUserByEmail(emailLower);
     if (userExists) {
       return res.status(400).json({ error: 'User already exists' });
     }
@@ -152,7 +153,7 @@ exports.register = async (req, res) => {
     if (!displayName) {
       return res.status(400).json({ error: 'Invalid name' });
     }
-    const user = await User.create({
+    const user = await createStaffUser({
       name: displayName,
       email: emailLower,
       password: normalizedPassword,
@@ -162,9 +163,7 @@ exports.register = async (req, res) => {
       passwordChangedAt: new Date(),
     });
 
-    const populated = await User.findById(user._id)
-      .select('-password')
-      .populate('departmentId', 'name slug signupAllowed permissionPreset pagePermissions');
+    const populated = await findStaffUserPopulated(user._id);
 
     await finishAuthSession(req, res, populated._id);
     return res.status(201).json(formatAuthUser(populated));
@@ -252,10 +251,10 @@ exports.googleLogin = async (req, res) => {
       return res.status(403).json({ error: registrationCheck.error });
     }
 
-    let user = await User.findOne({ email: emailLower });
+    let user = await findStaffUserByEmail(emailLower);
 
     if (!user) {
-      user = await User.create({
+      user = await createStaffUser({
         name,
         email: emailLower,
         password: Math.random().toString(36).slice(-8),
@@ -263,9 +262,7 @@ exports.googleLogin = async (req, res) => {
       });
     }
 
-    const populated = await User.findById(user._id)
-      .select('-password')
-      .populate('departmentId', 'name slug signupAllowed permissionPreset pagePermissions');
+    const populated = await findStaffUserPopulated(user._id);
 
     return sendAuthSuccess(req, res, populated);
   } catch (error) {
@@ -408,15 +405,17 @@ exports.googleAuthCallback = async (req, res) => {
 
     if (state && state.startsWith('link_')) {
       const userId = state.split('_')[1];
-      const user = await User.findById(userId);
+      const user = await findStaffUserById(userId);
       if (user) {
-        const exists = user.googleAccounts.some((acc) => acc.email.toLowerCase() === emailLower);
+        const accounts = Array.isArray(user.googleAccounts) ? [...user.googleAccounts] : [];
+        const exists = accounts.some((acc) => acc.email?.toLowerCase() === emailLower);
         if (!exists) {
-          user.googleAccounts.push({
+          accounts.push({
             email: emailLower,
             accessToken: tokens.access_token,
             refreshToken: tokens.refresh_token,
           });
+          user.googleAccounts = accounts;
         }
         if (tokens.refresh_token) {
           user.googleRefreshToken = tokens.refresh_token;
@@ -434,10 +433,10 @@ exports.googleAuthCallback = async (req, res) => {
       return res.redirect(`${FRONTEND_URL}/login?error=unauthorized_domain`);
     }
 
-    let user = await User.findOne({ email: emailLower });
+    let user = await findStaffUserByEmail(emailLower);
 
     if (!user) {
-      user = await User.create({
+      user = await createStaffUser({
         name: profile.name,
         email: emailLower,
         avatar: profile.picture,
@@ -473,9 +472,7 @@ exports.oauthEstablishSession = async (req, res) => {
     }
 
     const userId = verifyOAuthTicket(ticket.trim());
-    const populated = await User.findById(userId)
-      .select('-password')
-      .populate('departmentId', 'name slug signupAllowed permissionPreset pagePermissions');
+    const populated = await findStaffUserPopulated(userId);
 
     if (!populated) {
       return res.status(401).json({ error: 'User no longer exists' });
@@ -681,10 +678,6 @@ exports.devBypassLogin = async (req, res) => {
     let populated = await findStaffUserByEmail(bypassEmail);
     if (populated) {
       populated = await findStaffUserPopulated(populated._id);
-    } else {
-      populated = await User.findOne({ email: bypassEmail })
-        .select('-password')
-        .populate('departmentId', 'name slug signupAllowed permissionPreset pagePermissions');
     }
 
     if (!populated) {

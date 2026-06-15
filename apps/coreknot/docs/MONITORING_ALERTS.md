@@ -5,7 +5,7 @@
 | Endpoint | Purpose | Expected |
 |----------|---------|----------|
 | `GET /api/health/live` | Liveness | 200 always when process up |
-| `GET /api/health/ready` | Readiness | 200 when Mongo connected; 503 when degraded |
+| `GET /api/health/ready` | Readiness | 200 when Postgres (and Mongo if required) healthy; 503 when degraded |
 | `GET /api/health` | Combined status | 200 + `ready` in JSON body |
 
 Configure platform health checks on `/api/health` (Render/Railway) or `/api/health/ready` for stricter probes.

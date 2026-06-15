@@ -1,4 +1,4 @@
-const FinanceDocument = require('../models/FinanceDocument');
+const financeRepository = require('../repositories/financeRepository');
 const Project = require('../models/Project');
 const axios = require('axios');
 const { isAdminUser, isOpsUser } = require('../utils/departmentPermissions');
@@ -16,7 +16,7 @@ const {
 } = require('../utils/uploadthingServer');
 
 const populateFinanceDoc = (id) =>
-  FinanceDocument.findById(id)
+  financeRepository.findById(id)
     .populate('uploadedBy', 'name email avatar')
     .populate('project', 'name')
     .populate('folderId', 'folderName title isFolder')
@@ -35,7 +35,7 @@ const uploadDocument = async (req, res) => {
     }
 
     if (folderId) {
-      const folder = await FinanceDocument.findOne({ _id: folderId, isFolder: true, project });
+      const folder = await financeRepository.findOne({ _id: folderId, isFolder: true, project });
       if (!folder) {
         return res.status(404).json({ success: false, message: 'Folder not found for this project' });
       }
@@ -63,7 +63,7 @@ const uploadDocument = async (req, res) => {
       }
     }
 
-    const doc = new FinanceDocument({
+    const doc = await financeRepository.create({
       title,
       description: description || '',
       project,
@@ -85,8 +85,6 @@ const uploadDocument = async (req, res) => {
         detectedCategory: docMetadata.detectedCategory || 'other'
       }
     });
-
-    await doc.save();
 
     const populated = await populateFinanceDoc(doc._id);
 
@@ -110,7 +108,7 @@ const uploadDocumentsBulk = async (req, res) => {
       if (!title || !project || !fileUrl) continue;
 
       if (folderId) {
-        const folder = await FinanceDocument.findOne({ _id: folderId, isFolder: true, project });
+        const folder = await financeRepository.findOne({ _id: folderId, isFolder: true, project });
         if (!folder) continue;
       }
 
@@ -127,7 +125,7 @@ const uploadDocumentsBulk = async (req, res) => {
         console.error('Error parsing document for OCR in bulk:', err);
       }
 
-      const doc = new FinanceDocument({
+      const doc = await financeRepository.create({
         title,
         description: description || '',
         project,
@@ -149,12 +147,10 @@ const uploadDocumentsBulk = async (req, res) => {
           detectedCategory: docMetadata.detectedCategory || 'other'
         }
       });
-
-      await doc.save();
       savedDocs.push(doc._id);
     }
 
-    const populatedDocs = await FinanceDocument.find({ _id: { $in: savedDocs } })
+    const populatedDocs = await financeRepository.find({ _id: { $in: savedDocs } })
       .populate('uploadedBy', 'name email avatar')
       .populate('project', 'name')
       .populate('folderId', 'folderName title isFolder')
@@ -253,9 +249,9 @@ const getDocuments = async (req, res) => {
       if (sortField === 'title') sort.fileName = order;
     }
 
-    const total = await FinanceDocument.countDocuments(filter);
+    const total = await financeRepository.countDocuments(filter);
 
-    const categoryMixRows = await FinanceDocument.aggregate([
+    const categoryMixRows = await financeRepository.mongoRepo.aggregate([
       { $match: filter },
       { $match: { isFolder: { $ne: true } } },
       {
@@ -277,7 +273,7 @@ const getDocuments = async (req, res) => {
       count: row.count,
     }));
 
-    let docs = await FinanceDocument.find(filter)
+    let docs = await financeRepository.find(filter)
       .populate('uploadedBy', 'name email avatar')
       .populate('project', 'name')
       .populate('folderId', 'folderName title isFolder')
@@ -289,7 +285,7 @@ const getDocuments = async (req, res) => {
     // Attach document counts to folder rows
     const folderIds = docs.filter((d) => d.isFolder).map((d) => d._id);
     if (folderIds.length > 0) {
-      const counts = await FinanceDocument.aggregate([
+      const counts = await financeRepository.mongoRepo.aggregate([
         { $match: { folderId: { $in: folderIds }, isFolder: { $ne: true } } },
         { $group: { _id: '$folderId', count: { $sum: 1 } } },
       ]);
@@ -301,7 +297,7 @@ const getDocuments = async (req, res) => {
 
     let currentFolder = null;
     if (folderId) {
-      currentFolder = await FinanceDocument.findOne({ _id: folderId, isFolder: true })
+      currentFolder = await financeRepository.findOne({ _id: folderId, isFolder: true })
         .populate('project', 'name')
         .lean();
     }
@@ -337,13 +333,13 @@ const createFolder = async (req, res) => {
     }
 
     if (parentFolderId) {
-      const parent = await FinanceDocument.findOne({ _id: parentFolderId, isFolder: true, project });
+      const parent = await financeRepository.findOne({ _id: parentFolderId, isFolder: true, project });
       if (!parent) {
         return res.status(404).json({ success: false, message: 'Parent folder not found' });
       }
     }
 
-    const existing = await FinanceDocument.findOne({
+    const existing = await financeRepository.findOne({
       isFolder: true,
       project,
       folderName: folderName.trim(),
@@ -353,7 +349,7 @@ const createFolder = async (req, res) => {
       return res.status(409).json({ success: false, message: 'Folder already exists' });
     }
 
-    const folder = new FinanceDocument({
+    const folder = await financeRepository.create({
       isFolder: true,
       folderName: folderName.trim(),
       title: folderName.trim(),
@@ -362,8 +358,6 @@ const createFolder = async (req, res) => {
       uploadedBy: req.user._id,
       category: 'other',
     });
-
-    await folder.save();
     const populated = await populateFinanceDoc(folder._id);
     res.status(201).json({ success: true, data: populated, message: 'Folder created' });
   } catch (error) {
@@ -385,13 +379,13 @@ const getFolders = async (req, res) => {
       parentFolderId: parentFolderId || null,
     };
 
-    const folders = await FinanceDocument.find(filter)
+    const folders = await financeRepository.find(filter)
       .populate('project', 'name')
       .sort({ folderName: 1 })
       .lean();
 
     const folderIds = folders.map((f) => f._id);
-    const counts = await FinanceDocument.aggregate([
+    const counts = await financeRepository.mongoRepo.aggregate([
       { $match: { folderId: { $in: folderIds }, isFolder: { $ne: true } } },
       { $group: { _id: '$folderId', count: { $sum: 1 } } },
     ]);
@@ -411,12 +405,12 @@ const getFolders = async (req, res) => {
 
 const deleteFolder = async (req, res) => {
   try {
-    const folder = await FinanceDocument.findOne({ _id: req.params.folderId, isFolder: true });
+    const folder = await financeRepository.findOne({ _id: req.params.folderId, isFolder: true });
     if (!folder) {
       return res.status(404).json({ success: false, message: 'Folder not found' });
     }
 
-    const childDocs = await FinanceDocument.find({ folderId: folder._id, isFolder: { $ne: true } });
+    const childDocs = await financeRepository.find({ folderId: folder._id, isFolder: { $ne: true } });
     for (const doc of childDocs) {
       if (doc.fileKey) {
         try {
@@ -427,8 +421,8 @@ const deleteFolder = async (req, res) => {
       }
     }
 
-    await FinanceDocument.deleteMany({ folderId: folder._id });
-    await folder.deleteOne();
+    await financeRepository.deleteMany({ folderId: folder._id });
+    await financeRepository.deleteOne({ _id: folder._id });
 
     res.json({ success: true, message: 'Folder and documents deleted' });
   } catch (error) {
@@ -452,7 +446,7 @@ const getFolderBreadcrumb = async (req, res) => {
   try {
     const { folderId } = req.params;
     const trail = [];
-    let current = await FinanceDocument.findOne({ _id: folderId, isFolder: true })
+    let current = await financeRepository.findOne({ _id: folderId, isFolder: true })
       .populate('project', 'name')
       .lean();
 
@@ -467,7 +461,7 @@ const getFolderBreadcrumb = async (req, res) => {
         project: current.project,
       });
       if (!current.parentFolderId) break;
-      current = await FinanceDocument.findOne({ _id: current.parentFolderId, isFolder: true })
+      current = await financeRepository.findOne({ _id: current.parentFolderId, isFolder: true })
         .populate('project', 'name')
         .lean();
     }
@@ -481,7 +475,7 @@ const getFolderBreadcrumb = async (req, res) => {
 
 const deleteDocument = async (req, res) => {
   try {
-    const doc = await FinanceDocument.findById(req.params.id);
+    const doc = await financeRepository.findById(req.params.id);
     if (!doc) {
       return res.status(404).json({ success: false, message: 'Document not found' });
     }
@@ -502,7 +496,7 @@ const deleteDocument = async (req, res) => {
       }
     }
 
-    await doc.deleteOne();
+    await financeRepository.deleteOne({ _id: doc._id });
     res.json({ success: true, message: 'Document deleted' });
   } catch (error) {
     console.error('Delete document error:', error);
@@ -512,7 +506,7 @@ const deleteDocument = async (req, res) => {
 
 const getStats = async (req, res) => {
   try {
-    const stats = await FinanceDocument.aggregate([
+    const stats = await financeRepository.mongoRepo.aggregate([
       { $match: { isFolder: { $ne: true } } },
       {
         $facet: {
@@ -587,10 +581,9 @@ const rejectSpoofedTenantPayload = (req, res) => {
 
 /** Tenant-scoped load; 403 if id exists in another tenant, 404 if missing. */
 const loadFinanceDocForMutation = async (req, res, notFoundMessage = 'Invoice not found') => {
-  const doc = await FinanceDocument.findOne({ _id: req.params.id });
+  const doc = await financeRepository.findOne({ _id: req.params.id });
   if (doc) return doc;
-  const foreign = await FinanceDocument.findOne({ _id: req.params.id })
-    .setOptions({ bypassTenant: true })
+  const foreign = await financeRepository.findOne({ _id: req.params.id }, { bypass: true })
     .select('tenantId approvalStatus')
     .lean();
   if (foreign) {
@@ -604,7 +597,7 @@ const loadFinanceDocForMutation = async (req, res, notFoundMessage = 'Invoice no
 const updateDocument = async (req, res) => {
   try {
     const { title, description, project, category, metadata } = req.body;
-    const doc = await FinanceDocument.findById(req.params.id);
+    const doc = await financeRepository.findById(req.params.id);
     if (!doc) {
       return res.status(404).json({ success: false, message: 'Document not found' });
     }
@@ -677,7 +670,7 @@ const submitInvoice = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Expense date is required' });
     }
 
-    const doc = new FinanceDocument({
+    const doc = await financeRepository.create({
       title: String(title).trim(),
       description: description || '',
       category: 'invoice',
@@ -710,14 +703,12 @@ const submitInvoice = async (req, res) => {
       },
     });
 
-    await doc.save();
-
     queueGamificationEvent('INVOICE_SUBMITTED', {
       userId: req.user._id,
       invoice: { _id: doc._id },
     });
 
-    const populated = await FinanceDocument.findById(doc._id)
+    const populated = await financeRepository.findById(doc._id)
       .populate('uploadedBy', 'name email avatar')
       .populate('submittedBy', 'name email avatar')
       .lean();
@@ -735,7 +726,7 @@ const submitInvoice = async (req, res) => {
 
 const listPendingInvoices = async (req, res) => {
   try {
-    const docs = await FinanceDocument.find({ approvalStatus: 'pending', category: 'invoice' })
+    const docs = await financeRepository.find({ approvalStatus: 'pending', category: 'invoice' })
       .populate('uploadedBy', 'name email avatar')
       .populate('submittedBy', 'name email avatar')
       .populate('project', 'name')
@@ -761,7 +752,7 @@ const listMyInvoices = async (req, res) => {
       ];
     }
 
-    const docs = await FinanceDocument.find(filter)
+    const docs = await financeRepository.find(filter)
       .populate('uploadedBy', 'name email avatar')
       .populate('submittedBy', 'name email avatar')
       .populate('reviewedBy', 'name email avatar')
@@ -814,7 +805,7 @@ const approveInvoice = async (req, res) => {
     doc.rejectionReason = '';
     await doc.save();
 
-    const populated = await FinanceDocument.findById(doc._id)
+    const populated = await financeRepository.findById(doc._id)
       .populate('uploadedBy', 'name email avatar')
       .populate('submittedBy', 'name email avatar')
       .populate('reviewedBy', 'name email avatar')
@@ -843,7 +834,7 @@ const rejectInvoice = async (req, res) => {
     doc.rejectionReason = req.body?.rejectionReason || req.body?.reason || '';
     await doc.save();
 
-    const populated = await FinanceDocument.findById(doc._id)
+    const populated = await financeRepository.findById(doc._id)
       .populate('uploadedBy', 'name email avatar')
       .populate('submittedBy', 'name email avatar')
       .populate('reviewedBy', 'name email avatar')

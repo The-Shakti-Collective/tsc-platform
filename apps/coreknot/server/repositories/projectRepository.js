@@ -5,7 +5,14 @@ const { isPostgresProjectsEnabled } = require('../infrastructure/postgres/prisma
 const {
   mirrorProjectFromMongo,
   deleteProjectMirror,
+  upsertProjectFromMongo,
+  deleteProjectMirrorSync,
 } = require('../infrastructure/postgres/postgresEntityWrites');
+const {
+  shouldWritePostgresFirst,
+  shouldMirrorMongo,
+  asMongoDoc,
+} = require('../infrastructure/postgres/writeStrategy');
 const {
   resolveTscId,
   resolveMongoId,
@@ -194,35 +201,57 @@ const projectRepository = {
   },
 
   async create(doc) {
+    if (shouldWritePostgresFirst(isPostgresProjectsEnabled)) {
+      const created = shouldMirrorMongo() ? await mongoRepo.create(doc) : asMongoDoc(doc);
+      await upsertProjectFromMongo(created);
+      return created;
+    }
     const created = await mongoRepo.create(doc);
     if (isPostgresProjectsEnabled()) {
-      await mirrorProjectFromMongo(created);
+      await upsertProjectFromMongo(created);
     }
     return created;
   },
 
   async findOneAndUpdate(filter, update, options = {}) {
+    if (shouldWritePostgresFirst(isPostgresProjectsEnabled)) {
+      let updated;
+      if (shouldMirrorMongo()) {
+        updated = await mongoRepo.findOneAndUpdate(filter, update, options);
+      } else {
+        const existing = await this.findOne(filter, options);
+        if (!existing) return null;
+        updated = { ...existing, ...(update.$set || update) };
+      }
+      if (updated) await upsertProjectFromMongo(asMongoDoc(updated));
+      return updated;
+    }
     const updated = await mongoRepo.findOneAndUpdate(filter, update, options);
     if (updated && isPostgresProjectsEnabled()) {
-      await mirrorProjectFromMongo(updated);
+      await upsertProjectFromMongo(updated);
     }
     return updated;
   },
 
   async findByIdAndUpdate(id, update, options = {}) {
-    const updated = await mongoRepo.findByIdAndUpdate(id, update, options);
-    if (updated && isPostgresProjectsEnabled()) {
-      await mirrorProjectFromMongo(updated);
-    }
-    return updated;
+    return this.findOneAndUpdate({ _id: id }, update, options);
   },
 
   async deleteOne(filter, options = {}) {
     const doc = await mongoRepo.findOne(filter, options);
-    if (!doc) return null;
+    if (!doc && !usePostgres(options)) return null;
+    const target = doc || await this.findOne(filter, options);
+    if (!target) return null;
+    if (shouldWritePostgresFirst(isPostgresProjectsEnabled)) {
+      await deleteProjectMirrorSync(target._id);
+      if (shouldMirrorMongo()) {
+        return mongoRepo.deleteOne(filter, options);
+      }
+      return { deletedCount: 1 };
+    }
     const result = await mongoRepo.deleteOne(filter, options);
     if (isPostgresProjectsEnabled()) {
-      await deleteProjectMirror(doc._id);
+      await deleteProjectMirrorSync(doc._id);
     }
     return result;
   },

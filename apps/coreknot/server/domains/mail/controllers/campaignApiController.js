@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const Campaign = require('../models/Campaign');
-const MailCampaign = require('../models/MailCampaign');
+const mailCampaignRepository = require('../../../repositories/mailCampaignRepository');
 const MailTemplate = require('../models/MailTemplate');
 const MailEvent = require('../models/MailEvent');
 const EmailLog = require('../models/EmailLog');
@@ -56,7 +56,7 @@ exports.list = async (req, res) => {
     ];
     const [coreCampaigns, mailCampaigns] = await Promise.all([
       Campaign.aggregate(listPipeline),
-      MailCampaign.aggregate(listPipeline),
+      mailCampaignRepository.mongoRepo.aggregate(listPipeline),
     ]);
     const allCampaigns = [...coreCampaigns, ...mailCampaigns].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 

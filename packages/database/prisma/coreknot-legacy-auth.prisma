@@ -1,0 +1,2 @@
+// CoreKnot legacy runtime auth — merged into schema.prisma (2026-06-14).
+// Audit trail only; canonical models: CkLegacyTenant, CkLegacyDepartment, CkLegacyStaffUser.

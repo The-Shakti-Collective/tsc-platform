@@ -54,6 +54,11 @@ function registerProcessHandlers() {
 }
 
 function connectMongoOnStartup() {
+  const { isMongoRequired } = require('../infrastructure/postgres/prismaClient');
+  if (!isMongoRequired()) {
+    console.info('[mongo] Skipped — COREKNOT_MONGO_REQUIRED=false (Neon primary mode)');
+    return;
+  }
   connectMongo({ reason: 'startup' })
     .then(() => bootstrapMongoSideEffects())
     .catch(() => {

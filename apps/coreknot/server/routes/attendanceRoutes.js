@@ -3,8 +3,8 @@ const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
 const { isOpsUser, isAdminUser } = require('../utils/departmentPermissions');
-const Attendance = require('../models/Attendance');
-const LeaveRequest = require('../models/LeaveRequest');
+const attendanceRepository = require('../repositories/attendanceRepository');
+const leaveRequestRepository = require('../repositories/leaveRequestRepository');
 const { awardAttendanceXpOnDayLocked, isAttendanceDayLocked } = require('../utils/attendanceXp');
 const { refreshAttendanceMetrics } = require('../utils/refreshAttendanceMetrics');
 const {
@@ -94,7 +94,7 @@ router.get('/', validateQuery(attendanceQuery), async (req, res) => {
       return res.json(cached);
     }
 
-    const rows = await Attendance.find(query).sort({ date: -1 });
+    const rows = await attendanceRepository.find(query).sort({ date: -1 });
     await Promise.all(
       rows.map((row) => {
         if (row.inTimeRecord?.manualTimestamp && row.outTimeRecord?.manualTimestamp) {
@@ -117,7 +117,7 @@ router.post('/check', validateBody(attendanceCheckBody), async (req, res) => {
     const today = todayStart();
     const type = req.body?.type === 'out' ? 'out' : 'in';
 
-    const existing = await Attendance.findOne({ userId: req.user._id, date: today });
+    const existing = await attendanceRepository.findOne({ userId: req.user._id, date: today });
 
     const targetRecord = type === 'in' ? existing?.inTimeRecord : existing?.outTimeRecord;
     if (targetRecord?.isApproved) {
@@ -135,7 +135,7 @@ router.post('/check', validateBody(attendanceCheckBody), async (req, res) => {
       ? { 'inTimeRecord': { systemTimestamp: now, manualTimestamp: timeValue, workMode, verificationMethod, isApproved: false } }
       : { 'outTimeRecord': { systemTimestamp: now, manualTimestamp: timeValue, workMode, verificationMethod, isApproved: false } };
 
-    const attendance = await Attendance.findOneAndUpdate(
+    const attendance = await attendanceRepository.findOneAndUpdate(
       { userId: req.user._id, date: today },
       {
         $set: {
@@ -164,7 +164,7 @@ router.post('/check/undo', async (req, res) => {
   try {
     const today = todayStart();
     const type = req.body?.type === 'out' ? 'out' : 'in';
-    const existing = await Attendance.findOne({ userId: req.user._id, date: today });
+    const existing = await attendanceRepository.findOne({ userId: req.user._id, date: today });
 
     if (!existing) return res.status(404).json({ error: 'No attendance record for today' });
 
@@ -180,7 +180,7 @@ router.post('/check/undo', async (req, res) => {
       ? { $unset: { 'inTimeRecord': '' } }
       : { $unset: { 'outTimeRecord': '' } };
 
-    const attendance = await Attendance.findOneAndUpdate(
+    const attendance = await attendanceRepository.findOneAndUpdate(
       { userId: req.user._id, date: today },
       updateBlock,
       { new: true }
@@ -200,7 +200,7 @@ router.patch('/:id/approve', async (req, res) => {
       return res.status(400).json({ error: 'Invalid approval target. Must be IN or OUT.' });
     }
 
-    const row = await Attendance.findById(req.params.id);
+    const row = await attendanceRepository.findById(req.params.id);
     if (!row) return res.status(404).json({ error: 'Attendance record not found' });
     if (row.onLeave) return res.status(400).json({ error: 'Leave entries are approved separately' });
 
@@ -246,7 +246,7 @@ router.put('/upsert/by-user-date', async (req, res) => {
     const { userId, username, date, inTimeRecord, outTimeRecord, isHalfDay, onLeave, reason } = req.body;
     if (!userId || !date) return res.status(400).json({ error: 'userId and date are required' });
 
-    const row = await Attendance.findOneAndUpdate(
+    const row = await attendanceRepository.findOneAndUpdate(
       { userId, date: toStartOfDay(date) },
       {
         $set: {
@@ -288,7 +288,7 @@ router.post('/leave', validateBody(leaveRequestBody), async (req, res) => {
     if (!fromDate || !toDate) return res.status(400).json({ error: 'fromDate and toDate are required' });
     const start = toStartOfDay(fromDate);
     const end = toStartOfDay(toDate);
-    const request = await LeaveRequest.create({
+    const request = await leaveRequestRepository.create({
       userId: req.user._id,
       username: req.user.name,
       fromDate: start,
@@ -310,7 +310,7 @@ router.get('/leave/requests', validateQuery(leaveRequestsQuery), async (req, res
     } else {
       query.userId = req.user._id;
     }
-    const requests = await LeaveRequest.find(query)
+    const requests = await leaveRequestRepository.find(query)
       .populate('userId', 'name email')
       .populate('reviewedBy', 'name')
       .sort({ createdAt: -1 })
@@ -327,7 +327,7 @@ router.patch('/leave/requests/:id/approve', async (req, res) => {
       return res.status(403).json({ error: 'Only operations can approve leave requests' });
     }
 
-    const request = await LeaveRequest.findById(req.params.id);
+    const request = await leaveRequestRepository.findById(req.params.id);
     if (!request) return res.status(404).json({ error: 'Leave request not found' });
     if (request.status !== 'pending') {
       return res.status(400).json({ error: `Leave request is already ${request.status}` });
@@ -340,7 +340,7 @@ router.patch('/leave/requests/:id/approve', async (req, res) => {
 
     await syncApprovedLeaveToAttendance(request);
 
-    const populated = await LeaveRequest.findById(request._id)
+    const populated = await leaveRequestRepository.findById(request._id)
       .populate('userId', 'name email')
       .populate('reviewedBy', 'name')
       .lean();
@@ -357,7 +357,7 @@ router.patch('/leave/requests/:id/reject', validateBody(leaveReviewBody), async 
       return res.status(403).json({ error: 'Only operations can reject leave requests' });
     }
 
-    const request = await LeaveRequest.findById(req.params.id);
+    const request = await leaveRequestRepository.findById(req.params.id);
     if (!request) return res.status(404).json({ error: 'Leave request not found' });
     if (request.status !== 'pending') {
       return res.status(400).json({ error: `Leave request is already ${request.status}` });
@@ -369,7 +369,7 @@ router.patch('/leave/requests/:id/reject', validateBody(leaveReviewBody), async 
     request.reviewNote = req.body?.reviewNote || '';
     await request.save();
 
-    const populated = await LeaveRequest.findById(request._id)
+    const populated = await leaveRequestRepository.findById(request._id)
       .populate('userId', 'name email')
       .populate('reviewedBy', 'name')
       .lean();
@@ -385,8 +385,8 @@ router.delete('/reset', async (req, res) => {
     if (!isAdminUser(req.user)) {
       return res.status(403).json({ error: 'Not authorized — admin required' });
     }
-    await Attendance.deleteMany({});
-    await LeaveRequest.deleteMany({});
+    await attendanceRepository.deleteMany({});
+    await leaveRequestRepository.deleteMany({});
     res.json({ message: 'All attendance records reset' });
   } catch (error) {
     res.status(500).json({ error: error.message });

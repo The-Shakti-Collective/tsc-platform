@@ -36,7 +36,6 @@ const SUPABASE_ANON_KEY = firstEnv([
 
 const SUPABASE_DB_URL = firstEnv([
   'SUPABASE_DB_URL',
-  'DATABASE_URL',
   'SUPABASE_POSTGRES_URL',
 ]);
 
@@ -44,10 +43,11 @@ const SUPABASE_BACKUP_BUCKET = (
   process.env.SUPABASE_BACKUP_BUCKET || 'taskmaster-backups'
 ).trim();
 
-const SUPABASE_SECONDARY_ENABLED = readBool('SUPABASE_SECONDARY_ENABLED', true);
+/** Off by default — Neon is primary; Supabase was legacy ops mirror. */
+const SUPABASE_SECONDARY_ENABLED = readBool('SUPABASE_SECONDARY_ENABLED', false);
 
-/** When Supabase is enabled, system/app log reads and writes use Postgres first. */
-const LOGS_PRIMARY_SUPABASE = readBool('LOGS_PRIMARY_SUPABASE', true);
+/** When Supabase is enabled, system/app log reads and writes use Supabase Postgres. */
+const LOGS_PRIMARY_SUPABASE = readBool('LOGS_PRIMARY_SUPABASE', false);
 
 /** Optional cold archive of logs into Mongo (large/low-access retention). Off by default. */
 const MONGO_LOG_ARCHIVE = readBool('MONGO_LOG_ARCHIVE', false);

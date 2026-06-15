@@ -5,7 +5,14 @@ const { isPostgresCrmEnabled } = require('../infrastructure/postgres/prismaClien
 const {
   mirrorLeadFromMongo,
   deleteLeadMirror,
+  upsertLeadFromMongo,
+  deleteLeadMirrorSync,
 } = require('../infrastructure/postgres/postgresEntityWrites');
+const {
+  shouldWritePostgresFirst,
+  shouldMirrorMongo,
+  asMongoDoc,
+} = require('../infrastructure/postgres/writeStrategy');
 const {
   resolveTscId,
   resolveMongoId,
@@ -111,8 +118,42 @@ async function findPostgresLeads(filter = {}, options = {}) {
 }
 
 async function countPostgresLeads(filter = {}, options = {}) {
-  const rows = await findPostgresLeads(filter, options);
-  return rows.length;
+  const prisma = await getPrismaClient();
+  const orgWhere = await tenantOrgWhere(options);
+  if (!orgWhere) return 0;
+
+  const where = { ...orgWhere };
+
+  if (filter._id || filter.id) {
+    const tscId = await resolveLeadTscId(filter._id || filter.id);
+    if (!tscId) return 0;
+    where.id = tscId;
+  }
+
+  if (filter.crmType) where.metadata = { path: ['crmType'], equals: filter.crmType };
+
+  if (filter.assignedRepId === null) {
+    where.assignedPersonId = null;
+  } else if (filter.assignedRepId) {
+    const personId = await resolveTscId('Person', String(filter.assignedRepId));
+    if (personId) where.assignedPersonId = personId;
+  }
+
+  if (filter.leadStatus) {
+    const { STAGE_TO_LEAD_STATUS } = require('../infrastructure/postgres/postgresEntityMappers');
+    const stageEntry = Object.entries(STAGE_TO_LEAD_STATUS).find(([, v]) => v === filter.leadStatus);
+    if (stageEntry) where.stage = stageEntry[0];
+  }
+
+  if (filter.source) where.source = filter.source;
+
+  // Text search filters still require in-memory pass — use findMany only when $or present.
+  if (filter.$or) {
+    const rows = await findPostgresLeads(filter, options);
+    return rows.length;
+  }
+
+  return prisma.lead.count({ where });
 }
 
 function usePostgres(options = {}) {
@@ -215,35 +256,57 @@ const leadRepository = {
   },
 
   async create(doc) {
+    if (shouldWritePostgresFirst(isPostgresCrmEnabled)) {
+      const created = shouldMirrorMongo() ? await mongoRepo.create(doc) : asMongoDoc(doc);
+      await upsertLeadFromMongo(created);
+      return created;
+    }
     const created = await mongoRepo.create(doc);
     if (isPostgresCrmEnabled()) {
-      await mirrorLeadFromMongo(created);
+      await upsertLeadFromMongo(created);
     }
     return created;
   },
 
   async findOneAndUpdate(filter, update, options = {}) {
+    if (shouldWritePostgresFirst(isPostgresCrmEnabled)) {
+      let updated;
+      if (shouldMirrorMongo()) {
+        updated = await mongoRepo.findOneAndUpdate(filter, update, options);
+      } else {
+        const existing = await this.findOne(filter, options);
+        if (!existing) return null;
+        updated = { ...existing, ...(update.$set || update) };
+      }
+      if (updated) await upsertLeadFromMongo(asMongoDoc(updated));
+      return updated;
+    }
     const updated = await mongoRepo.findOneAndUpdate(filter, update, options);
     if (updated && isPostgresCrmEnabled()) {
-      await mirrorLeadFromMongo(updated);
+      await upsertLeadFromMongo(updated);
     }
     return updated;
   },
 
   async findByIdAndUpdate(id, update, options = {}) {
-    const updated = await mongoRepo.findByIdAndUpdate(id, update, options);
-    if (updated && isPostgresCrmEnabled()) {
-      await mirrorLeadFromMongo(updated);
-    }
-    return updated;
+    return this.findOneAndUpdate({ _id: id }, update, options);
   },
 
   async deleteOne(filter, options = {}) {
     const doc = await mongoRepo.findOne(filter, options);
-    if (!doc) return null;
+    if (!doc && !usePostgres(options)) return null;
+    const target = doc || await this.findOne(filter, options);
+    if (!target) return null;
+    if (shouldWritePostgresFirst(isPostgresCrmEnabled)) {
+      await deleteLeadMirrorSync(target._id);
+      if (shouldMirrorMongo()) {
+        return mongoRepo.deleteOne(filter, options);
+      }
+      return { deletedCount: 1 };
+    }
     const result = await mongoRepo.deleteOne(filter, options);
     if (isPostgresCrmEnabled()) {
-      await deleteLeadMirror(doc._id);
+      await deleteLeadMirrorSync(doc._id);
     }
     return result;
   },

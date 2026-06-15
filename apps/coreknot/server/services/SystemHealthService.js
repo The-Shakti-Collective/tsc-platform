@@ -1,16 +1,33 @@
 const mongoose = require('mongoose');
 const { config } = require('../config');
 const { connectMongo, isMongoReady } = require('./mongoConnectionService');
+const { isMongoRequired, pingPostgres, isPostgresConfigured } = require('../infrastructure/postgres/prismaClient');
+const { areAllP0StoresOnPostgres } = require('../infrastructure/postgres/migrationProfile');
 
 let systemStatus = 'STARTING';
 let failReason = null;
+let lastPostgresPing = { ok: false, reason: 'not checked' };
 
 class SystemHealthService {
   static async checkDependencies() {
     try {
-      // readyState 1 = connected, 2 = connecting
-      if (mongoose.connection.readyState !== 1 && mongoose.connection.readyState !== 2) {
-        throw new Error('Database disconnected or connecting failed (readyState: ' + mongoose.connection.readyState + ')');
+      const mongoRequired = isMongoRequired();
+      const postgresRequired = isPostgresConfigured() && (
+        !mongoRequired || areAllP0StoresOnPostgres()
+      );
+
+      if (postgresRequired) {
+        lastPostgresPing = await pingPostgres();
+        if (!lastPostgresPing.ok) {
+          throw new Error(`Postgres unavailable: ${lastPostgresPing.reason}`);
+        }
+      }
+
+      if (mongoRequired) {
+        // readyState 1 = connected, 2 = connecting
+        if (mongoose.connection.readyState !== 1 && mongoose.connection.readyState !== 2) {
+          throw new Error('Database disconnected or connecting failed (readyState: ' + mongoose.connection.readyState + ')');
+        }
       }
 
       const { redisAvailable } = require('./backgroundQueue');
@@ -24,7 +41,7 @@ class SystemHealthService {
     } catch (err) {
       systemStatus = config.isProduction ? 'FAIL' : 'DEGRADED';
       failReason = err.message;
-      if (!isMongoReady() && mongoose.connection.readyState === 0) {
+      if (isMongoRequired() && !isMongoReady() && mongoose.connection.readyState === 0) {
         connectMongo({ reason: 'health-check', maxAttempts: 1 }).catch(() => {});
       }
       return false;
@@ -56,13 +73,23 @@ class SystemHealthService {
       supabaseStatus = 'unknown';
     }
 
+    const postgresOk = lastPostgresPing.ok;
+    const mongoRequired = isMongoRequired();
+    const mongoOk = !mongoRequired || mongoState === 1 || mongoState === 2;
+
     return {
       status: systemStatus,
       reason: failReason,
       dependencies: {
+        postgres: {
+          ok: postgresOk,
+          state: postgresOk ? 'connected' : (lastPostgresPing.reason || 'disconnected'),
+          required: isPostgresConfigured(),
+        },
         mongodb: {
-          ok: mongoState === 1 || mongoState === 2,
-          state: mongoLabels[mongoState] || String(mongoState),
+          ok: mongoOk,
+          state: mongoRequired ? (mongoLabels[mongoState] || String(mongoState)) : 'optional',
+          required: mongoRequired,
         },
         redis: {
           ok: redisStatus === 'connected',
@@ -73,6 +100,7 @@ class SystemHealthService {
           state: supabaseStatus,
         },
       },
+      migration: require('../infrastructure/postgres/migrationProfile').getMigrationProfile(),
       uptimeSeconds: Math.floor(process.uptime()),
     };
   }

@@ -24,6 +24,14 @@ describe('supabase secondary store', () => {
     expect(preferRestPostgres()).toBe(true);
   });
 
+  it('is disabled by default even with credentials', () => {
+    process.env.SUPABASE_URL = 'https://example.supabase.co';
+    process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-role';
+    delete process.env.SUPABASE_SECONDARY_ENABLED;
+    const { isSupabaseEnabled } = require('../config/supabase');
+    expect(isSupabaseEnabled()).toBe(false);
+  });
+
   it('is enabled when url + service role + flag are set', () => {
     process.env.SUPABASE_URL = 'https://example.supabase.co';
     process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-role';

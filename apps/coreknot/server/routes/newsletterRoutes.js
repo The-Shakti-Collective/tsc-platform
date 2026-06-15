@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const express = require('express');
-const NewsletterIssue = require('../models/NewsletterIssue');
-const NewsletterArticle = require('../models/NewsletterArticle');
+const newsletterRepository = require('../repositories/newsletterRepository');
+const newsletterArticleRepository = require('../repositories/newsletterArticleRepository');
 const Campaign = require('../models/Campaign');
 const { protect, requirePageAccess } = require('../middleware/authMiddleware');
 const { isAdminUser } = require('../utils/departmentPermissions');
@@ -51,9 +51,9 @@ const getOrCreateIssueByWeekKey = async (weekKey) => {
   const bounds = getWeekBounds(weekKey);
   if (!bounds) throw new Error('Invalid week key');
 
-  let issue = await NewsletterIssue.findOne({ weekKey });
+  let issue = await newsletterRepository.findOne({ weekKey });
   if (!issue) {
-    issue = await NewsletterIssue.create({
+    issue = await newsletterRepository.create({
       weekKey,
       weekStart: bounds.weekStart,
       weekEnd: bounds.weekEnd,
@@ -64,9 +64,9 @@ const getOrCreateIssueByWeekKey = async (weekKey) => {
 };
 
 const loadIssueBundle = async (issueId) => {
-  const issue = await NewsletterIssue.findById(issueId);
+  const issue = await newsletterRepository.findById(issueId);
   if (!issue) return null;
-  const articles = await NewsletterArticle.find({ issueId: issue._id })
+  const articles = await newsletterArticleRepository.find({ issueId: issue._id })
     .sort({ sortOrder: 1, createdAt: 1 })
     .populate('addedBy', 'name email')
     .lean();
@@ -94,12 +94,12 @@ router.get('/issues/current', async (req, res) => {
 router.get('/issues/:weekKey', async (req, res) => {
   try {
     if (/^[a-f0-9]{24}$/i.test(req.params.weekKey)) {
-      const issue = await NewsletterIssue.findById(req.params.weekKey);
+      const issue = await newsletterRepository.findById(req.params.weekKey);
       if (!issue) return res.status(404).json({ error: 'Issue not found' });
       const bundle = await loadIssueBundle(issue._id);
       return res.json(bundle);
     }
-    const issue = await NewsletterIssue.findOne({ weekKey: req.params.weekKey });
+    const issue = await newsletterRepository.findOne({ weekKey: req.params.weekKey });
     if (!issue) return res.status(404).json({ error: 'Issue not found' });
     const bundle = await loadIssueBundle(issue._id);
     res.json(bundle);
@@ -121,7 +121,7 @@ router.post('/articles', validateBody(createArticleBody), async (req, res) => {
   try {
     let issue;
     if (req.body.issueId) {
-      issue = await NewsletterIssue.findById(req.body.issueId);
+      issue = await newsletterRepository.findById(req.body.issueId);
       if (!issue) return res.status(404).json({ error: 'Issue not found' });
       if (issue.status === 'sent') {
         return res.status(400).json({ error: 'Cannot add articles to a sent issue' });
@@ -133,7 +133,7 @@ router.post('/articles', validateBody(createArticleBody), async (req, res) => {
     const urlObj = normalizeUrl(req.body.url);
     if (!urlObj) return res.status(400).json({ error: 'Invalid URL' });
 
-    const existing = await NewsletterArticle.findOne({
+    const existing = await newsletterArticleRepository.findOne({
       issueId: issue._id,
       canonicalUrl: urlObj.href,
     });
@@ -142,9 +142,9 @@ router.post('/articles', validateBody(createArticleBody), async (req, res) => {
     }
 
     const preview = await previewLink(req.body.url);
-    const count = await NewsletterArticle.countDocuments({ issueId: issue._id });
+    const count = await newsletterArticleRepository.countDocuments({ issueId: issue._id });
 
-    const article = await NewsletterArticle.create({
+    const article = await newsletterArticleRepository.create({
       issueId: issue._id,
       url: preview.url || urlObj.href,
       canonicalUrl: preview.canonicalUrl || urlObj.href,
@@ -177,10 +177,10 @@ router.post('/articles', validateBody(createArticleBody), async (req, res) => {
 
 router.patch('/articles/:id', validateBody(patchArticleBody), async (req, res) => {
   try {
-    const article = await NewsletterArticle.findById(req.params.id);
+    const article = await newsletterArticleRepository.findById(req.params.id);
     if (!article) return res.status(404).json({ error: 'Article not found' });
 
-    const issue = await NewsletterIssue.findById(article.issueId);
+    const issue = await newsletterRepository.findById(article.issueId);
     if (issue?.status === 'sent') {
       return res.status(400).json({ error: 'Cannot edit articles in a sent issue' });
     }
@@ -205,10 +205,10 @@ router.patch('/articles/:id', validateBody(patchArticleBody), async (req, res) =
 
 router.delete('/articles/:id', async (req, res) => {
   try {
-    const article = await NewsletterArticle.findById(req.params.id);
+    const article = await newsletterArticleRepository.findById(req.params.id);
     if (!article) return res.status(404).json({ error: 'Article not found' });
 
-    const issue = await NewsletterIssue.findById(article.issueId);
+    const issue = await newsletterRepository.findById(article.issueId);
     if (issue?.status === 'sent') {
       return res.status(400).json({ error: 'Cannot delete articles from a sent issue' });
     }
@@ -227,7 +227,7 @@ router.delete('/articles/:id', async (req, res) => {
 
 router.patch('/issues/:id/curate', validateBody(curateIssueBody), async (req, res) => {
   try {
-    const issue = await NewsletterIssue.findById(req.params.id);
+    const issue = await newsletterRepository.findById(req.params.id);
     if (!issue) return res.status(404).json({ error: 'Issue not found' });
     if (issue.status === 'sent') {
       return res.status(400).json({ error: 'Issue already sent' });
@@ -243,7 +243,7 @@ router.patch('/issues/:id/curate', validateBody(curateIssueBody), async (req, re
         if (row.sortOrder !== undefined) patch.sortOrder = row.sortOrder;
         if (row.included !== undefined) patch.included = row.included;
         if (!Object.keys(patch).length) return;
-        await NewsletterArticle.updateOne(
+        await newsletterArticleRepository.updateOne(
           { _id: row.id, issueId: issue._id },
           { $set: patch },
         );
@@ -260,13 +260,13 @@ router.patch('/issues/:id/curate', validateBody(curateIssueBody), async (req, re
 
 router.post('/issues/:id/compile', async (req, res) => {
   try {
-    const issue = await NewsletterIssue.findById(req.params.id);
+    const issue = await newsletterRepository.findById(req.params.id);
     if (!issue) return res.status(404).json({ error: 'Issue not found' });
     if (issue.status === 'sent') {
       return res.status(400).json({ error: 'Issue already sent' });
     }
 
-    const articles = await NewsletterArticle.find({ issueId: issue._id, included: true })
+    const articles = await newsletterArticleRepository.find({ issueId: issue._id, included: true })
       .sort({ sortOrder: 1, createdAt: 1 })
       .lean();
 
@@ -292,12 +292,12 @@ router.post('/issues/:id/compile', async (req, res) => {
 
 router.get('/issues/:id/preview', async (req, res) => {
   try {
-    const issue = await NewsletterIssue.findById(req.params.id);
+    const issue = await newsletterRepository.findById(req.params.id);
     if (!issue) return res.status(404).json({ error: 'Issue not found' });
 
     let html = issue.compiledHtml;
     if (!html) {
-      const articles = await NewsletterArticle.find({ issueId: issue._id, included: true })
+      const articles = await newsletterArticleRepository.find({ issueId: issue._id, included: true })
         .sort({ sortOrder: 1, createdAt: 1 })
         .lean();
       html = compileNewsletterHtml({ issue, articles });
@@ -320,7 +320,7 @@ router.post('/issues/:id/audience-preview', validateBody(audiencePreviewBody), a
 
 router.post('/issues/:id/send', validateBody(sendIssueBody), async (req, res) => {
   try {
-    const issue = await NewsletterIssue.findById(req.params.id);
+    const issue = await newsletterRepository.findById(req.params.id);
     if (!issue) return res.status(404).json({ error: 'Issue not found' });
     if (issue.status === 'sent') {
       return res.status(400).json({ error: 'Issue already sent' });
@@ -328,7 +328,7 @@ router.post('/issues/:id/send', validateBody(sendIssueBody), async (req, res) =>
 
     let html = issue.compiledHtml;
     if (!html) {
-      const articles = await NewsletterArticle.find({ issueId: issue._id, included: true })
+      const articles = await newsletterArticleRepository.find({ issueId: issue._id, included: true })
         .sort({ sortOrder: 1, createdAt: 1 })
         .lean();
       if (!articles.length) {

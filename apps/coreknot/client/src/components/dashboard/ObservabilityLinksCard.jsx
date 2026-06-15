@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Activity, ExternalLink } from 'lucide-react';
-import { SiSentry, SiPosthog, SiBetterstack, SiDatadog } from 'react-icons/si';
+import { SiSentry, SiPosthog, SiBetterstack } from 'react-icons/si';
 import { DashboardWidgetShell, Badge } from '../ui';
 import { useAuth } from '../../contexts/AuthContext';
 import { isAdminUser } from '../../utils/departmentPermissions';
@@ -10,7 +10,6 @@ const TOOL_ICONS = {
   sentry: SiSentry,
   posthog: SiPosthog,
   betterstack: SiBetterstack,
-  datadog: SiDatadog,
 };
 
 function ToolTile({ tool }) {
@@ -32,8 +31,8 @@ function ToolTile({ tool }) {
         <p className="text-[10px] text-[var(--color-text-muted)] mt-0.5 truncate">{tool.description}</p>
       </div>
       {!tool.showSetupBadge ? null : (
-        <Badge variant="neutral" className="text-[8px] mt-2 self-start">
-          Add keys in .env.local
+        <Badge variant="neutral" className="text-[8px] mt-2 self-start leading-tight">
+          {tool.setupHint || 'Add keys in .env.local'}
         </Badge>
       )}
     </>
@@ -93,7 +92,7 @@ function ObservabilityLinksCard() {
         )}
       </p>
 
-      <div className="grid grid-cols-2 gap-2 flex-1">
+      <div className="grid grid-cols-3 gap-2 flex-1">
         {tools.map((tool) => (
           <ToolTile key={tool.id} tool={tool} />
         ))}

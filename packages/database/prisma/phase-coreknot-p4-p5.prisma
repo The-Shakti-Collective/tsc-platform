@@ -1,0 +1,237 @@
+// CoreKnot domain backend Phases 4–5 — merge into schema.prisma
+// Royalties statements, distribution, content assets, integrations, analytics snapshots
+
+enum RoyaltyStatementStatus {
+  draft
+  pending
+  reconciled
+  paid
+}
+
+enum DistributionProvider {
+  distrokid
+  manual
+  other
+}
+
+enum DistributionSubmissionStatus {
+  draft
+  submitted
+  processing
+  live
+  failed
+  cancelled
+}
+
+enum ContentAssetType {
+  audio
+  video
+  image
+  document
+  other
+}
+
+enum ContentItemStatus {
+  draft
+  published
+  archived
+}
+
+enum IntegrationProvider {
+  google
+  meta
+  spotify
+  youtube
+  distrokid
+  resend
+  other
+}
+
+enum IntegrationConnectionStatus {
+  disconnected
+  pending
+  connected
+  error
+}
+
+// Extend Release model with:
+//   upc, isrc, distributor, dspLinks
+//   tracks ReleaseTrack[]
+//   distributionSubmissions DistributionSubmission[]
+//   contentAssets ContentAsset[]
+
+// Extend Artist model with:
+//   contentAssets ContentAsset[]
+//   contentItems ContentItem[]
+//   distributionChannels DistributionChannel[]
+//   royaltyStatements RoyaltyStatement[]
+
+// Extend Organization model with:
+//   integrationConnections IntegrationConnection[]
+//   analyticsMetricSnapshots AnalyticsMetricSnapshot[]
+//   royaltyStatements RoyaltyStatement[]
+
+model RoyaltyStatement {
+  id             String                 @id @default(cuid())
+  organizationId String
+  artistId       String?
+  periodStart    DateTime
+  periodEnd      DateTime
+  currency       String                 @default("INR")
+  grossAmount    Decimal                @default(0)
+  netAmount      Decimal                @default(0)
+  status         RoyaltyStatementStatus @default(draft)
+  source         String?
+  externalId     String?
+  metadata       Json                   @default("{}")
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  artist       Artist?           @relation(fields: [artistId], references: [id], onDelete: SetNull)
+  lineItems    RoyaltyLineItem[]
+
+  @@index([organizationId, periodStart])
+  @@index([artistId, status])
+  @@index([status])
+}
+
+model RoyaltyLineItem {
+  id          String   @id @default(cuid())
+  statementId String
+  title       String
+  platform    String?
+  streams     Int?
+  amount      Decimal
+  currency    String   @default("INR")
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now())
+
+  statement RoyaltyStatement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+
+  @@index([statementId])
+}
+
+model DistributionChannel {
+  id        String               @id @default(cuid())
+  artistId  String
+  provider  DistributionProvider @default(distrokid)
+  name      String
+  isActive  Boolean              @default(true)
+  config    Json                 @default("{}")
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  artist      Artist                   @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  submissions DistributionSubmission[]
+
+  @@index([artistId, provider])
+}
+
+model DistributionSubmission {
+  id              String                       @id @default(cuid())
+  channelId       String
+  releaseId       String?
+  title           String
+  status          DistributionSubmissionStatus @default(draft)
+  upc             String?
+  isrc            String?
+  submittedAt     DateTime?
+  liveAt          DateTime?
+  externalId      String?
+  providerPayload Json                         @default("{}")
+  createdAt       DateTime                     @default(now())
+  updatedAt       DateTime                     @updatedAt
+
+  channel DistributionChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  release Release?            @relation(fields: [releaseId], references: [id], onDelete: SetNull)
+
+  @@index([channelId, status])
+  @@index([releaseId])
+}
+
+model ReleaseTrack {
+  id          String @id @default(cuid())
+  releaseId   String
+  title       String
+  trackNumber Int    @default(1)
+  isrc        String?
+  durationSec Int?
+  metadata    Json   @default("{}")
+
+  release Release @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+
+  @@index([releaseId])
+}
+
+model ContentAsset {
+  id         String           @id @default(cuid())
+  artistId   String
+  releaseId  String?
+  title      String
+  assetType  ContentAssetType @default(other)
+  mimeType   String?
+  storageKey String?
+  url        String?
+  sizeBytes  Int?
+  metadata   Json             @default("{}")
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  artist  Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  release Release? @relation(fields: [releaseId], references: [id], onDelete: SetNull)
+
+  @@index([artistId])
+  @@index([releaseId])
+}
+
+model ContentItem {
+  id          String            @id @default(cuid())
+  artistId    String
+  title       String
+  body        String?
+  status      ContentItemStatus @default(draft)
+  publishedAt DateTime?
+  metadata    Json              @default("{}")
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@index([artistId, status])
+}
+
+model IntegrationConnection {
+  id                String                      @id @default(cuid())
+  organizationId    String?
+  provider          IntegrationProvider
+  status            IntegrationConnectionStatus @default(disconnected)
+  externalAccountId String?
+  scopes            String[]                    @default([])
+  tokenStub         Json                        @default("{}")
+  lastSyncAt        DateTime?
+  metadata          Json                        @default("{}")
+  createdAt         DateTime                    @default(now())
+  updatedAt         DateTime                    @updatedAt
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@index([provider, status])
+  @@index([organizationId])
+}
+
+model AnalyticsMetricSnapshot {
+  id             String   @id @default(cuid())
+  organizationId String?
+  metricKey      String
+  periodStart    DateTime
+  periodEnd      DateTime
+  value          Decimal  @default(0)
+  dimensions     Json     @default("{}")
+  createdAt      DateTime @default(now())
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@index([metricKey, periodStart])
+  @@index([organizationId, metricKey])
+}

@@ -58,6 +58,8 @@
                     "migrate:coreknot:mongo":  "node scripts/coreknot/migrate-mongo-to-tsc.mjs --dry-run",
                     "migrate:coreknot:p0":  "node scripts/migrations/coreknot/run-p0.mjs",
                     "migrate:coreknot:p0:execute":  "node scripts/migrations/coreknot/run-p0.mjs --execute",
+                    "migrate:coreknot:p1":  "node scripts/migrations/coreknot/run-p1.mjs",
+                    "migrate:coreknot:p1:execute":  "node scripts/migrations/coreknot/run-p1.mjs --execute",
                     "sync:coreknot:prod-local":  "pnpm --filter @tsc/coreknot-server sync-db",
                     "dev:website":  "pnpm --filter @tsc/website dev",
                     "dev:stack:community":  "powershell -ExecutionPolicy Bypass -File scripts/dev-community.ps1",
@@ -76,6 +78,8 @@
                     "sweep:prod":  "powershell -ExecutionPolicy Bypass -File scripts/sweep-prod.ps1",
                     "start:prod":  "pnpm --filter @tsc/api start:prod",
                     "migrate:coreknot:count-parity":  "node e2e/migration/count-parity.mjs",
+                    "migrate:coreknot:verify-cutover":  "node scripts/migrations/coreknot/verify-cutover.mjs",
+                    "migrate:coreknot:verify-cutover:ping":  "node scripts/migrations/coreknot/verify-cutover.mjs --ping",
                     "coreknot:migrate:export-users":  "node scripts/migrations/coreknot/export-users-json.mjs",
                     "coreknot:migrate:seed-auth":  "node scripts/migrations/coreknot/load-legacy-auth.mjs"
                 },

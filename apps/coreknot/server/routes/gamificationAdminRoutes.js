@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const GamificationConfig = require('../models/GamificationConfig');
+const gamificationRepository = require('../repositories/gamificationRepository');
 const GamificationService = require('../services/gamificationService');
 const logger = require('../utils/logger');
 const { protect, requirePageAccess } = require('../middleware/authMiddleware');
@@ -53,9 +53,10 @@ router.get('/config', protect, gamificationAccess, async (req, res) => {
 router.put('/config', protect, gamificationAccess, validateBody(gamificationConfigBody), async (req, res) => {
   try {
     const updates = req.body;
-    let config = await GamificationConfig.findOne().sort({ updatedAt: -1 });
+    const configRows = await gamificationRepository.find({}).sort({ updatedAt: -1 }).limit(1);
+    let config = Array.isArray(configRows) ? configRows[0] : configRows;
     if (!config) {
-      config = new GamificationConfig();
+      config = await gamificationRepository.create({});
     }
 
     const changedFields = [];

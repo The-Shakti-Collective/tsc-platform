@@ -18,17 +18,19 @@
   },
   "scripts": {
     "build": "prisma generate && tsc",
-    "prisma:generate": "prisma generate",
+    "prisma:generate": "pnpm exec prisma generate",
     "prisma:validate": "prisma validate",
     "lint": "eslint src --max-warnings 0",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "seed:dev-user": "tsx scripts/seed-dev-user.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.0.0"
   },
   "devDependencies": {
     "prisma": "^6.0.0",
+    "tsx": "^4.19.0",
     "typescript": "^5.7.0",
     "@types/node": "^22.0.0"
   }

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { protect, requirePageAccess } = require('../middleware/authMiddleware');
 const { isAdminUser } = require('../utils/departmentPermissions');
-const CalendarEvent = require('../models/CalendarEvent');
+const calendarRepository = require('../repositories/calendarRepository');
 const { seedMusicContentCalendar } = require('../services/musicCalendarSeedService');
 const Task = require('../models/Task');
 const TaskAssignment = require('../models/TaskAssignment');
@@ -67,8 +67,7 @@ router.get('/', validateQuery(calendarQuery), async (req, res) => {
       ],
     };
 
-    const events = await CalendarEvent.find(eventQuery)
-      .setOptions({ bypassTenant: true })
+    const events = await calendarRepository.find(eventQuery, { bypass: true })
       .populate('createdBy', 'name avatar')
       .populate('projectId', 'name workspace')
       .lean();
@@ -188,7 +187,7 @@ router.post('/', validateBody(calendarEventBody), async (req, res) => {
     const { start: eventDateTime, end: eventEndDateTime } = rangeCheck;
 
     const resolvedType = eventType || 'event';
-    const event = await CalendarEvent.create({
+    const event = await calendarRepository.create({
       title,
       description: description || '',
       date: eventDateTime,
@@ -201,7 +200,7 @@ router.post('/', validateBody(calendarEventBody), async (req, res) => {
       createdBy: req.user._id,
     });
 
-    const populated = await CalendarEvent.findById(event._id)
+    const populated = await calendarRepository.findById(event._id)
       .populate('createdBy', 'name avatar')
       .populate('projectId', 'name workspace');
 
@@ -261,7 +260,7 @@ router.post('/', validateBody(calendarEventBody), async (req, res) => {
 // PUT /api/calendar/:id — update event (only owner)
 router.put('/:id', validateBody(calendarEventBody), async (req, res) => {
   try {
-    const event = await CalendarEvent.findById(req.params.id);
+    const event = await calendarRepository.findById(req.params.id);
     if (!event) return res.status(404).json({ error: 'Event not found' });
     if (event.createdBy.toString() !== req.user._id.toString()) {
       return res.status(403).json({ error: 'Not authorized to edit this event' });
@@ -305,7 +304,7 @@ router.put('/:id', validateBody(calendarEventBody), async (req, res) => {
     }
 
     await event.save();
-    const populated = await CalendarEvent.findById(event._id)
+    const populated = await calendarRepository.findById(event._id)
       .populate('createdBy', 'name avatar')
       .populate('projectId', 'name workspace');
     const populatedObj = populated.toObject();
@@ -320,7 +319,7 @@ router.put('/:id', validateBody(calendarEventBody), async (req, res) => {
 // DELETE /api/calendar/:id — delete event (only owner or admin)
 router.delete('/:id', async (req, res) => {
   try {
-    const event = await CalendarEvent.findById(req.params.id);
+    const event = await calendarRepository.findById(req.params.id);
     if (!event) return res.status(404).json({ error: 'Event not found' });
 
     const isOwner = event.createdBy.toString() === req.user._id.toString();
@@ -329,7 +328,7 @@ router.delete('/:id', async (req, res) => {
       return res.status(403).json({ error: 'Not authorized to delete this event' });
     }
 
-    await CalendarEvent.findByIdAndDelete(req.params.id);
+    await calendarRepository.deleteOne({ _id: req.params.id });
     res.json({ message: 'Event deleted' });
   } catch (err) {
     console.error('Error deleting calendar event:', err);

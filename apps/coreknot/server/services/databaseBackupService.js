@@ -114,10 +114,15 @@ const getRetentionCount = () => {
 
 const getBackupDestination = () => {
   const explicit = String(process.env.BACKUP_DESTINATION || '').trim().toLowerCase();
+  if (explicit === 'neon' || explicit === 'none') {
+    return 'neon';
+  }
   if (explicit === 'mongo' || explicit === 'supabase' || explicit === 'both') {
     return explicit;
   }
   try {
+    const { useNeonBackupStrategy } = require('../infrastructure/postgres/migrationProfile');
+    if (useNeonBackupStrategy()) return 'neon';
     const { isSupabaseEnabled } = require('../config/supabase');
     return isSupabaseEnabled() ? 'supabase' : 'mongo';
   } catch {
@@ -298,6 +303,20 @@ const runDailyBackup = async () => {
   let connection;
 
   resetBackupProgress(snapshotDate);
+
+  if (destination === 'neon') {
+    const result = {
+      success: true,
+      skipped: true,
+      destination: 'neon',
+      snapshotDate,
+      message: 'Mongo/Supabase backup skipped — use Neon point-in-time recovery (PITR) and optional R2 cold archive.',
+      durationMs: Date.now() - startedAt,
+    };
+    finishBackupProgress(result);
+    logger.info('DatabaseBackup', result.message, { snapshotDate });
+    return result;
+  }
 
   try {
     const sourceUri = getSourceUri();

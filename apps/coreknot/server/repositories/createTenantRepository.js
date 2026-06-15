@@ -50,6 +50,20 @@ function createTenantRepository(Model) {
     findByIdAndUpdate(id, update, options = {}) {
       return this.findOneAndUpdate({ _id: id }, update, options);
     },
+
+    deleteOne(filter, options = {}) {
+      return applyToQuery(
+        Model.deleteOne(withTenantFilter(filter, options)),
+        options,
+      );
+    },
+
+    deleteMany(filter, options = {}) {
+      return applyToQuery(
+        Model.deleteMany(withTenantFilter(filter, options)),
+        options,
+      );
+    },
   };
 }
 

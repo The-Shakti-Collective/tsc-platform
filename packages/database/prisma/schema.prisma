@@ -69,46 +69,46 @@ enum BrandBudgetRange {
 }
 
 model Relationship {
-  id                 String           @id
-  sourceEntityType   GraphEntityType
-  sourceEntityId     String
-  targetEntityType   GraphEntityType
-  targetEntityId     String
-  relationshipType   RelationshipType
-  strength           Float?
-  weight             Float?
-  metadata           Json             @default("{}")
-  effectiveFrom      DateTime?
-  effectiveTo        DateTime?
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
+  id               String           @id
+  sourceEntityType GraphEntityType
+  sourceEntityId   String
+  targetEntityType GraphEntityType
+  targetEntityId   String
+  relationshipType RelationshipType
+  strength         Float?
+  weight           Float?
+  metadata         Json             @default("{}")
+  effectiveFrom    DateTime?
+  effectiveTo      DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
+  @@unique([sourceEntityType, sourceEntityId, targetEntityType, targetEntityId, relationshipType])
   @@index([sourceEntityType, sourceEntityId])
   @@index([targetEntityType, targetEntityId])
   @@index([relationshipType])
   @@index([effectiveFrom, effectiveTo])
-  @@unique([sourceEntityType, sourceEntityId, targetEntityType, targetEntityId, relationshipType])
 }
 
 model Brand {
-  id           String            @id @default(cuid())
-  name         String
-  industry     String?
-  website      String?
-  city         String?
-  country      String?
-  logo         String?
-  description  String?
-  budgetRange  BrandBudgetRange?
-  categories   String[]          @default([])
-  verified     Boolean           @default(false)
-  status       BrandStatus       @default(active)
-  trustScore   Float?
-  personId     String?
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  id          String            @id @default(cuid())
+  name        String
+  industry    String?
+  website     String?
+  city        String?
+  country     String?
+  logo        String?
+  description String?
+  budgetRange BrandBudgetRange?
+  categories  String[]          @default([])
+  verified    Boolean           @default(false)
+  status      BrandStatus       @default(active)
+  trustScore  Float?
+  personId    String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 
-  owner         Person?        @relation("BrandOwner", fields: [personId], references: [id], onDelete: SetNull)
+  owner         Person?       @relation("BrandOwner", fields: [personId], references: [id], onDelete: SetNull)
   opportunities Opportunity[]
   deals         Deal[]
   contracts     Contract[]
@@ -129,7 +129,7 @@ model Agency {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  contact       Person?        @relation("AgencyContact", fields: [personId], references: [id], onDelete: SetNull)
+  contact       Person?       @relation("AgencyContact", fields: [personId], references: [id], onDelete: SetNull)
   opportunities Opportunity[]
   deals         Deal[]
 
@@ -411,46 +411,56 @@ model Person {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  mergedInto                Person?                    @relation("PersonMerge", fields: [mergedIntoId], references: [id], onDelete: SetNull)
-  mergedFrom                Person[]                   @relation("PersonMerge")
-  profile                   PersonProfile?
-  identifiers               PersonIdentifier[]
-  roles                     PersonRole[]
-  mergeLogs                 IdentityMergeLog[]         @relation("MergeSurvivor")
-  verificationRequests      PersonVerificationRequest[]
-  activities                Activity[]                 @relation("PersonActivities")
-  following                 PersonFollow[]             @relation("PersonFollowing")
-  followers                 PersonFollow[]             @relation("PersonFollowers")
-  communityMemberships      CommunityMember[]
-  eventParticipations       EventParticipation[]
-  communityPosts            CommunityPost[]
-  collaborationsCreated     Collaboration[]            @relation("CollaborationCreator")
-  collaborationApplications CollaborationApplication[] @relation("CollaborationApplicant")
-  opportunityApplications   OpportunityApplication[]
-  ecosystemCredit           EcosystemCredit?
-  artist                    Artist?
-  fanProfile                FanProfile?
-  artistFollows             ArtistFollow[]
-  superfanSnapshots         SuperfanSnapshot[]
-  membershipSubscriptions   MembershipSubscription[]
-  rewardRedemptions         RewardRedemption[]
-  supportActions            SupportAction[]
-  fanPurchases              FanPurchase[]
-  agentRecommendations      AgentRecommendation[]      @relation("AgentRecommendationsForPerson")
-  automationRuns            AutomationRun[]
-  brandsOwned               Brand[]                    @relation("BrandOwner")
-  agenciesLed               Agency[]                   @relation("AgencyContact")
-  bookingRequests           BookingRequest[]           @relation("BookingRequestRequester")
-  payouts                   Payout[]
-  ownedWorkspaces           Workspace[]                @relation("WorkspaceOwner")
-  workspaceMembers          WorkspaceMember[]
-  projectMembers            ProjectMember[]
-  createdTasks              Task[]                     @relation("TaskCreator")
-  taskAssignees             TaskAssignee[]
-  taskComments              TaskComment[]
-  generatedOpportunitiesApproved GeneratedOpportunity[] @relation("GeneratedOpportunityApprovedBy")
-  creativeIdentity             CreativeIdentity?
-  skillEndorsementsGiven       SkillEndorsement[]     @relation("SkillEndorsementsGiven")
+  mergedInto                     Person?                     @relation("PersonMerge", fields: [mergedIntoId], references: [id], onDelete: SetNull)
+  mergedFrom                     Person[]                    @relation("PersonMerge")
+  profile                        PersonProfile?
+  identifiers                    PersonIdentifier[]
+  roles                          PersonRole[]
+  mergeLogs                      IdentityMergeLog[]          @relation("MergeSurvivor")
+  verificationRequests           PersonVerificationRequest[]
+  activities                     Activity[]                  @relation("PersonActivities")
+  following                      PersonFollow[]              @relation("PersonFollowing")
+  followers                      PersonFollow[]              @relation("PersonFollowers")
+  communityMemberships           CommunityMember[]
+  eventParticipations            EventParticipation[]
+  communityPosts                 CommunityPost[]
+  collaborationsCreated          Collaboration[]             @relation("CollaborationCreator")
+  collaborationApplications      CollaborationApplication[]  @relation("CollaborationApplicant")
+  opportunityApplications        OpportunityApplication[]
+  ecosystemCredit                EcosystemCredit?
+  artist                         Artist?
+  fanProfile                     FanProfile?
+  artistFollows                  ArtistFollow[]
+  superfanSnapshots              SuperfanSnapshot[]
+  membershipSubscriptions        MembershipSubscription[]
+  rewardRedemptions              RewardRedemption[]
+  supportActions                 SupportAction[]
+  fanPurchases                   FanPurchase[]
+  agentRecommendations           AgentRecommendation[]       @relation("AgentRecommendationsForPerson")
+  automationRuns                 AutomationRun[]
+  brandsOwned                    Brand[]                     @relation("BrandOwner")
+  agenciesLed                    Agency[]                    @relation("AgencyContact")
+  bookingRequests                BookingRequest[]            @relation("BookingRequestRequester")
+  payouts                        Payout[]
+  ownedWorkspaces                Workspace[]                 @relation("WorkspaceOwner")
+  workspaceMembers               WorkspaceMember[]
+  projectMembers                 ProjectMember[]
+  createdTasks                   Task[]                      @relation("TaskCreator")
+  taskAssignees                  TaskAssignee[]
+  taskComments                   TaskComment[]
+  generatedOpportunitiesApproved GeneratedOpportunity[]      @relation("GeneratedOpportunityApprovedBy")
+  creativeIdentity               CreativeIdentity?
+  skillEndorsementsGiven         SkillEndorsement[]          @relation("SkillEndorsementsGiven")
+  userAccount                    User?
+  platformIdentity               Identity?
+  organizationMemberships        OrganizationMember[]
+  organizationTeamsLed           OrganizationTeam[]          @relation("OrganizationTeamLead")
+  organizationTeamMemberships    OrganizationTeamMember[]
+  assignedLeads                  Lead[]                      @relation("LeadAssignee")
+  assignedInquiries              Inquiry[]                   @relation("InquiryAssignee")
+  sentMessages                   Message[]                   @relation("MessageSender")
+  notifications                  Notification[]              @relation("NotificationRecipient")
+  auditLogs                      AuditLog[]                  @relation("AuditActor")
 
   @@index([mergedIntoId])
   @@index([email])
@@ -711,8 +721,8 @@ model Artist {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  person       Person?                  @relation(fields: [personId], references: [id], onDelete: SetNull)
-  passport     ArtistPassport?
+  person                  Person?                  @relation(fields: [personId], references: [id], onDelete: SetNull)
+  passport                ArtistPassport?
   followers               ArtistFollow[]
   communities             Community[]
   events                  Event[]
@@ -726,6 +736,13 @@ model Artist {
   bookingRequests         BookingRequest[]
   contracts               Contract[]
   payouts                 Payout[]
+  inquiries               Inquiry[]
+  gigs                    Gig[]
+  releases                Release[]
+  contentAssets           ContentAsset[]
+  contentItems            ContentItem[]
+  distributionChannels    DistributionChannel[]
+  royaltyStatements       RoyaltyStatement[]
 
   @@index([personId])
 }
@@ -775,14 +792,14 @@ model Community {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  artist    Artist?                         @relation(fields: [artistId], references: [id], onDelete: SetNull)
-  members   CommunityMember[]
-  posts     CommunityPost[]
-  snapshots         CommunityIntelligenceSnapshot[]
-  audienceSnapshots CommunityAudienceSnapshot[]
+  artist             Artist?                         @relation(fields: [artistId], references: [id], onDelete: SetNull)
+  members            CommunityMember[]
+  posts              CommunityPost[]
+  snapshots          CommunityIntelligenceSnapshot[]
+  audienceSnapshots  CommunityAudienceSnapshot[]
   membershipPrograms Membership[]
   commerceProducts   CommerceProduct[]
-  automationRuns    AutomationRun[]
+  automationRuns     AutomationRun[]
 
   @@index([city])
 }
@@ -1113,8 +1130,8 @@ model Event {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  artist                Artist?                       @relation(fields: [artistId], references: [id], onDelete: SetNull)
-  venue                 Venue?                        @relation(fields: [venueId], references: [id], onDelete: SetNull)
+  artist                Artist?                     @relation(fields: [artistId], references: [id], onDelete: SetNull)
+  venue                 Venue?                      @relation(fields: [venueId], references: [id], onDelete: SetNull)
   participations        EventParticipation[]
   intelligenceSnapshots EventIntelligenceSnapshot[]
   tickets               Ticket[]
@@ -1124,19 +1141,19 @@ model Event {
 }
 
 model EventIntelligenceSnapshot {
-  id                    String   @id @default(cuid())
-  eventId               String
-  snapshotDate          DateTime @default(now())
-  predictedAttendance   Float?
-  actualAttendance      Float    @default(0)
-  predictedRevenueStub  Float?
-  actualRevenueStub     Float    @default(0)
-  conversionRate        Float    @default(0)
-  audienceGrowthImpact  Float    @default(0)
-  communityImpact       Float    @default(0)
-  fanDensityByCity      Json     @default("{}")
-  metrics               Json     @default("{}")
-  createdAt             DateTime @default(now())
+  id                   String   @id @default(cuid())
+  eventId              String
+  snapshotDate         DateTime @default(now())
+  predictedAttendance  Float?
+  actualAttendance     Float    @default(0)
+  predictedRevenueStub Float?
+  actualRevenueStub    Float    @default(0)
+  conversionRate       Float    @default(0)
+  audienceGrowthImpact Float    @default(0)
+  communityImpact      Float    @default(0)
+  fanDensityByCity     Json     @default("{}")
+  metrics              Json     @default("{}")
+  createdAt            DateTime @default(now())
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
@@ -1211,11 +1228,32 @@ model CollaborationApplication {
 }
 
 model Organization {
-  id   String @id @default(cuid())
-  name String
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  type      String?
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  opportunities Opportunity[]
-  apiKeys       ApiKey[]
+  members                  OrganizationMember[]
+  teams                    OrganizationTeam[]
+  leads                    Lead[]
+  inquiries                Inquiry[]
+  gigs                     Gig[]
+  expenses                 Expense[]
+  releases                 Release[]
+  listings                 MarketplaceListing[]
+  messages                 Message[]
+  notifications            Notification[]
+  auditLogs                AuditLog[]
+  opportunities            Opportunity[]
+  apiKeys                  ApiKey[]
+  royaltyStatements        RoyaltyStatement[]
+  integrationConnections   IntegrationConnection[]
+  analyticsMetricSnapshots AnalyticsMetricSnapshot[]
+
+  @@index([type])
 }
 
 enum MarketplaceListingType {
@@ -1236,37 +1274,38 @@ enum MarketplaceOwnerType {
 }
 
 model Opportunity {
-  id                 String                   @id @default(cuid())
+  id                 String                  @id @default(cuid())
   title              String
   category           OpportunityCategory
   city               String?
   deadline           DateTime?
-  status             String                   @default("open")
+  status             String                  @default("open")
   value              Decimal?
   source             String?
   organizationId     String?
-  marketplaceVisible Boolean                  @default(true)
+  marketplaceVisible Boolean                 @default(true)
   listingType        MarketplaceListingType?
   ownerType          MarketplaceOwnerType?
   ownerId            String?
   budget             Decimal?
-  requirements       String[]                 @default([])
+  requirements       String[]                @default([])
   genre              String?
   brandId            String?
   agencyId           String?
-  metadata           Json                     @default("{}")
-  createdAt          DateTime                 @default(now())
-  updatedAt          DateTime                 @updatedAt
+  metadata           Json                    @default("{}")
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
 
-  organization Organization?            @relation(fields: [organizationId], references: [id], onDelete: SetNull)
-  brand        Brand?                   @relation(fields: [brandId], references: [id], onDelete: SetNull)
-  agency       Agency?                  @relation(fields: [agencyId], references: [id], onDelete: SetNull)
-  applications OpportunityApplication[]
-  activities   OpportunityActivity[]
-  deals        Deal[]
-  automationRuns AutomationRun[]
-  bookingRequests BookingRequest[]
-  generatedFrom  GeneratedOpportunity[]
+  organization       Organization?            @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  brand              Brand?                   @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  agency             Agency?                  @relation(fields: [agencyId], references: [id], onDelete: SetNull)
+  applications       OpportunityApplication[]
+  activities         OpportunityActivity[]
+  deals              Deal[]
+  automationRuns     AutomationRun[]
+  bookingRequests    BookingRequest[]
+  generatedFrom      GeneratedOpportunity[]
+  marketplaceListing MarketplaceListing?
 
   @@index([category, status])
   @@index([city])
@@ -1329,16 +1368,16 @@ model Deal {
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
 
-  opportunity Opportunity             @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
-  application OpportunityApplication? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
-  artist      Artist                  @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  brand       Brand?                  @relation(fields: [brandId], references: [id], onDelete: SetNull)
-  agency      Agency?                 @relation(fields: [agencyId], references: [id], onDelete: SetNull)
-  revenue     RevenueTransaction[]
+  opportunity     Opportunity             @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  application     OpportunityApplication? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  artist          Artist                  @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  brand           Brand?                  @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  agency          Agency?                 @relation(fields: [agencyId], references: [id], onDelete: SetNull)
+  revenue         RevenueTransaction[]
   bookingRequests BookingRequest[]
-  contracts   Contract[]
-  invoices    Invoice[]
-  escrows     Escrow[]
+  contracts       Contract[]
+  invoices        Invoice[]
+  escrows         Escrow[]
 
   @@index([artistId, status])
   @@index([brandId, status])
@@ -1838,18 +1877,18 @@ enum TscVerificationBadge {
 }
 
 model TscIdentity {
-  id            String                 @id @default(cuid())
+  id            String                @id @default(cuid())
   entityType    TscIdentityEntityType
   entityId      String
   namespace     TscIdentityNamespace
   slug          String
   canonicalUrl  String
-  isPublic      Boolean                @default(true)
+  isPublic      Boolean               @default(true)
   verifiedBadge TscVerificationBadge?
   verifiedAt    DateTime?
-  metadata      Json                   @default("{}")
-  createdAt     DateTime               @default(now())
-  updatedAt     DateTime               @updatedAt
+  metadata      Json                  @default("{}")
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
 
   @@unique([namespace, slug])
   @@unique([entityType, entityId, namespace])
@@ -2096,10 +2135,10 @@ model ApiKey {
   createdAt  DateTime  @default(now())
   lastUsedAt DateTime?
 
-  ownerOrg              Organization?           @relation(fields: [ownerOrgId], references: [id], onDelete: SetNull)
-  whiteLabelTenant      WhiteLabelTenant?
-  webhookSubscriptions  WebhookSubscription[]
-  dataExchangePartner   DataExchangePartner?
+  ownerOrg             Organization?         @relation(fields: [ownerOrgId], references: [id], onDelete: SetNull)
+  whiteLabelTenant     WhiteLabelTenant?
+  webhookSubscriptions WebhookSubscription[]
+  dataExchangePartner  DataExchangePartner?
 
   @@index([ownerOrgId])
   @@index([isActive])
@@ -2565,4 +2604,675 @@ model SkillEndorsement {
   @@index([creativeIdentityId])
   @@index([skillId])
   @@index([endorserPersonId])
+}
+
+// ── CoreKnot domain backend Phases 1–3 ──────────────────────────────────────
+
+enum PlatformRole {
+  SUPER_ADMIN
+  ORG_OWNER
+  MANAGER
+  ARTIST
+  TEAM_MEMBER
+  CLIENT
+  FAN
+}
+
+enum LeadPipelineStage {
+  new
+  contacted
+  qualified
+  proposal
+  won
+  lost
+}
+
+enum InquiryStatus {
+  open
+  in_progress
+  resolved
+  closed
+}
+
+enum GigStatus {
+  tentative
+  confirmed
+  completed
+  cancelled
+}
+
+enum ExpenseStatus {
+  draft
+  approved
+  paid
+  void
+}
+
+enum ReleaseStatus {
+  draft
+  scheduled
+  released
+  archived
+}
+
+enum RoyaltyStatus {
+  pending
+  accrued
+  paid
+}
+
+enum MarketplaceListingStatus {
+  draft
+  active
+  paused
+  closed
+}
+
+enum DomainNotificationType {
+  system
+  inquiry
+  gig
+  invoice
+  message
+}
+
+enum AuditAction {
+  create
+  update
+  delete
+  status_change
+}
+
+model User {
+  id           String       @id @default(cuid())
+  clerkUserId  String       @unique
+  personId     String       @unique
+  platformRole PlatformRole @default(TEAM_MEMBER)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([platformRole])
+}
+
+model Identity {
+  id          String   @id @default(cuid())
+  personId    String   @unique
+  displayName String?
+  avatarUrl   String?
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+}
+
+model OrganizationMember {
+  id             String       @id @default(cuid())
+  organizationId String
+  personId       String
+  role           PlatformRole
+  status         String       @default("active")
+  joinedAt       DateTime     @default(now())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  person       Person       @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, personId])
+  @@index([personId, status])
+  @@index([organizationId, role])
+}
+
+model OrganizationTeam {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  slug           String
+  description    String?
+  leadPersonId   String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead         Person?                  @relation("OrganizationTeamLead", fields: [leadPersonId], references: [id], onDelete: SetNull)
+  members      OrganizationTeamMember[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@index([leadPersonId])
+}
+
+model OrganizationTeamMember {
+  id       String   @id @default(cuid())
+  teamId   String
+  personId String
+  role     String   @default("member")
+  joinedAt DateTime @default(now())
+
+  team   OrganizationTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  person Person           @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, personId])
+  @@index([personId])
+}
+
+model Lead {
+  id               String            @id @default(cuid())
+  organizationId   String
+  name             String
+  email            String?
+  phone            String?
+  source           String?
+  stage            LeadPipelineStage @default(new)
+  assignedPersonId String?
+  notes            String?
+  metadata         Json              @default("{}")
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignee     Person?      @relation("LeadAssignee", fields: [assignedPersonId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, stage])
+  @@index([assignedPersonId])
+}
+
+model Inquiry {
+  id               String        @id @default(cuid())
+  organizationId   String
+  subject          String
+  body             String?
+  status           InquiryStatus @default(open)
+  contactName      String?
+  contactEmail     String?
+  artistId         String?
+  assignedPersonId String?
+  metadata         Json          @default("{}")
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  artist       Artist?      @relation(fields: [artistId], references: [id], onDelete: SetNull)
+  assignee     Person?      @relation("InquiryAssignee", fields: [assignedPersonId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status])
+  @@index([artistId])
+  @@index([assignedPersonId])
+}
+
+model Gig {
+  id             String    @id @default(cuid())
+  organizationId String
+  artistId       String?
+  title          String
+  venue          String?
+  city           String?
+  startsAt       DateTime
+  endsAt         DateTime?
+  status         GigStatus @default(tentative)
+  fee            Decimal?
+  currency       String    @default("INR")
+  notes          String?
+  metadata       Json      @default("{}")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  artist       Artist?      @relation(fields: [artistId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, startsAt])
+  @@index([artistId, startsAt])
+  @@index([status])
+}
+
+model Expense {
+  id             String        @id @default(cuid())
+  organizationId String
+  title          String
+  amount         Decimal
+  currency       String        @default("INR")
+  status         ExpenseStatus @default(draft)
+  category       String?
+  incurredAt     DateTime?
+  metadata       Json          @default("{}")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([incurredAt])
+}
+
+model Release {
+  id             String        @id @default(cuid())
+  organizationId String
+  artistId       String?
+  title          String
+  type           String?
+  releaseDate    DateTime?
+  status         ReleaseStatus @default(draft)
+  upc            String?
+  isrc           String?
+  distributor    String?
+  dspLinks       Json          @default("[]")
+  campaignNotes  String?
+  metadata       Json          @default("{}")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization            Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  artist                  Artist?                  @relation(fields: [artistId], references: [id], onDelete: SetNull)
+  royalties               Royalty[]
+  tracks                  ReleaseTrack[]
+  distributionSubmissions DistributionSubmission[]
+  contentAssets           ContentAsset[]
+
+  @@index([organizationId, status])
+  @@index([artistId])
+  @@index([releaseDate])
+}
+
+model Royalty {
+  id          String        @id @default(cuid())
+  releaseId   String
+  amount      Decimal
+  currency    String        @default("INR")
+  periodStart DateTime?
+  periodEnd   DateTime?
+  status      RoyaltyStatus @default(pending)
+  metadata    Json          @default("{}")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  release Release @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+
+  @@index([releaseId, status])
+}
+
+model MarketplaceListing {
+  id             String                   @id @default(cuid())
+  organizationId String?
+  title          String
+  description    String?
+  listingType    MarketplaceListingType?
+  status         MarketplaceListingStatus @default(draft)
+  price          Decimal?
+  currency       String                   @default("INR")
+  opportunityId  String?                  @unique
+  metadata       Json                     @default("{}")
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  opportunity  Opportunity?  @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status])
+  @@index([listingType, status])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  organizationId String?
+  threadId       String
+  senderPersonId String
+  body           String
+  metadata       Json     @default("{}")
+  sentAt         DateTime @default(now())
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  sender       Person        @relation("MessageSender", fields: [senderPersonId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, sentAt(sort: Desc)])
+  @@index([organizationId])
+  @@index([senderPersonId])
+}
+
+model Notification {
+  id                String                 @id @default(cuid())
+  organizationId    String?
+  recipientPersonId String
+  type              DomainNotificationType
+  title             String
+  body              String?
+  readAt            DateTime?
+  metadata          Json                   @default("{}")
+  createdAt         DateTime               @default(now())
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  recipient    Person        @relation("NotificationRecipient", fields: [recipientPersonId], references: [id], onDelete: Cascade)
+
+  @@index([recipientPersonId, readAt])
+  @@index([organizationId, createdAt(sort: Desc)])
+}
+
+model AuditLog {
+  id             String      @id @default(cuid())
+  organizationId String?
+  actorPersonId  String?
+  entityType     String
+  entityId       String
+  action         AuditAction
+  changes        Json        @default("{}")
+  createdAt      DateTime    @default(now())
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  actor        Person?       @relation("AuditActor", fields: [actorPersonId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt(sort: Desc)])
+  @@index([entityType, entityId])
+  @@index([actorPersonId])
+}
+
+// ── CoreKnot domain backend Phases 4–5 ──────────────────────────────────────
+
+enum RoyaltyStatementStatus {
+  draft
+  pending
+  reconciled
+  paid
+}
+
+enum DistributionProvider {
+  distrokid
+  manual
+  other
+}
+
+enum DistributionSubmissionStatus {
+  draft
+  submitted
+  processing
+  live
+  failed
+  cancelled
+}
+
+enum ContentAssetType {
+  audio
+  video
+  image
+  document
+  other
+}
+
+enum ContentItemStatus {
+  draft
+  published
+  archived
+}
+
+enum IntegrationProvider {
+  google
+  meta
+  spotify
+  youtube
+  distrokid
+  resend
+  other
+}
+
+enum IntegrationConnectionStatus {
+  disconnected
+  pending
+  connected
+  error
+}
+
+model RoyaltyStatement {
+  id             String                 @id @default(cuid())
+  organizationId String
+  artistId       String?
+  periodStart    DateTime
+  periodEnd      DateTime
+  currency       String                 @default("INR")
+  grossAmount    Decimal                @default(0)
+  netAmount      Decimal                @default(0)
+  status         RoyaltyStatementStatus @default(draft)
+  source         String?
+  externalId     String?
+  metadata       Json                   @default("{}")
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  artist       Artist?           @relation(fields: [artistId], references: [id], onDelete: SetNull)
+  lineItems    RoyaltyLineItem[]
+
+  @@index([organizationId, periodStart])
+  @@index([artistId, status])
+  @@index([status])
+}
+
+model RoyaltyLineItem {
+  id          String   @id @default(cuid())
+  statementId String
+  title       String
+  platform    String?
+  streams     Int?
+  amount      Decimal
+  currency    String   @default("INR")
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now())
+
+  statement RoyaltyStatement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+
+  @@index([statementId])
+}
+
+model DistributionChannel {
+  id        String               @id @default(cuid())
+  artistId  String
+  provider  DistributionProvider @default(distrokid)
+  name      String
+  isActive  Boolean              @default(true)
+  config    Json                 @default("{}")
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  artist      Artist                   @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  submissions DistributionSubmission[]
+
+  @@index([artistId, provider])
+}
+
+model DistributionSubmission {
+  id              String                       @id @default(cuid())
+  channelId       String
+  releaseId       String?
+  title           String
+  status          DistributionSubmissionStatus @default(draft)
+  upc             String?
+  isrc            String?
+  submittedAt     DateTime?
+  liveAt          DateTime?
+  externalId      String?
+  providerPayload Json                         @default("{}")
+  createdAt       DateTime                     @default(now())
+  updatedAt       DateTime                     @updatedAt
+
+  channel DistributionChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  release Release?            @relation(fields: [releaseId], references: [id], onDelete: SetNull)
+
+  @@index([channelId, status])
+  @@index([releaseId])
+}
+
+model ReleaseTrack {
+  id          String  @id @default(cuid())
+  releaseId   String
+  title       String
+  trackNumber Int     @default(1)
+  isrc        String?
+  durationSec Int?
+  metadata    Json    @default("{}")
+
+  release Release @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+
+  @@index([releaseId])
+}
+
+model ContentAsset {
+  id         String           @id @default(cuid())
+  artistId   String
+  releaseId  String?
+  title      String
+  assetType  ContentAssetType @default(other)
+  mimeType   String?
+  storageKey String?
+  url        String?
+  sizeBytes  Int?
+  metadata   Json             @default("{}")
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  artist  Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  release Release? @relation(fields: [releaseId], references: [id], onDelete: SetNull)
+
+  @@index([artistId])
+  @@index([releaseId])
+}
+
+model ContentItem {
+  id          String            @id @default(cuid())
+  artistId    String
+  title       String
+  body        String?
+  status      ContentItemStatus @default(draft)
+  publishedAt DateTime?
+  metadata    Json              @default("{}")
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@index([artistId, status])
+}
+
+model IntegrationConnection {
+  id                String                      @id @default(cuid())
+  organizationId    String?
+  provider          IntegrationProvider
+  status            IntegrationConnectionStatus @default(disconnected)
+  externalAccountId String?
+  scopes            String[]                    @default([])
+  tokenStub         Json                        @default("{}")
+  lastSyncAt        DateTime?
+  metadata          Json                        @default("{}")
+  createdAt         DateTime                    @default(now())
+  updatedAt         DateTime                    @updatedAt
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@index([provider, status])
+  @@index([organizationId])
+}
+
+model AnalyticsMetricSnapshot {
+  id             String   @id @default(cuid())
+  organizationId String?
+  metricKey      String
+  periodStart    DateTime
+  periodEnd      DateTime
+  value          Decimal  @default(0)
+  dimensions     Json     @default("{}")
+  createdAt      DateTime @default(now())
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@index([metricKey, periodStart])
+  @@index([organizationId, metricKey])
+}
+
+// ── CoreKnot legacy runtime auth (transitional — pre-Clerk cutover) ─────────
+// Mirrors Mongo users/departments/tenants for local Postgres auth read path.
+// Audit fragment: packages/database/prisma/coreknot-legacy-auth.prisma
+
+model CkLegacyTenant {
+  id           String   @id
+  name         String
+  domain       String?  @unique
+  contactEmail String?
+  metadata     Json     @default("{}")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  departments CkLegacyDepartment[]
+  users       CkLegacyStaffUser[]
+
+  @@map("ck_legacy_tenants")
+}
+
+model CkLegacyDepartment {
+  id               String   @id
+  tenantId         String
+  name             String
+  slug             String
+  color            String   @default("#3b82f6")
+  sortOrder        Int      @default(0)
+  signupAllowed    Boolean  @default(true)
+  permissionPreset String   @default("standard")
+  pagePermissions  String[] @default([])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  tenant CkLegacyTenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  users  CkLegacyStaffUser[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@map("ck_legacy_departments")
+}
+
+model CkLegacyStaffUser {
+  id                 String    @id @default(cuid())
+  mongoId            String    @unique
+  tenantId           String
+  departmentId       String?
+  email              String    @unique
+  passwordHash       String?
+  name               String
+  avatar             String?
+  gender             String?
+  dateOfBirth        DateTime?
+  phone              String    @default("")
+  repId              String?   @unique
+  pagePermissions    String[]  @default([])
+  mustChangePassword Boolean   @default(false)
+  passwordChangedAt  DateTime?
+  googleId           String?
+  googleCalendarLinked Boolean @default(false)
+  exp                Int       @default(0)
+  level              Int       @default(1)
+  dailyStreak        Int       @default(0)
+  metadata           Json      @default("{}")
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  tenant     CkLegacyTenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  department CkLegacyDepartment? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([departmentId])
+  @@index([phone])
+  @@index([name])
+  @@map("ck_legacy_staff_users")
+}
+
+// Wave 2 transitional store — JSON payload mirror for domains without canonical Prisma models yet.
+model CkLegacyDocument {
+  id         String   @id @default(cuid())
+  entityType String
+  mongoId    String
+  tenantId   String?
+  payload    Json     @default("{}")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([entityType, mongoId])
+  @@index([tenantId, entityType])
+  @@map("ck_legacy_documents")
 }

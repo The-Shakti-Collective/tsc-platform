@@ -17,8 +17,30 @@ services:
         value: false
       - key: PORT
         value: 10000
+      # Postgres cutover (Neon primary — see docs/migration/PRODUCTION-CUTOVER.md)
+      - key: COREKNOT_POSTGRES_ENABLED
+        value: true
+      - key: COREKNOT_AUTH_STORE
+        value: postgres
+      - key: COREKNOT_TENANT_STORE
+        value: postgres
+      - key: COREKNOT_PROJECTS_STORE
+        value: postgres
+      - key: COREKNOT_TASKS_STORE
+        value: postgres
+      - key: COREKNOT_CRM_STORE
+        value: postgres
+      - key: COREKNOT_ARTISTS_STORE
+        value: postgres
+      - key: COREKNOT_DISABLE_GRIDFS_BACKUP
+        value: true
+      - key: BACKUP_DESTINATION
+        value: neon
+      - key: SUPABASE_SECONDARY_ENABLED
+        value: false
       # Set in Render Dashboard (never commit secrets):
-      # MONGODB_URI_PROD, REDIS_URL, JWT_SECRET, ENCRYPTION_KEY, RESEND_API_KEY
+      # DATABASE_URL (Neon), MONGODB_URI_PROD (parallel-run dual-write), REDIS_URL
+      # JWT_SECRET, ENCRYPTION_KEY, RESEND_API_KEY
       # SENTRY_DSN, BETTERSTACK_HEARTBEAT_URL, CORS_ALLOWED_ORIGINS
 
   - type: worker

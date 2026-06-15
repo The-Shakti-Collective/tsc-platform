@@ -87,33 +87,12 @@ function resolveBetterStackLink() {
   };
 }
 
-function resolveDatadogLink() {
-  const override = trimEnv(env.VITE_DATADOG_DASHBOARD_URL);
-  if (override) {
-    return { url: override, configured: true, showSetupBadge: false, source: 'override' };
-  }
-
-  const site = trimEnv(env.VITE_DD_SITE) || 'datadoghq.com';
-  const hasClient = !!(
-    trimEnv(env.VITE_DD_APPLICATION_ID) ||
-    trimEnv(env.VITE_DD_CLIENT_TOKEN)
-  );
-  const appHost = site.startsWith('http') ? site.replace(/\/$/, '') : `https://app.${site}`;
-
-  return {
-    url: appHost,
-    configured: hasClient,
-    showSetupBadge: !hasClient,
-    source: hasClient ? 'sdk' : 'default',
-  };
-}
-
-/** @returns {Array<{ id: string, name: string, description: string, url: string, configured: boolean, showSetupBadge: boolean }>} */
+/** @returns {Array<{ id: string, name: string, description: string, url: string, configured: boolean, showSetupBadge: boolean, setupHint?: string }>} */
 export function getObservabilityLinks() {
   const posthog = resolvePostHogLink();
   const sentry = resolveSentryLink();
   const betterstack = resolveBetterStackLink();
-  const datadog = resolveDatadogLink();
+  const devNeedsRestart = !!env.DEV;
 
   return [
     {
@@ -123,6 +102,9 @@ export function getObservabilityLinks() {
       url: sentry.url,
       configured: sentry.configured,
       showSetupBadge: sentry.showSetupBadge !== false,
+      setupHint: devNeedsRestart
+        ? 'Add VITE_SENTRY_DSN in client/.env.local, then restart Vite'
+        : 'Add VITE_SENTRY_DSN in client/.env.local',
     },
     {
       id: 'posthog',
@@ -131,6 +113,9 @@ export function getObservabilityLinks() {
       url: posthog.url,
       configured: posthog.configured,
       showSetupBadge: posthog.showSetupBadge !== false,
+      setupHint: devNeedsRestart
+        ? 'Add VITE_POSTHOG_KEY in client/.env.local, then restart Vite'
+        : 'Add VITE_POSTHOG_KEY in client/.env.local',
     },
     {
       id: 'betterstack',
@@ -139,14 +124,6 @@ export function getObservabilityLinks() {
       url: betterstack.url,
       configured: betterstack.configured,
       showSetupBadge: betterstack.showSetupBadge === true,
-    },
-    {
-      id: 'datadog',
-      name: 'Datadog',
-      description: 'APM & RUM',
-      url: datadog.url,
-      configured: datadog.configured,
-      showSetupBadge: datadog.showSetupBadge !== false,
     },
   ];
 }

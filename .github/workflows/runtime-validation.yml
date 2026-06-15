@@ -44,6 +44,36 @@ jobs:
       - name: Verify deploy bundle artifacts
         run: pnpm verify:deploy
 
+      - name: CoreKnot P0 migration dry-run
+        env:
+          MONGODB_URI: mongodb://127.0.0.1:27017/taskmaster_ci
+        run: pnpm migrate:coreknot:p0 || echo "P0 dry-run skipped (no Mongo in CI — non-blocking)"
+
+      - name: CoreKnot cutover profile validation
+        env:
+          COREKNOT_POSTGRES_ENABLED: "true"
+          COREKNOT_POSTGRES_PRIMARY: "true"
+          COREKNOT_MONGO_REQUIRED: "false"
+          COREKNOT_AUTH_STORE: postgres
+          COREKNOT_TENANT_STORE: postgres
+          COREKNOT_PROJECTS_STORE: postgres
+          COREKNOT_TASKS_STORE: postgres
+          COREKNOT_CRM_STORE: postgres
+          COREKNOT_ARTISTS_STORE: postgres
+          COREKNOT_MAIL_STORE: postgres
+          COREKNOT_DATAHUB_STORE: postgres
+          COREKNOT_ATTENDANCE_STORE: postgres
+          COREKNOT_FINANCE_STORE: postgres
+          COREKNOT_NEWSLETTER_STORE: postgres
+          COREKNOT_INTEGRATIONS_STORE: postgres
+          COREKNOT_GAMIFICATION_STORE: postgres
+          COREKNOT_CALENDAR_STORE: postgres
+          COREKNOT_NOTIFICATIONS_STORE: postgres
+          COREKNOT_DISABLE_GRIDFS_BACKUP: "true"
+          BACKUP_DESTINATION: neon
+          SUPABASE_SECONDARY_ENABLED: "false"
+        run: pnpm migrate:coreknot:verify-cutover
+
       - name: Resolve @tsc/database from deploy bundle
         working-directory: deploy
         run: |

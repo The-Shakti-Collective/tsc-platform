@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const ExlyOffering = require('../../../models/ExlyOffering');
-const ExlyBooking = require('../../../models/ExlyBooking');
+const integrationsRepository = require('../../../repositories/integrationsRepository');
 const exlyService = require('../../../services/exlyService');
 const CRMAudit = require('../../../models/CRMAudit');
 const Lead = require('../../../models/Lead');
@@ -86,7 +86,7 @@ exports.getOfferings = async (req, res) => {
       offeringId: { $nin: IGNORED_OFFERING_IDS },
     }).sort({ totalRevenue: -1 }).lean();
 
-    const bookingStats = await ExlyBooking.aggregate([
+    const bookingStats = await integrationsRepository.mongoRepo.aggregate([
       {
         $group: {
           _id: '$offeringId',
@@ -120,7 +120,7 @@ exports.getOfferings = async (req, res) => {
       .map((o) => o.offeringId);
     const inferredPriceMap = new Map();
     if (offeringsNeedingPrice.length > 0) {
-      const paidBookings = await ExlyBooking.find({
+      const paidBookings = await integrationsRepository.find({
         offeringId: { $in: offeringsNeedingPrice },
         pricePaid: { $gt: 0 },
       })
@@ -299,7 +299,7 @@ exports.handleExlyWebhook = async (req, res) => {
           ]
         };
 
-    await ExlyBooking.findOneAndUpdate(
+    await integrationsRepository.findOneAndUpdate(
       bookingQuery,
       {
         $set: {
@@ -348,7 +348,7 @@ exports.getOfferingDetails = async (req, res) => {
       return res.status(404).json({ error: 'Offering not found.' });
     }
 
-    const allBookings = await ExlyBooking.find({ offeringId }).sort({ bookedOn: -1 }).lean();
+    const allBookings = await integrationsRepository.find({ offeringId }).sort({ bookedOn: -1 }).lean();
     if ((!offering.price || offering.price <= 0) && allBookings.length > 0) {
       const inferred = inferListPriceFromBookings(allBookings);
       if (inferred > 0) {
@@ -451,7 +451,7 @@ exports.getOfferingAnalytics = async (req, res) => {
   try {
     const { offeringId } = req.params;
 
-    const bookings = await ExlyBooking.find({ offeringId }).lean();
+    const bookings = await integrationsRepository.find({ offeringId }).lean();
     const breakdown = computeBookingBreakdown(bookings);
 
     if (bookings.length === 0) {
@@ -479,7 +479,7 @@ exports.getOfferingAnalytics = async (req, res) => {
     const uniqueEmails = bookings.map((b) => b.email).filter(Boolean);
     const uniquePhones = bookings.map((b) => b.phone).filter(Boolean);
 
-    const allHistories = await ExlyBooking.find({
+    const allHistories = await integrationsRepository.find({
       $or: [
         { email: { $in: uniqueEmails } },
         { phone: { $in: uniquePhones } }
@@ -599,7 +599,7 @@ exports.updateOffering = async (req, res) => {
 
 exports.getDashboardStats = async (req, res) => {
   try {
-    const bookings = await ExlyBooking.find().sort({ bookedOn: 1 }).lean();
+    const bookings = await integrationsRepository.find().sort({ bookedOn: 1 }).lean();
     const breakdown = computeBookingBreakdown(bookings);
     const chartData = buildDailyChartData(bookings);
 
@@ -612,7 +612,7 @@ exports.getDashboardStats = async (req, res) => {
       ? Number((weightedConversion / offerings.length).toFixed(1))
       : 0;
 
-    const recentBooking = await ExlyBooking.findOne().sort({ bookedOn: -1 }).lean();
+    const recentBooking = await integrationsRepository.findOne().sort({ bookedOn: -1 }).lean();
 
     res.json({
       chartData,
@@ -634,7 +634,7 @@ exports.getDashboardStats = async (req, res) => {
 
 exports.getUnlinkedBookings = async (req, res) => {
   try {
-    const bookings = await ExlyBooking.find().sort({ bookedOn: -1 }).lean();
+    const bookings = await integrationsRepository.find().sort({ bookedOn: -1 }).lean();
     const leads = await Lead.find({}, 'email phone').lean();
     
     const leadEmails = new Set(leads.map(l => l.email?.toLowerCase().trim()).filter(Boolean));
@@ -665,7 +665,7 @@ exports.linkUnlinkedBookings = async (req, res) => {
     csvBackupService.backupAllLeadsToCsv();
 
     // 2. Fetch bookings
-    const bookings = await ExlyBooking.find({ _id: { $in: bookingIds } }).lean();
+    const bookings = await integrationsRepository.find({ _id: { $in: bookingIds } }).lean();
     if (bookings.length === 0) {
       return res.status(400).json({ error: 'No matching bookings found.' });
     }

@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const GamificationService = require('../services/gamificationService');
-const DailyMission = require('../models/DailyMission');
+const gamificationRepository = require('../repositories/gamificationRepository');
+const dailyMissionRepository = require('../repositories/dailyMissionRepository');
+const xpAuditLogRepository = require('../repositories/xpAuditLogRepository');
+const { findStaffUsersPostgres } = require('../repositories/staffUserRepository');
 const { protect } = require('../middleware/authMiddleware');
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
@@ -36,7 +39,7 @@ router.get('/missions', protect, async (req, res) => {
     await GamificationService.generateDailyMissions(req.user._id);
     await GamificationService.generateWeeklyMissions(req.user._id);
 
-    const missions = await DailyMission.find({
+    const missions = await dailyMissionRepository.find({
       userId: req.user._id,
       $or: [
         { cadence: { $ne: 'weekly' }, date: { $gte: today } },
@@ -59,8 +62,7 @@ router.get('/progress', protect, async (req, res) => {
     const currentLevelExp = await GamificationService.getExpForLevel(user.level || 1);
     const nextLevelExp = await GamificationService.getExpForLevel((user.level || 1) + 1);
 
-    const XPAuditLog = require('../models/XPAuditLog');
-    const adjustedLogCount = await XPAuditLog.countDocuments({
+    const adjustedLogCount = await xpAuditLogRepository.countDocuments({
       userId: user._id,
       $or: [
         { recalculatedAt: { $exists: true, $ne: null } },
@@ -84,24 +86,21 @@ router.get('/progress', protect, async (req, res) => {
 
 router.get('/history', protect, async (req, res) => {
   try {
-    const XPAuditLog = require('../models/XPAuditLog');
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 10));
     const skip = (page - 1) * limit;
     const config = await GamificationService.getConfigPlain();
     const userId = req.user._id;
-
     const [logs, total] = await Promise.all([
-      XPAuditLog.find({ userId })
+      xpAuditLogRepository.find({ userId })
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
-      XPAuditLog.countDocuments({ userId }),
+      xpAuditLogRepository.countDocuments({ userId }),
     ]);
 
-    const GamificationConfig = require('../models/GamificationConfig');
-    const configDoc = await GamificationConfig.findOne().select('lastRecalculatedAt').lean();
+    const configDoc = await gamificationRepository.findOne().select('lastRecalculatedAt').lean();
 
     res.json({
       logs: logs.map((log) => GamificationService.formatXpLogForApi(log, config, toSimpleMessage)),
@@ -117,21 +116,25 @@ router.get('/history', protect, async (req, res) => {
 
 router.get('/leaderboard', protect, async (req, res) => {
   try {
-    const User = require('../models/User');
-    const XPAuditLog = require('../models/XPAuditLog');
-    const GamificationConfig = require('../models/GamificationConfig');
     const weekly = await GamificationService.getWeeklyLeaderboard();
     const config = await GamificationService.getConfigPlain();
-    const configDoc = await GamificationConfig.findOne()
+    const configDoc = await gamificationRepository.findOne()
       .select('lastRecalculatedAt lastRecalcWeeklyPrior')
       .lean();
     const lastRecalculatedAt = configDoc?.lastRecalculatedAt || null;
     const weeklyPriorSnapshot = configDoc?.lastRecalcWeeklyPrior || null;
 
-    const allUsers = await User.find({}, 'name avatar exp level').sort({ name: 1 }).lean();
+    const staffPage = await findStaffUsersPostgres({ limit: 5000 }) || { rows: [] };
+    const allUsers = staffPage.rows.map((row) => ({
+      _id: row.mongoId,
+      name: row.name,
+      avatar: row.avatar,
+      exp: row.exp ?? 0,
+      level: row.level ?? 1,
+    }));
     const tenantUserIds = allUsers.map((u) => u._id);
 
-    const weekLogs = await XPAuditLog.find({
+    const weekLogs = await xpAuditLogRepository.find({
       userId: { $in: tenantUserIds },
       createdAt: { $gte: weekly.weekStart, $lte: weekly.weekEnd },
     })
@@ -251,12 +254,11 @@ router.get('/leaderboard/:userId/breakdown', protect, async (req, res) => {
       return res.status(400).json({ error: 'Invalid userId' });
     }
 
-    const XPAuditLog = require('../models/XPAuditLog');
-    const User = require('../models/User');
+    const { findStaffUserById } = require('../repositories/staffUserRepository');
     const config = await GamificationService.getConfigPlain();
     const { weekStart, weekEnd, weekStartKey, weekEndKey } = getCurrentWeekRange();
 
-    const logs = await XPAuditLog.find({
+    const logs = await xpAuditLogRepository.find({
       userId,
       createdAt: { $gte: weekStart, $lte: weekEnd },
     })
@@ -264,7 +266,16 @@ router.get('/leaderboard/:userId/breakdown', protect, async (req, res) => {
       .lean();
 
     const backfillMaps = await GamificationService.fetchHoursBackfillMaps(logs);
-    const user = await User.findById(userId, 'name avatar level xp').lean();
+    const staffUser = await findStaffUserById(userId);
+    const user = staffUser
+      ? {
+        _id: staffUser._id,
+        name: staffUser.name,
+        avatar: staffUser.avatar,
+        level: staffUser.level,
+        xp: staffUser.exp,
+      }
+      : null;
     const dedupedLogs = GamificationService.dedupeXpAuditLogsForTotals(logs);
 
     const groupedBreakdown = GamificationService.buildWeeklyGroupedBreakdown(

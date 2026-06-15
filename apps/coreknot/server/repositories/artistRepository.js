@@ -3,7 +3,12 @@ const Artist = require('../models/Artist');
 const { getTenantId } = require('../utils/tenantContext');
 const { idFilter } = require('../utils/mongoId');
 const { getPrismaClient, isPostgresArtistsEnabled } = require('../infrastructure/postgres/prismaClient');
-const { mirrorArtistFromMongo } = require('../infrastructure/postgres/postgresEntityWrites');
+const { mirrorArtistFromMongo, upsertArtistFromMongo } = require('../infrastructure/postgres/postgresEntityWrites');
+const {
+  shouldWritePostgresFirst,
+  shouldMirrorMongo,
+  asMongoDoc,
+} = require('../infrastructure/postgres/writeStrategy');
 const {
   findMappingByExternalId,
   findMappingByTscId,
@@ -230,9 +235,16 @@ async function findArtistByIdForWrite(artistId, options = {}) {
 }
 
 async function createArtist(doc, options = {}) {
+  if (shouldWritePostgresFirst(isPostgresArtistsEnabled)) {
+    const created = shouldMirrorMongo() ? await Artist.create(doc) : asMongoDoc(doc);
+    if (options.mirrorPostgres !== false) {
+      await upsertArtistFromMongo(created);
+    }
+    return created;
+  }
   const created = await Artist.create(doc);
   if (isPostgresArtistsEnabled() && options.mirrorPostgres !== false) {
-    await mirrorArtistFromMongo(created);
+    await upsertArtistFromMongo(created);
   }
   return created;
 }
@@ -240,7 +252,7 @@ async function createArtist(doc, options = {}) {
 async function saveArtist(mongoDoc, options = {}) {
   const saved = await mongoDoc.save();
   if (isPostgresArtistsEnabled() && options.mirrorPostgres !== false) {
-    await mirrorArtistFromMongo(saved);
+    await upsertArtistFromMongo(saved);
   }
   return saved;
 }
