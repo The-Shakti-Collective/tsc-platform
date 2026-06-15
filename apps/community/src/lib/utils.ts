@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { assertPlatformApiUrl } from '@/lib/platform-api-url';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -15,7 +16,7 @@ export function getApiBaseUrl(): string {
     throw new Error('NEXT_PUBLIC_API_URL or NEXT_PUBLIC_TSC_API_URL is required');
   }
 
-  return url.replace(/\/$/, '');
+  return assertPlatformApiUrl(url);
 }
 
 export function getAppBaseUrl(): string {

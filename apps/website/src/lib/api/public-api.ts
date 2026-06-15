@@ -3,11 +3,13 @@ import type {
   PublicCommunityListPayload,
   PublicEventListPayload,
 } from '@tsc/types';
+import { assertPlatformApiUrl } from '@/lib/api/platform-api-url';
 
 const API_KEY_HEADER = 'x-tsc-api-key';
 
 function getApiBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api';
+  const url = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api';
+  return assertPlatformApiUrl(url);
 }
 
 function getPublicApiKey(): string | undefined {
