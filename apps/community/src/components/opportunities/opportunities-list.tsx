@@ -1,38 +1,45 @@
 'use client';
 
 import Link from 'next/link';
+import { useAuth } from '@clerk/nextjs';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useCommunityClient } from '@/hooks/use-community-client';
-import { MOCK_OPPORTUNITIES, OPPORTUNITY_CATEGORIES } from '@/lib/mock-data';
+import { isClientAuthStubEnabled } from '@/lib/clerk-env';
+import { FEATURED_OPPORTUNITIES, OPPORTUNITY_CATEGORIES } from '@/lib/mock-data';
 import { shouldUseMockData } from '@/lib/use-mock-data';
 
-export function OpportunitiesList() {
+function OpportunitiesListInner({ authenticated }: { authenticated: boolean }) {
   const client = useCommunityClient();
   const useMock = shouldUseMockData();
+  const canFetchLive = authenticated && !useMock;
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['opportunities', 'list'],
     queryFn: () => client.listMarketplaceListings({ limit: 25 }),
-    enabled: !useMock,
+    enabled: canFetchLive,
     retry: false,
   });
 
   const opportunities = useMock
-    ? MOCK_OPPORTUNITIES
-    : (data?.items ?? []).map((item) => ({
-        id: item.id,
-        title: item.title,
-        organization: item.ownerName ?? 'Organization',
-        location: item.city ?? 'Remote',
-        compensation: item.budget != null ? `₹${item.budget.toLocaleString()}` : 'TBD',
-        deadline: item.deadline?.slice(0, 10) ?? 'Open',
-        matchPercent: Math.round(item.matchScore ?? 0),
-        category: item.category ?? item.listingType,
-      }));
+    ? FEATURED_OPPORTUNITIES
+    : canFetchLive
+      ? (data?.items ?? []).map((item) => ({
+          id: item.id,
+          title: item.title,
+          organization: item.ownerName ?? 'Organization',
+          location: item.city ?? 'Remote',
+          compensation: item.budget != null ? `₹${item.budget.toLocaleString()}` : 'TBD',
+          deadline: item.deadline?.slice(0, 10) ?? 'Open',
+          matchPercent: Math.round(item.matchScore ?? 0),
+          category: item.category ?? item.listingType,
+        }))
+      : FEATURED_OPPORTUNITIES;
+
+  const showFeaturedNote = !useMock && !authenticated;
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-4 py-8">
@@ -53,9 +60,20 @@ export function OpportunitiesList() {
         </div>
       </section>
 
-      {!useMock && isError ? (
+      {showFeaturedNote ? (
+        <div className="rounded-lg border border-brand-teal-deep/10 bg-brand-green-soft/40 px-4 py-3 text-sm text-brand-teal-deep">
+          Featured opportunities below.{' '}
+          <Link href="/sign-in" className="font-medium text-brand-green underline-offset-2 hover:underline">
+            Sign in
+          </Link>{' '}
+          to see personalized matches from the live marketplace.
+        </div>
+      ) : null}
+
+      {canFetchLive && isError ? (
         <p className="text-sm text-amber-800">
-          Could not load opportunities from Platform API. Check auth and API availability.
+          Could not load live opportunities. Showing featured listings while we reconnect to the
+          Platform API.
         </p>
       ) : null}
 
@@ -64,7 +82,10 @@ export function OpportunitiesList() {
           Categories
         </h2>
         <div className="flex flex-wrap gap-2">
-          {(useMock ? OPPORTUNITY_CATEGORIES : [...new Set(opportunities.map((o) => o.category))])
+          {(useMock || showFeaturedNote
+            ? OPPORTUNITY_CATEGORIES
+            : [...new Set(opportunities.map((o) => o.category))]
+          )
             .filter(Boolean)
             .map((cat) => (
               <Badge key={cat} variant="secondary" className="bg-brand-cream-muted">
@@ -75,7 +96,7 @@ export function OpportunitiesList() {
       </section>
 
       <section className="space-y-4">
-        {isLoading && !useMock ? (
+        {isLoading && canFetchLive ? (
           <p className="text-muted-foreground">Loading opportunities…</p>
         ) : opportunities.length === 0 ? (
           <p className="text-muted-foreground">No opportunities published yet.</p>
@@ -113,4 +134,24 @@ export function OpportunitiesList() {
       </section>
     </div>
   );
+}
+
+function OpportunitiesListClerk() {
+  const { isSignedIn, isLoaded } = useAuth();
+
+  if (!isLoaded) {
+    return (
+      <p className="px-4 py-12 text-center text-muted-foreground">Loading opportunities…</p>
+    );
+  }
+
+  return <OpportunitiesListInner authenticated={isSignedIn} />;
+}
+
+export function OpportunitiesList() {
+  if (isClientAuthStubEnabled()) {
+    return <OpportunitiesListInner authenticated />;
+  }
+
+  return <OpportunitiesListClerk />;
 }

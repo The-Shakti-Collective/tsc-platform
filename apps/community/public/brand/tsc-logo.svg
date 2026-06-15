@@ -1,0 +1,7 @@
+<svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The Shakti Collective">
+  <text x="10" y="45" font-family="Signika, sans-serif" font-size="40" font-weight="600" fill="#083d3a">
+    TSC
+  </text>
+  <circle cx="190" cy="30" r="15" fill="none" stroke="#126d5e" stroke-width="2"/>
+  <circle cx="190" cy="30" r="8" fill="#126d5e" opacity="0.45"/>
+</svg>

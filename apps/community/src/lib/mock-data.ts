@@ -172,6 +172,8 @@ export const MOCK_SUCCESS_STORIES = [
   },
 ];
 
+export const FEATURED_OPPORTUNITIES = MOCK_OPPORTUNITIES;
+
 export const MOCK_PROFILE_EXTRAS = {
   creativeTitle: 'Music Producer & Composer',
   availability: 'Available for Collaborations',

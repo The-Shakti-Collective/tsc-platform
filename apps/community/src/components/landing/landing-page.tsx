@@ -9,6 +9,7 @@ import {
   Users,
   Wallet,
 } from 'lucide-react';
+import { BrandPattern } from '@/components/brand/brand-pattern';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { MOCK_SUCCESS_STORIES } from '@/lib/mock-data';
@@ -63,6 +64,7 @@ export function LandingPage() {
     <div className="tm-marketing-page">
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-brand-teal-deep/10">
+        <BrandPattern variant="hero" className="pointer-events-none absolute inset-0" />
         <div className="absolute inset-0 bg-gradient-to-br from-brand-cream-wash via-brand-cream-wash to-brand-green-soft/40" />
         <div className="relative mx-auto max-w-6xl px-4 py-20 md:py-28">
           <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-brand-green">

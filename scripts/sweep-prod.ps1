@@ -22,8 +22,8 @@ if (-not (Test-Path "$Root/package.json")) {
 Set-Location $Root
 
 if (-not $ApiUrl) { $ApiUrl = "https://api.theshakticollective.in" }
-if (-not $CommunityUrl) { $CommunityUrl = "https://community.theshakticollective.in" }
-if (-not $CoreknotUrl) { $CoreknotUrl = "https://coreknot.theshakticollective.in" }
+if (-not $CommunityUrl) { $CommunityUrl = "https://theshakticollective.in/community" }
+if (-not $CoreknotUrl) { $CoreknotUrl = "https://coreknot.in" }
 if (-not $WebsiteUrl) { $WebsiteUrl = "https://theshakticollective.in" }
 
 $ReportDir = Join-Path $Root ".agents/reports"

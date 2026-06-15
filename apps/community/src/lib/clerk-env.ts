@@ -34,6 +34,18 @@ export function isClientAuthStubEnabled(): boolean {
   return isPlaceholderClerkKey(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 }
 
+export function isClerkConfigured(): boolean {
+  if (typeof window !== 'undefined') {
+    const pub = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim();
+    return !!pub && !isPlaceholderClerkKey(pub);
+  }
+  const pub = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim();
+  const secret = process.env.CLERK_SECRET_KEY?.trim();
+  if (!pub || !secret) return false;
+  if (isPlaceholderClerkKey(pub) || isPlaceholderClerkKey(secret)) return false;
+  return true;
+}
+
 export function requireClerkPublishableKey(): string {
   const key = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim();
   if (!key || isPlaceholderClerkKey(key)) {

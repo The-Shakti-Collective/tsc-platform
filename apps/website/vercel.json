@@ -4,6 +4,16 @@
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
   "buildCommand": "pnpm build",
   "regions": ["bom1"],
+  "rewrites": [
+    {
+      "source": "/community",
+      "destination": "https://tsc-platform-community-pearl.vercel.app/community"
+    },
+    {
+      "source": "/community/:match*",
+      "destination": "https://tsc-platform-community-pearl.vercel.app/community/:match*"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
