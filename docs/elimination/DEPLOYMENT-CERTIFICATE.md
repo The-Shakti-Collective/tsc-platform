@@ -12,6 +12,7 @@
 | Vercel — Website | `apps/website/vercel.json` | ✅ `bom1`, monorepo install |
 | Vercel — Community | `apps/community/vercel.json` | ✅ |
 | Vercel — CoreKnot | `apps/coreknot/client/vercel.json` | ⚠️ H5 install path (founder) |
+| Monorepo install isolation | `generateVercelConfig.cjs` postinstall guard | ✅ H8 — skips on Website/Community Vercel; see [TECH-DEBT-ROADMAP.md](../architecture/TECH-DEBT-ROADMAP.md) H8 |
 | Render | `apps/coreknot/render.yaml` | ❌ Legacy — deploy ambiguity |
 | Neon | Shared Postgres | Documented in env templates |
 | Redis | BullMQ / queues | Required prod for workers |

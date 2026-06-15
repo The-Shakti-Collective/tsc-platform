@@ -47,6 +47,7 @@
 | H2 | CoreKnot JWT vs Platform Clerk | **Auth** | OPEN — CoreKnot Clerk migration [AUTH-CUTOVER-PLAN.md](../elimination/AUTH-CUTOVER-PLAN.md) |
 | H3 | E2E suite green (full flows) | **E2E** | PARTIAL — smoke fixed; signup/org/invite/project/task flows still failing |
 | H5 | CoreKnot Vercel monorepo install | **DevOps** | OPEN — [TECH-DEBT H5 / P1-10](../elimination/MASTER-TECH-DEBT-ELIMINATION-REPORT.md) |
+| H8 | Isolate CoreKnot postinstall from Website/Community Vercel | **DevOps** / **CoreKnot** | PARTIAL — guard in `generateVercelConfig.cjs`; see [DEPLOYMENT-CERTIFICATE.md](../elimination/DEPLOYMENT-CERTIFICATE.md) |
 | M3 | Supabase secondary mirror code | **Mongo-Exit** | OPEN — remove after Neon backup confirmed |
 | M4 | 100+ CoreKnot Mongo one-off scripts | **Mongo-Exit** | OPEN — archive to `scripts/archive/` |
 | M5 | `packages/projects`, `packages/tasks` in Platform monorepo | **Platform-API** | OPEN — [SHARED-PACKAGE-ROADMAP.md](../elimination/SHARED-PACKAGE-ROADMAP.md) |
@@ -83,6 +84,7 @@
 | H3 | E2E failing flows | No merge confidence | **E2E** — smoke ✅; full flows remain |
 | H4 | Community mock data | ✅ API wired (dev mock via flag only) | `NEXT_PUBLIC_USE_MOCK_DATA=true` for local demo |
 | H5 | CoreKnot Vercel proxy/install | Client deploy fails | **DevOps** + **Founder** |
+| H8 | CoreKnot postinstall breaks Website/Community Vercel | Architecture violation — Platform deploys must not require CoreKnot env (`RENDER_API_PROXY_URL`) | **DevOps** / **CoreKnot** — `generateVercelConfig.cjs` no-ops unless `VERCEL_PROJECT_NAME` contains `coreknot`, `COREKNOT_DEPLOY=true`, or CoreKnot build lifecycle; see [DEPLOYMENT-ARCHITECTURE.md](./DEPLOYMENT-ARCHITECTURE.md) · [DEPLOYMENT-CERTIFICATE.md](../elimination/DEPLOYMENT-CERTIFICATE.md) |
 | H6 | Render.yaml alongside Railway | ✅ Archived | [DEPLOYMENT-CERTIFICATE.md](../elimination/DEPLOYMENT-CERTIFICATE.md) |
 | H7 | `org-scaffold/` deprecated templates | ✅ DEPRECATED.md | Full archive on repo extraction |
 

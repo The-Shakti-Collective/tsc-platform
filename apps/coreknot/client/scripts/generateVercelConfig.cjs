@@ -8,6 +8,35 @@ const path = require('path');
 
 const CLIENT_ROOT = path.join(__dirname, '..');
 const REPO_ROOT = path.join(CLIENT_ROOT, '..');
+const CLIENT_REL = 'apps/coreknot/client';
+
+const normalizePath = (value) => String(value || '').replace(/\\/g, '/');
+
+const isCoreKnotDeployContext = () => {
+  if (process.env.COREKNOT_DEPLOY === 'true') return true;
+
+  const projectName = (process.env.VERCEL_PROJECT_NAME || '').toLowerCase();
+  if (projectName.includes('coreknot')) return true;
+
+  const lifecycle = process.env.npm_lifecycle_event || '';
+  if (['prebuild', 'build', 'prevercel-build'].includes(lifecycle)) return true;
+
+  const initCwd = normalizePath(process.env.INIT_CWD);
+  if (initCwd.endsWith(CLIENT_REL)) return true;
+
+  const cwd = normalizePath(process.cwd());
+  if (cwd.endsWith(CLIENT_REL) && !lifecycle && process.env.VERCEL !== '1') return true;
+
+  return false;
+};
+
+if (!isCoreKnotDeployContext()) {
+  console.log(
+    '[generateVercelConfig] skipped — not CoreKnot deploy context'
+    + ` (VERCEL_PROJECT_NAME=${process.env.VERCEL_PROJECT_NAME || 'unset'})`,
+  );
+  process.exit(0);
+}
 
 const readLocalProductionApiUrl = () => {
   const localHosts = path.join(REPO_ROOT, '.cursor', 'production-hosts.local.json');

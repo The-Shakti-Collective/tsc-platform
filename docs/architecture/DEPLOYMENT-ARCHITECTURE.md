@@ -28,6 +28,8 @@
 | Region | `bom1` |
 | Domain | `theshakticollective.in`, `www.theshakticollective.in` |
 
+Monorepo `pnpm install` must not run CoreKnot-only scripts — `generateVercelConfig.cjs` no-ops unless CoreKnot deploy context ([TECH-DEBT-ROADMAP.md](./TECH-DEBT-ROADMAP.md) H8).
+
 ### TSC Community
 
 | Setting | Value |
