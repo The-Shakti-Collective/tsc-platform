@@ -15,6 +15,7 @@
                     "build:fallback":  "pnpm --filter @tsc/api... run build",
                     "verify:dist":  "node scripts/verify-workspace-dist.mjs",
                     "deploy:api":  "node scripts/create-deploy-bundle.mjs",
+                    "deploy:coreknot":  "node scripts/create-coreknot-deploy-bundle.mjs",
                     "verify:deploy":  "node scripts/verify-deploy-bundle.mjs",
                     "start:prod:railway":  "node scripts/railway-start.mjs",
                     "build:all":  "pnpm -r run build",
@@ -79,8 +80,10 @@
                     "sweep:prod":  "powershell -ExecutionPolicy Bypass -File scripts/sweep-prod.ps1",
                     "start:prod":  "pnpm --filter @tsc/api start:prod",
                     "migrate:coreknot:count-parity":  "node e2e/migration/count-parity.mjs",
+                    "migrate:coreknot:audit-tasks":  "node scripts/migrations/coreknot/audit-task-parity.mjs",
                     "migrate:coreknot:verify-cutover":  "node scripts/migrations/coreknot/verify-cutover.mjs",
                     "migrate:coreknot:verify-cutover:ping":  "node scripts/migrations/coreknot/verify-cutover.mjs --ping",
+                    "smoke:coreknot:api":  "node scripts/coreknot/smoke-api.mjs",
                     "coreknot:migrate:export-users":  "node scripts/migrations/coreknot/export-users-json.mjs",
                     "coreknot:migrate:seed-auth":  "node scripts/migrations/coreknot/load-legacy-auth.mjs"
                 },

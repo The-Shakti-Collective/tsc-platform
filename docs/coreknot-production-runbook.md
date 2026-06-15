@@ -219,6 +219,23 @@ From [FOUNDER-TASKS.md](../.specify/agents/execution/FOUNDER-TASKS.md):
 
 ---
 
+## 8. Local development (API only)
+
+Postgres-primary local boot (no Mongo required):
+
+```powershell
+# From repo root — API on :5000 (apps/coreknot/server/.env)
+pnpm dev:coreknot:server
+pnpm smoke:coreknot:api
+
+# Optional: client on :5173 (separate terminal)
+pnpm dev:coreknot
+```
+
+Set `COREKNOT_MONGO_REQUIRED=false`, `DATABASE_URL`, and leave `REDIS_URL` empty for memory queue stub. See `.agents/reports/COREKNOT-RUN-STATUS.md` for latest PASS/FAIL.
+
+---
+
 ## Related files
 
 | File | Purpose |

@@ -109,6 +109,11 @@ const updateStatsForTenant = async ({ quiet = false } = {}) => {
 };
 
 const updateStats = async ({ quiet = false } = {}) => {
+  const { isMongoRequired } = require('../infrastructure/postgres/prismaClient');
+  if (!isMongoRequired()) {
+    if (!quiet) logger.debug('statsWorker', 'Skipped — COREKNOT_MONGO_REQUIRED=false');
+    return;
+  }
   try {
     if (!quiet) logger.info('statsWorker', 'Starting CRM stats snapshot job');
     await runForEachTenant(() => updateStatsForTenant({ quiet }));
@@ -119,6 +124,11 @@ const updateStats = async ({ quiet = false } = {}) => {
 
 // Initialize Worker
 const initWorker = () => {
+  const { isMongoRequired } = require('../infrastructure/postgres/prismaClient');
+  if (!isMongoRequired()) {
+    logger.debug('statsWorker', 'Skipped — COREKNOT_MONGO_REQUIRED=false (Postgres-primary mode)');
+    return;
+  }
   // Run every 5 minutes
   cron.schedule('*/5 * * * *', () => updateStats());
   logger.debug('statsWorker', 'Scheduled node-cron for CRM Stat Snapshots (every 5 mins)');

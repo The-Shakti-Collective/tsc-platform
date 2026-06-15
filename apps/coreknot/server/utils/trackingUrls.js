@@ -12,13 +12,17 @@ const isLocalHostUrl = (url = '') => {
 };
 
 /** Public API origin for open pixel + click redirect routes (/api/track/...). */
-const DEFAULT_PUBLIC_TRACKING = 'https://YOUR-RENDER-SERVICE.onrender.com';
+const DEFAULT_PUBLIC_TRACKING = 'https://api.coreknot.in';
 
 const resolveTrackingApiBaseUrl = () => {
   const explicit = (process.env.TRACKING_BASE_URL || '').trim().replace(/\/$/, '');
   if (explicit) return explicit;
 
-  const appBase = (process.env.APP_BASE_URL || '').trim().replace(/\/$/, '');
+  const appBase = (
+    process.env.APP_BASE_URL
+    || process.env.SERVER_URL
+    || ''
+  ).trim().replace(/\/$/, '');
   const useLocal = process.env.TRACKING_USE_LOCAL === 'true';
   const local = isLocalHostUrl(appBase);
 
@@ -29,6 +33,10 @@ const resolveTrackingApiBaseUrl = () => {
   if (useLocal) {
     const port = process.env.PORT || 5000;
     return appBase || `http://localhost:${port}`;
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    return DEFAULT_PUBLIC_TRACKING;
   }
 
   // Local dev + real inboxes: Gmail cannot reach localhost — use public API

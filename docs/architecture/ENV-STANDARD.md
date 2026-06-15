@@ -77,7 +77,7 @@
 |----------|-----------|
 | Railway (Platform API) | `DATABASE_URL`, `REDIS_URL`, `CLERK_*`, `CORS_ORIGIN`, `SENTRY_DSN`, R2, Typesense |
 | Railway (CoreKnot) | `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `MONGODB_URI_PROD` (until sunset), `COREKNOT_*`, webhooks |
-| Vercel (each frontend) | `NEXT_PUBLIC_*` or `VITE_*`, Clerk publishable key |
+| Vercel (each frontend) | `NEXT_PUBLIC_*` or `VITE_*`, Clerk publishable key — see `apps/community/.env.vercel.example` |
 | Never in git | All secrets above |
 
 ## Anti-patterns (remove)

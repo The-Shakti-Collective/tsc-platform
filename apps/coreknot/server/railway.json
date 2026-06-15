@@ -1,0 +1,29 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "_comment": "Railway service Root Directory MUST be repo root (/). Config path: apps/coreknot/server/railway.json. Do not set Root Directory to apps/coreknot/server — build will fail (no pnpm-lock.yaml).",
+  "build": {
+    "builder": "NIXPACKS",
+    "nixpacksConfigPath": "apps/coreknot/server/nixpacks.toml",
+    "watchPatterns": [
+      "apps/coreknot/server/**",
+      "apps/coreknot/shared/**",
+      "packages/database/**",
+      "pnpm-lock.yaml",
+      "pnpm-workspace.yaml",
+      "package.json",
+      "scripts/create-coreknot-deploy-bundle.mjs",
+      "scripts/railway-start-coreknot.mjs",
+      "scripts/verify-coreknot-deploy-bundle.mjs"
+    ]
+  },
+  "deploy": {
+    "preDeployCommand": [
+      "pnpm --filter @tsc/database exec prisma migrate deploy"
+    ],
+    "startCommand": "node scripts/railway-start-coreknot.mjs",
+    "healthcheckPath": "/api/health/ready",
+    "healthcheckTimeout": 180,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 5
+  }
+}

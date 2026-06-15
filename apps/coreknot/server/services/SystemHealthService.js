@@ -7,6 +7,31 @@ const { areAllP0StoresOnPostgres } = require('../infrastructure/postgres/migrati
 let systemStatus = 'STARTING';
 let failReason = null;
 let lastPostgresPing = { ok: false, reason: 'not checked' };
+let lastRedisHealth = { ok: false, state: 'unknown' };
+
+async function refreshRedisHealth() {
+  const { isRedisConfigured } = require('../utils/wslRedis');
+  if (!isRedisConfigured()) {
+    lastRedisHealth = { ok: true, state: 'not_configured' };
+    return;
+  }
+
+  try {
+    const { getSharedRedis } = require('../utils/sharedRedis');
+    const redis = getSharedRedis();
+    if (!redis) {
+      lastRedisHealth = { ok: false, state: 'unavailable' };
+      return;
+    }
+    const pong = await redis.ping();
+    lastRedisHealth = pong === 'PONG'
+      ? { ok: true, state: 'connected' }
+      : { ok: false, state: 'error' };
+  } catch {
+    const { getRedisHealthSnapshot } = require('./backgroundQueue');
+    lastRedisHealth = getRedisHealthSnapshot();
+  }
+}
 
 class SystemHealthService {
   static async checkDependencies() {
@@ -30,10 +55,7 @@ class SystemHealthService {
         }
       }
 
-      const { redisAvailable } = require('./backgroundQueue');
-      if (redisAvailable === false) {
-        // Just a warning, not fatal for this system, but could be logged
-      }
+      await refreshRedisHealth();
 
       systemStatus = 'HEALTHY';
       failReason = null;
@@ -51,12 +73,14 @@ class SystemHealthService {
   static getDetailedStatus() {
     const mongoState = mongoose.connection.readyState;
     const mongoLabels = ['disconnected', 'connected', 'connecting', 'disconnecting'];
-    let redisStatus = 'unknown';
-    try {
-      const { redisAvailable } = require('./backgroundQueue');
-      redisStatus = redisAvailable ? 'connected' : 'unavailable';
-    } catch {
-      redisStatus = 'unavailable';
+    let redisHealth = lastRedisHealth;
+    if (redisHealth.state === 'unknown') {
+      try {
+        const { getRedisHealthSnapshot } = require('./backgroundQueue');
+        redisHealth = getRedisHealthSnapshot();
+      } catch {
+        redisHealth = { ok: false, state: 'unavailable' };
+      }
     }
 
     let supabaseStatus = 'disabled';
@@ -92,8 +116,8 @@ class SystemHealthService {
           required: mongoRequired,
         },
         redis: {
-          ok: redisStatus === 'connected',
-          state: redisStatus,
+          ok: redisHealth.ok,
+          state: redisHealth.state,
         },
         supabase: {
           ok: supabaseStatus === 'enabled',
@@ -123,7 +147,11 @@ class SystemHealthService {
 
 // Periodic checks — skip in Jest (setup.js syncs health after in-memory Mongo connects).
 if (process.env.NODE_ENV !== 'test') {
-  setInterval(SystemHealthService.checkDependencies, 15000);
+  refreshRedisHealth().catch(() => {});
+  SystemHealthService.checkDependencies().catch(() => {});
+  setInterval(() => {
+    SystemHealthService.checkDependencies().catch(() => {});
+  }, 15000);
 }
 
 module.exports = SystemHealthService;

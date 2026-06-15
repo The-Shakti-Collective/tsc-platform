@@ -76,11 +76,10 @@ pnpm install --frozen-lockfile && pnpm db:generate && pnpm build && pnpm verify:
 | Setting | Value |
 |---------|-------|
 | Host | **Railway** (two services) |
-| Root directory | `apps/coreknot/server` |
-| Config | `apps/coreknot/server/railway.toml` |
-| API start | `node server.js` (`RUN_WORKERS=false`) |
-| Worker start | `node workers/startWorkers.js` (`RUN_WORKERS=true`) |
-| Health | `GET /api/health` |
+| Root directory | **Monorepo root** (`/`) |
+| Config | `apps/coreknot/server/railway.json`, `nixpacks.toml` |
+| API / worker start | `node scripts/railway-start-coreknot.mjs` (`RUN_WORKERS=false` / `true`) |
+| Health | `GET /api/health/ready` |
 | Domain | `api.coreknot.in` |
 
 **Legacy — ARCHIVED:** Render blueprint at `docs/archive/render.coreknot.legacy.yaml`. Do not deploy to Render for new environments.

@@ -23,4 +23,11 @@ describe('jobs/registry + bootstrap', () => {
     expect(unique.size).toBeLessThan(all.length);
     expect(all.length).toBe(CRON_JOBS.length + QUEUE_WORKERS.length);
   });
+
+  it('marks Mongo-only reminder and supabase jobs for skip when mongo optional', () => {
+    const mongoOnly = CRON_JOBS.filter((j) =>
+      ['notification-minute', 'notification-daily', 'stats-snapshot', 'supabase-sync'].includes(j.id),
+    );
+    expect(mongoOnly.every((j) => j.requiresMongo === true)).toBe(true);
+  });
 });

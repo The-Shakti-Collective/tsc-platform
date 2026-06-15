@@ -6,7 +6,10 @@ node_modules/
 .turbo/
 dist/
 deploy/
+deploy-coreknot/
+deploy-coreknot.build.*/
 deploy.build.*/
+/shared/
 .deploy-active/
 .railway-deploy-test/
 .next/

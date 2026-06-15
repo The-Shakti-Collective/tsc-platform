@@ -369,11 +369,28 @@ async function shutdownBackgroundQueue() {
   redisAvailable = false;
 }
 
+function getRedisHealthSnapshot() {
+  const { isRedisConfigured } = require('../utils/wslRedis');
+  if (!isRedisConfigured()) {
+    return { ok: true, state: 'not_configured' };
+  }
+
+  const status = redisConnection?.status;
+  if (redisAvailable || status === 'ready') {
+    return { ok: true, state: 'connected' };
+  }
+  if (status === 'connecting' || status === 'connect' || status === 'reconnecting') {
+    return { ok: false, state: status };
+  }
+  return { ok: false, state: 'unavailable' };
+}
+
 module.exports = {
   queueHolySheetSync,
   queueCsvBackup,
   queueGamificationEvent,
   isRedisAvailable: () => redisAvailable,
+  getRedisHealthSnapshot,
   getManagedQueues,
   shutdownBackgroundQueue,
 };

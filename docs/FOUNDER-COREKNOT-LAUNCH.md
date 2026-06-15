@@ -30,14 +30,39 @@ Expect **WITHIN_TOLERANCE** before cutover.
 
 ## 2. Railway — two services
 
-Monorepo root: repository root. Service root: `apps/coreknot/server`.
+**Monorepo root:** repository root (not `apps/coreknot/server`).
 
-| Service | Start command | `RUN_WORKERS` |
-|---------|---------------|---------------|
-| **coreknot-api** | `node server.js` | `false` |
-| **coreknot-worker** | `node workers/startWorkers.js` | `true` |
+| Setting | Value |
+|---------|--------|
+| **Root directory** | `/` (repo root) |
+| **Config path** | `apps/coreknot/server/railway.json` |
+| **Build** | Nixpacks via `apps/coreknot/server/nixpacks.toml` (deploy bundle) |
+| **Start** | `node scripts/railway-start-coreknot.mjs` |
+| **Pre-deploy** | `pnpm --filter @tsc/database exec prisma migrate deploy` |
+| **Health** | `/api/health/ready` (180s timeout) |
 
-Use [`apps/coreknot/server/railway.toml`](../apps/coreknot/server/railway.toml) and env template [`railway.env.example`](../apps/coreknot/server/railway.env.example).
+Create **two services** from the same repo/config; only env differs:
+
+| Service | `RUN_WORKERS` |
+|---------|---------------|
+| **coreknot-api** | `false` |
+| **coreknot-worker** | `true` |
+
+Use env template [`railway.env.example`](../apps/coreknot/server/railway.env.example). Reference: [`railway.json`](../apps/coreknot/server/railway.json), [`nixpacks.toml`](../apps/coreknot/server/nixpacks.toml).
+
+**CLI (after `railway login`):**
+
+```powershell
+railway link
+railway logs --service coreknot-api
+railway domain api.coreknot.in --service coreknot-api
+```
+
+**Networking:** Railway → coreknot-api → Settings → Networking → add `api.coreknot.in`. Cloudflare `api` CNAME must target the hostname Railway shows (grey cloud / DNS only until cert is Valid).
+
+If `https://api.coreknot.in` returns Railway **404 "Application not found"**, the custom domain is not attached to a live service yet.
+
+**Build fails with `pnpm-lock.yaml is absent`:** Root Directory is set to `apps/coreknot/server` instead of repo root. Fix in Railway → Service → Settings → Source → **Root Directory** = empty or `/`, **Config file** = `apps/coreknot/server/railway.json`, then redeploy.
 
 ### Required secrets (both services)
 

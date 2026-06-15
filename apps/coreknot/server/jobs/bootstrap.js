@@ -16,11 +16,17 @@ function resolveInitFn(entry) {
  */
 function bootstrapBackgroundJobs() {
   const skipMailWorkerOnWeb = process.env.RUN_WORKERS !== 'true';
+  const { isMongoRequired } = require('../infrastructure/postgres/prismaClient');
   const seen = new Set();
   const started = [];
   let skipped = 0;
 
   for (const entry of [...CRON_JOBS, ...QUEUE_WORKERS]) {
+    if (entry.requiresMongo && !isMongoRequired()) {
+      skipped += 1;
+      logger.debug('jobs', `Skipped ${entry.id} — Mongo not required (Postgres-primary)`);
+      continue;
+    }
     if (skipMailWorkerOnWeb && entry.id === 'mail-campaign') {
       skipped += 1;
       continue;

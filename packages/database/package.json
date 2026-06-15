@@ -17,8 +17,8 @@
     }
   },
   "scripts": {
-    "build": "prisma generate && tsc",
-    "prisma:generate": "pnpm exec prisma generate",
+    "build": "node ./node_modules/prisma/build/index.js generate && tsc",
+    "prisma:generate": "node ./node_modules/prisma/build/index.js generate",
     "prisma:validate": "prisma validate",
     "lint": "eslint src --max-warnings 0",
     "typecheck": "tsc --noEmit -p tsconfig.json",

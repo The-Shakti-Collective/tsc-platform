@@ -1,16 +1,13 @@
-# Deploy TWO services from apps/coreknot/server (monorepo rootDir: apps/coreknot/server):
-#   1. Web API  — node server.js          (RUN_WORKERS=false)
-#   2. Worker   — node workers/startWorkers.js (RUN_WORKERS=true)
-#
-# Health: GET /api/health (liveness) · GET /api/health/ready (readiness — Postgres + optional Mongo)
-# Postgres cutover env: docs/migration/PRODUCTION-CUTOVER.md
-# Required Dashboard secrets: DATABASE_URL (Neon), MONGODB_URI_PROD (parallel run), REDIS_URL, JWT_SECRET
+# Legacy reference — canonical config: apps/coreknot/server/railway.json
+# Railway Dashboard → Config file: /apps/coreknot/server/railway.json
+
 [build]
 builder = "NIXPACKS"
+nixpacksConfigPath = "apps/coreknot/server/nixpacks.toml"
 
 [deploy]
-startCommand = "node server.js"
-healthcheckPath = "/api/health"
-healthcheckTimeout = 120
+startCommand = "node scripts/railway-start-coreknot.mjs"
+healthcheckPath = "/api/health/ready"
+healthcheckTimeout = 180
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 5

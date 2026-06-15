@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://YOUR-RENDER-SERVICE.onrender.com/api/$1"
+      "destination": "https://api.coreknot.in/api/$1"
     },
     {
       "source": "/socket.io/(.*)",
-      "destination": "https://YOUR-RENDER-SERVICE.onrender.com/socket.io/$1"
+      "destination": "https://api.coreknot.in/socket.io/$1"
     },
     {
       "source": "/((?!api/).*)",

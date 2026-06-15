@@ -10,6 +10,7 @@ const CRON_JOBS = [
     init: 'initWorker',
     schedule: '*/5 * * * *',
     description: 'CRM stat snapshots for dashboard',
+    requiresMongo: true,
   },
   {
     id: 'task-activity-purge',
@@ -24,6 +25,7 @@ const CRON_JOBS = [
     init: 'init',
     schedule: '* * * * *',
     description: 'Due-date and reminder notifications',
+    requiresMongo: true,
   },
   {
     id: 'notification-daily',
@@ -31,6 +33,7 @@ const CRON_JOBS = [
     init: 'init',
     schedule: '30 18 * * *',
     description: 'Daily digest notifications',
+    requiresMongo: true,
   },
   {
     id: 'supabase-sync',
@@ -38,6 +41,7 @@ const CRON_JOBS = [
     init: 'initSupabaseSyncWorker',
     schedule: '15 */6 * * *',
     description: 'Mirror Mongo changes to Supabase',
+    requiresMongo: true,
   },
 ];
 
@@ -69,6 +73,7 @@ const QUEUE_WORKERS = [
     init: 'initSupabaseSyncWorker',
     queue: 'supabase-sync',
     description: 'BullMQ supabase sync consumer',
+    requiresMongo: true,
   },
   {
     id: 'mail-campaign',

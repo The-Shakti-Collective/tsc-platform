@@ -203,6 +203,12 @@ const dispatchCampaignJobs = async (campaignId) => {
 const resumeStuckCampaigns = async () => {
   if (process.env.NODE_ENV === 'test') return { resumed: 0 };
 
+  const { isMongoRequired } = require('../infrastructure/postgres/prismaClient');
+  if (!isMongoRequired()) {
+    logger.debug('Queue Service', 'resumeStuckCampaigns skipped — COREKNOT_MONGO_REQUIRED=false');
+    return { resumed: 0 };
+  }
+
   const filter = { status: { $in: ['Sending', 'Queued'] } };
   let resumed = 0;
 

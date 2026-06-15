@@ -1,0 +1,17 @@
+# CoreKnot API / worker — use with Railway service root = monorepo root
+# and Config path = apps/coreknot/server/railway.json
+[phases.setup]
+nixPkgs = ["nodejs_20", "pnpm"]
+
+[phases.install]
+cmds = ["NODE_ENV=development pnpm install --frozen-lockfile"]
+
+[phases.build]
+cmds = [
+  "NODE_ENV=development pnpm db:generate",
+  "NODE_ENV=development pnpm --filter @tsc/database build",
+  "RAILWAY_DEPLOY_DIR=/app/deploy-coreknot pnpm deploy:coreknot",
+]
+
+[start]
+cmd = "node scripts/railway-start-coreknot.mjs"

@@ -8,21 +8,47 @@
  */
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 
+const { loadConfig } = require('../config');
+loadConfig();
+
 process.env.RUN_WORKERS = 'true';
 
 const logger = require('../utils/logger');
 const { connectMongo, bootstrapMongoSideEffects, applyMongooseDefaults } = require('../services/mongoConnectionService');
+const { isMongoRequired, pingPostgres, isPostgresConfigured } = require('../infrastructure/postgres/prismaClient');
+const {
+  startWorkerHealthServer,
+  setWorkerReady,
+  closeWorkerHealthServer,
+} = require('./workerHealthServer');
 
 applyMongooseDefaults();
 
 let shuttingDown = false;
 const closers = [];
 
+async function bootstrapDataStores() {
+  if (isMongoRequired()) {
+    await connectMongo({ reason: 'workers' });
+    await bootstrapMongoSideEffects();
+    return;
+  }
+
+  logger.info('workers', 'Mongo skipped — COREKNOT_MONGO_REQUIRED=false (Postgres-primary)');
+  if (!isPostgresConfigured()) return;
+
+  const ping = await pingPostgres();
+  if (!ping.ok) {
+    throw new Error(`Postgres unavailable: ${ping.reason}`);
+  }
+  logger.info('workers', 'Postgres connected');
+}
+
 async function start() {
   logger.info('workers', 'Starting CoreKnot background workers…');
+  startWorkerHealthServer();
 
-  await connectMongo({ reason: 'workers' });
-  await bootstrapMongoSideEffects();
+  await bootstrapDataStores();
 
   const { initMailCampaignWorker } = require('./mailCampaignWorker');
   const mailWorker = initMailCampaignWorker();
@@ -40,12 +66,14 @@ async function start() {
     });
   }, 5000);
 
+  setWorkerReady(true);
   logger.info('workers', 'Worker process ready');
 }
 
 async function shutdown(signal) {
   if (shuttingDown) return;
   shuttingDown = true;
+  setWorkerReady(false);
   logger.info('workers', `Shutting down (${signal || 'signal'})…`);
 
   const deadline = Date.now() + 30000;
@@ -65,6 +93,7 @@ async function shutdown(signal) {
     await mongoose.connection.close().catch(() => {});
   }
 
+  await closeWorkerHealthServer();
   process.exit(0);
 }
 
