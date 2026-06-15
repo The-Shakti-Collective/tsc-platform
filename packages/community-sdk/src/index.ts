@@ -1,5 +1,7 @@
 import type {
   EcosystemPassportPayload,
+  MarketplaceListingDetail,
+  MarketplaceListingsPayload,
   PersonCoreSummary,
   PersonProfileEditInput,
   PersonProfileRecord,
@@ -81,6 +83,31 @@ export class CommunityApiClient {
     return this.request<PersonCoreSummary & { profileSlug: string | null }>(
       `/identity/persons/by-username/${encodeURIComponent(username)}`,
     );
+  }
+
+  listMarketplaceListings(query?: { limit?: number; city?: string; type?: string }) {
+    const params = new URLSearchParams();
+    if (query?.limit) params.set('limit', String(query.limit));
+    if (query?.city) params.set('city', query.city);
+    if (query?.type) params.set('type', query.type);
+    const qs = params.toString();
+    return this.request<MarketplaceListingsPayload>(
+      `/marketplace/listings${qs ? `?${qs}` : ''}`,
+    );
+  }
+
+  getMarketplaceListing(id: string) {
+    return this.request<MarketplaceListingDetail>(`/marketplace/listings/${id}`);
+  }
+
+  getCurrentUser() {
+    return this.request<{
+      id?: string;
+      clerkUserId: string;
+      personId?: string;
+      platformRole: string;
+      provisioned: boolean;
+    }>('/users/me');
   }
 }
 
