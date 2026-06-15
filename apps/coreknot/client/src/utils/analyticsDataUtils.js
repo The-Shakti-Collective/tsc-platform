@@ -1,0 +1,25 @@
+export const formatChartData = (history, platform) => {
+  if (!history || !Array.isArray(history)) return [];
+
+  return history.map((item) => {
+    const dateRaw = item.timestamp || item.date;
+    const dateStr = dateRaw
+      ? new Date(dateRaw).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      : '';
+
+    const metrics = item.metrics || item;
+    let value = 0;
+
+    if (platform === 'spotify') {
+      value = metrics.followers ?? metrics.value ?? 0;
+    } else if (platform === 'youtube') {
+      value = metrics.subscribers ?? metrics.views ?? metrics.value ?? 0;
+    } else if (platform === 'instagram' || platform === 'meta') {
+      value = metrics.followers ?? metrics.likes ?? metrics.value ?? 0;
+    } else {
+      value = metrics.value ?? metrics.followers ?? metrics.subscribers ?? 0;
+    }
+
+    return { label: dateStr, name: dateStr, value: Number(value) || 0 };
+  });
+};

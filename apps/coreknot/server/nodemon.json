@@ -1,0 +1,8 @@
+﻿{
+  "delay": 3500,
+  "signal": "SIGTERM",
+  "ext": "js,json",
+  "events": {
+    "restart": "node scripts/freePort.js 5000 --wait"
+  }
+}

@@ -1,22 +1,201 @@
-import { defineConfig, loadEnv } from 'vite';
-import react from '@vitejs/plugin-react';
+import fs from 'fs'
+import path from 'path'
+import { defineConfig, loadEnv } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+import { VitePWA } from 'vite-plugin-pwa'
+import { visualizer } from 'rollup-plugin-visualizer'
 
+const publicDir = path.resolve(__dirname, 'public')
+const iconsDir = path.join(publicDir, 'icons')
+const brandIconAssets = fs.existsSync(iconsDir)
+  ? fs.readdirSync(iconsDir).filter((f) => /\.(png|json)$/i.test(f)).map((f) => `icons/${f}`)
+  : []
+const agentationStub = path.resolve(__dirname, 'src/components/dev/agentationStub.js')
+// Repo lives under OneDrive on this machine — sync retouches mtimes on src/ and public/ after every save.
+const isOneDriveWorkspace = /OneDrive/i.test(__dirname)
+
+// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
-  const apiTarget = (env.VITE_API_URL || 'http://localhost:4000').replace(/\/$/, '');
+  const env = loadEnv(mode, __dirname, '')
+  const agentationEnabled =
+    mode === 'development' && env.VITE_ENABLE_AGENTATION === 'true'
+  // Attendance strangler: VITE_NEST_ATTENDANCE=true → NestJS :5001; override via VITE_ATTENDANCE_PROXY
+  const attendanceProxyTarget =
+    env.VITE_ATTENDANCE_PROXY
+    || (env.VITE_NEST_ATTENDANCE === 'true' ? 'http://127.0.0.1:5001' : 'http://127.0.0.1:5000')
 
   return {
-    plugins: [react()],
-    server: {
-      host: '0.0.0.0',
-      port: 3001,
-      strictPort: true,
-      proxy: {
-        '/api': {
-          target: apiTarget,
-          changeOrigin: true,
+  define: {
+    __AGENTATION_ENABLED__: JSON.stringify(agentationEnabled),
+  },
+  plugins: [
+    react(),
+    tailwindcss(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
+      injectRegister: false,
+      includeAssets: [
+        'brand-mark.svg',
+        'favicon.svg',
+        'favicon.ico',
+        'safari-pinned-tab.svg',
+        'manifest.json',
+        ...brandIconAssets,
+      ],
+      manifest: false,
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024
+      },
+      devOptions: {
+        enabled: false,
+        type: 'module'
+      }
+    }),
+    ...(mode === 'production'
+      ? [
+          visualizer({
+            filename: 'dist/bundle-analysis.html',
+            open: false,
+            gzipSize: true,
+            brotliSize: true,
+          }),
+        ]
+      : []),
+  ],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+      "@shared": path.resolve(__dirname, "../shared"),
+      ...(mode === 'production' ? { agentation: agentationStub } : {}),
+    },
+  },
+  server: {
+    port: 3001,
+    strictPort: true,
+    host: '0.0.0.0',
+    // OneDrive on Windows rewrites mtimes on synced files (public/ and src/) → spurious full reloads.
+    watch: {
+      // Collapse OneDrive double-touch / sync churn into a single reload per real save.
+      awaitWriteFinish: {
+        stabilityThreshold: isOneDriveWorkspace ? 750 : 200,
+        pollInterval: 100,
+      },
+      ignored: [
+        '**/vercel.json',
+        '**/vercel.json.example',
+        '**/public/icons/**',
+        '**/public/manifest.json',
+        '**/public/favicon.ico',
+        '**/public/safari-pinned-tab.svg',
+        '**/.cursor/**',
+        '**/.specify/**',
+        '**/docs/**',
+        '**/dist/**',
+        '**/bundle-analysis.html',
+      ],
+    },
+    proxy: {
+      // Strangler: VITE_NEST_ATTENDANCE=true or VITE_ATTENDANCE_PROXY=http://127.0.0.1:5001
+      '/api/attendance': {
+        target: attendanceProxyTarget,
+        changeOrigin: true,
+        cookieDomainRewrite: '',
+      },
+      // TSC Nest API (direct browser/proxy hits — most /api goes to CRM :5000)
+      '/api/feed': {
+        target: 'http://127.0.0.1:4000',
+        changeOrigin: true,
+        cookieDomainRewrite: '',
+      },
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        cookieDomainRewrite: '',
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            const existing = req.headers['x-forwarded-for'];
+            const clientIp = req.socket?.remoteAddress;
+            if (clientIp && !existing) {
+              proxyReq.setHeader('X-Forwarded-For', clientIp);
+            }
+          });
+        },
+      },
+      '/socket.io': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        ws: true,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            const existing = req.headers['x-forwarded-for'];
+            const clientIp = req.socket?.remoteAddress;
+            if (clientIp && !existing) {
+              proxyReq.setHeader('X-Forwarded-For', clientIp);
+            }
+          });
         },
       },
     },
-  };
-});
+  },
+  preview: {
+    proxy: {
+      // Strangler: VITE_NEST_ATTENDANCE=true or VITE_ATTENDANCE_PROXY=http://127.0.0.1:5001
+      '/api/attendance': {
+        target: attendanceProxyTarget,
+        changeOrigin: true,
+        cookieDomainRewrite: '',
+      },
+      '/api/feed': {
+        target: 'http://127.0.0.1:4000',
+        changeOrigin: true,
+        cookieDomainRewrite: '',
+      },
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        cookieDomainRewrite: '',
+      },
+      '/socket.io': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        ws: true,
+      },
+    },
+  },
+  build: {
+    chunkSizeWarningLimit: 600,
+    modulePreload: {
+      polyfill: true,
+      resolveDependencies: (_filename, deps) =>
+        deps.filter(
+          (dep) =>
+            !/mermaid|recharts|quill|xyflow|framer-motion|cytoscape|wardley|@xyflow/i.test(dep)
+        ),
+    },
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+          if (/[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom)[\\/]/.test(id)) {
+            return 'react';
+          }
+          if (id.includes('@tanstack/react-query')) return 'query';
+          if (id.includes('axios')) return 'axios';
+          if (id.includes('lucide-react')) return 'lucide';
+          if (id.includes('socket.io-client')) return 'socket';
+          if (id.includes('recharts')) return 'recharts';
+          if (id.includes('react-quill') || /[\\/]quill[\\/]/.test(id)) return 'quill';
+          if (id.includes('framer-motion')) return 'framer-motion';
+          if (id.includes('@xyflow')) return 'xyflow';
+          if (id.includes('mermaid')) return 'mermaid';
+          return undefined;
+        },
+      },
+    },
+  }
+}})

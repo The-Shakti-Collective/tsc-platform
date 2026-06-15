@@ -1,0 +1,243 @@
+{
+  "generatedAt": "2026-06-14T06:48:58.443Z",
+  "password": "Raghav143#",
+  "emailPattern": "e2e-{archetype}@test.coreknot.local",
+  "database": "taskmaster_local",
+  "userCount": 6,
+  "users": [
+    {
+      "email": "e2e-dept-admin@test.coreknot.local",
+      "password": "Raghav143#",
+      "archetype": "dept-admin",
+      "department": {
+        "slug": "admin",
+        "name": "Admin",
+        "permissionPreset": "admin",
+        "pagePermissions": [
+          "dashboard",
+          "calendar",
+          "todo",
+          "inbox",
+          "projects",
+          "assets",
+          "schedule",
+          "logs",
+          "notes",
+          "emails",
+          "equipment",
+          "contacts",
+          "attendance",
+          "subscriptions",
+          "leads",
+          "followups",
+          "bookings",
+          "finance",
+          "announcements",
+          "ops_logs",
+          "artists",
+          "settings",
+          "office_assets",
+          "features",
+          "workflows",
+          "admin_users",
+          "admin_teams",
+          "admin_roles",
+          "admin_data",
+          "admin_artist_path",
+          "admin_exly",
+          "admin_scripts",
+          "admin_gamification",
+          "admin_project_analytics",
+          "campaigns"
+        ]
+      },
+      "projectRoles": [
+        {
+          "project": "[E2E] SANDBOX",
+          "role": "lead"
+        }
+      ],
+      "userId": "6a2e4eda9346764d6fa5c4cd"
+    },
+    {
+      "email": "e2e-dept-artist-management@test.coreknot.local",
+      "password": "Raghav143#",
+      "archetype": "dept-artist-management",
+      "department": {
+        "slug": "artist-management",
+        "name": "Artist Management",
+        "permissionPreset": "artist-management",
+        "pagePermissions": [
+          "dashboard",
+          "calendar",
+          "todo",
+          "inbox",
+          "settings",
+          "projects",
+          "assets",
+          "schedule",
+          "logs",
+          "notes",
+          "emails",
+          "equipment",
+          "contacts",
+          "attendance",
+          "subscriptions",
+          "artists",
+          "leads",
+          "followups",
+          "bookings"
+        ]
+      },
+      "projectRoles": [
+        {
+          "project": "[E2E] SECONDARY",
+          "role": "lead"
+        }
+      ],
+      "userId": "6a2e4eda9346764d6fa5c4d7"
+    },
+    {
+      "email": "e2e-dept-ops@test.coreknot.local",
+      "password": "Raghav143#",
+      "archetype": "dept-ops",
+      "department": {
+        "slug": "ops",
+        "name": "Operations",
+        "permissionPreset": "ops",
+        "pagePermissions": [
+          "dashboard",
+          "calendar",
+          "todo",
+          "inbox",
+          "settings",
+          "projects",
+          "assets",
+          "schedule",
+          "logs",
+          "notes",
+          "emails",
+          "equipment",
+          "contacts",
+          "attendance",
+          "subscriptions",
+          "finance",
+          "announcements",
+          "ops_logs",
+          "office_assets"
+        ]
+      },
+      "projectRoles": [
+        {
+          "project": "[E2E] SANDBOX",
+          "role": "lead"
+        }
+      ],
+      "userId": "6a2e4eda9346764d6fa5c4df"
+    },
+    {
+      "email": "e2e-dept-sales@test.coreknot.local",
+      "password": "Raghav143#",
+      "archetype": "dept-sales",
+      "department": {
+        "slug": "sales",
+        "name": "Sales",
+        "permissionPreset": "sales",
+        "pagePermissions": [
+          "dashboard",
+          "calendar",
+          "todo",
+          "inbox",
+          "settings",
+          "projects",
+          "assets",
+          "schedule",
+          "logs",
+          "notes",
+          "emails",
+          "equipment",
+          "contacts",
+          "attendance",
+          "subscriptions",
+          "leads",
+          "followups",
+          "bookings"
+        ]
+      },
+      "projectRoles": [
+        {
+          "project": "[E2E] SANDBOX",
+          "role": "member"
+        },
+        {
+          "project": "[E2E] SECONDARY",
+          "role": "member"
+        }
+      ],
+      "userId": "6a2e4eda9346764d6fa5c4e7"
+    },
+    {
+      "email": "e2e-dept-creative@test.coreknot.local",
+      "password": "Raghav143#",
+      "archetype": "dept-creative",
+      "department": {
+        "slug": "creative",
+        "name": "Creative",
+        "permissionPreset": "creative",
+        "pagePermissions": [
+          "dashboard",
+          "calendar",
+          "todo",
+          "inbox",
+          "settings",
+          "projects",
+          "assets",
+          "schedule",
+          "logs",
+          "notes",
+          "emails",
+          "equipment",
+          "contacts",
+          "attendance",
+          "subscriptions",
+          "assets",
+          "features",
+          "workflows",
+          "office_assets"
+        ]
+      },
+      "projectRoles": [
+        {
+          "project": "[E2E] SANDBOX",
+          "role": "viewer"
+        },
+        {
+          "project": "[E2E] SECONDARY",
+          "role": "lead"
+        }
+      ],
+      "userId": "6a2e4eda9346764d6fa5c4ee"
+    },
+    {
+      "email": "e2e-pw-gate@test.coreknot.local",
+      "password": "E2eGateTemp1!",
+      "archetype": "pw-gate",
+      "mustChangePassword": true,
+      "userId": "6a2e4eda9346764d6fa5c4f3"
+    }
+  ],
+  "projects": [
+    {
+      "name": "[E2E] SANDBOX",
+      "workspace": "GENERAL",
+      "projectId": "6a2e4eda9346764d6fa5c4f8",
+      "ownerArchetype": "dept-admin"
+    },
+    {
+      "name": "[E2E] SECONDARY",
+      "workspace": "GENERAL",
+      "projectId": "6a2e4eda9346764d6fa5c4ff",
+      "ownerArchetype": "dept-creative"
+    }
+  ]
+}

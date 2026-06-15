@@ -1,0 +1,47 @@
+# CoreKnot — Render Blueprint reference
+# Deploy from monorepo root with rootDir: apps/coreknot/server (or use Railway — see railway.toml)
+# Docs: docs/coreknot-production-runbook.md · docs/migration/mail-campaign-workers.md
+
+services:
+  - type: web
+    name: coreknot-api-staging
+    runtime: node
+    rootDir: apps/coreknot/server
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: RUN_WORKERS
+        value: false
+      - key: PORT
+        value: 10000
+      # Set in Render Dashboard (never commit secrets):
+      # MONGODB_URI_PROD, REDIS_URL, JWT_SECRET, ENCRYPTION_KEY, RESEND_API_KEY
+      # SENTRY_DSN, BETTERSTACK_HEARTBEAT_URL, CORS_ALLOWED_ORIGINS
+
+  - type: worker
+    name: coreknot-worker-staging
+    runtime: node
+    rootDir: apps/coreknot/server
+    buildCommand: npm install
+    startCommand: node workers/startWorkers.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: RUN_WORKERS
+        value: true
+      # Same shared secrets as coreknot-api-staging
+
+cronJobs:
+  - name: coreknot-keep-warm
+    schedule: "*/14 * * * *"
+    runtime: node
+    rootDir: apps/coreknot/server
+    buildCommand: npm install
+    startCommand: node scripts/keepWarm.js
+    envVars:
+      - key: KEEP_WARM_URL
+        value: https://YOUR-RENDER-SERVICE.onrender.com/api/health
+      # Or: https://YOUR-PRODUCTION-API-HEALTH (custom domain api.coreknot.in/api/health)

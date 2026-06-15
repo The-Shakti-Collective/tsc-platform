@@ -1,0 +1,47 @@
+/** Map login API failures to user-facing copy (mobile proxy vs credential vs rate limit). */
+export function formatLoginError(err) {
+  if (!err?.response) {
+    return {
+      message: 'Could not reach the server. Check your connection and try again.',
+      isNetwork: true,
+    };
+  }
+
+  const status = err.response.status;
+  const data = err.response.data;
+  const serverError = data?.error || data?.message;
+  const errorCode = data?.code;
+
+  if (errorCode === 'DATABASE_UNAVAILABLE' || status === 503) {
+    return {
+      message: serverError || 'Database temporarily unavailable. Try again in a minute.',
+      isNetwork: false,
+      isDatabase: true,
+    };
+  }
+
+  if (serverError) {
+    return { message: serverError, isNetwork: false };
+  }
+
+  if (status === 429) {
+    return { message: 'Too many login attempts. Please try again in 15 minutes.', isNetwork: false };
+  }
+
+  if (status === 404 || status === 502 || status === 503 || status === 504) {
+    return {
+      message:
+        'Could not reach the login API. Check your connection and try again in a minute. If it still fails, contact your admin — the server proxy may need redeploying.',
+      isNetwork: true,
+    };
+  }
+
+  if (status === 401 || status === 403) {
+    return { message: 'Invalid email or password.', isNetwork: false };
+  }
+
+  return {
+    message: 'Authentication failed. Please check your credentials.',
+    isNetwork: false,
+  };
+}

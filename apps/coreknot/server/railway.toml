@@ -1,0 +1,15 @@
+# Deploy TWO services from apps/coreknot/server (monorepo rootDir: apps/coreknot/server):
+#   1. Web API  — node server.js          (RUN_WORKERS=false)
+#   2. Worker   — node workers/startWorkers.js (RUN_WORKERS=true)
+#
+# Health: GET /api/health (liveness) · GET /api/health/ready (readiness)
+# Docs: docs/coreknot-production-runbook.md · docs/migration/mail-campaign-workers.md
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "node server.js"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5

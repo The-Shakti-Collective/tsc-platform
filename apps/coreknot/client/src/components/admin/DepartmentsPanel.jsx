@@ -1,0 +1,308 @@
+import React, { useMemo, useState } from 'react';
+import { Building2, Trash2, FileText, BarChart3, Pencil } from 'lucide-react';
+import { Button, Input, Badge } from '../ui';
+import { ModalShell, ModalHeader, ModalBody, ModalFooter } from '../ui/modals';;
+import {
+  useCreateDepartment,
+  useUpdateDepartment,
+  useDeleteDepartment,
+} from '../../hooks/useTaskmasterQueries';
+import {
+  PRESET_PAGES,
+  PERMISSION_PRESET_OPTIONS,
+  resolveDepartmentPages,
+} from '../../utils/pagePermissions';
+import PagePermissionsEditor from './PagePermissionsEditor';
+import { DepartmentMonthlyReportPanel, TeamMonthlyReportPanel } from './AggregatedMonthlyReportPanel';
+import { useConfirm } from '../../contexts/confirmContext';
+import { useUnsavedChanges, stableJsonEqual, cloneSnapshot } from '../../hooks/useUnsavedChanges';
+
+const DepartmentsPanel = ({ users = [], departments = [] }) => {
+  const { confirm } = useConfirm();
+  const [newName, setNewName] = useState('');
+  const [newPreset, setNewPreset] = useState('standard');
+  const [editingDept, setEditingDept] = useState(null);
+  const [editPages, setEditPages] = useState([]);
+  const [editPagesBaseline, setEditPagesBaseline] = useState([]);
+  const [editPreset, setEditPreset] = useState('standard');
+  const [editPresetBaseline, setEditPresetBaseline] = useState('standard');
+  const [reportDept, setReportDept] = useState(null);
+  const [teamReportOpen, setTeamReportOpen] = useState(false);
+
+  const createMutation = useCreateDepartment();
+  const updateMutation = useUpdateDepartment();
+  const deleteMutation = useDeleteDepartment();
+
+  const memberCounts = useMemo(() => {
+    const counts = {};
+    users.forEach((u) => {
+      const id = u.departmentId?._id || u.departmentId;
+      if (id) counts[id] = (counts[id] || 0) + 1;
+    });
+    return counts;
+  }, [users]);
+
+  const handleCreate = async () => {
+    if (!newName.trim()) return;
+    try {
+      await createMutation.mutateAsync({
+        name: newName.trim(),
+        permissionPreset: newPreset,
+        pagePermissions: PRESET_PAGES[newPreset] || PRESET_PAGES.standard,
+      });
+      setNewName('');
+      setNewPreset('standard');
+    } catch (err) {
+      alert(err.response?.data?.error || err.message);
+    }
+  };
+
+  const openEdit = (dept) => {
+    const pages = resolveDepartmentPages(dept);
+    const preset = dept.permissionPreset || 'standard';
+    setEditingDept(dept);
+    setEditPreset(preset);
+    setEditPresetBaseline(preset);
+    setEditPages(pages);
+    setEditPagesBaseline(cloneSnapshot(pages));
+  };
+
+  const applyPresetToEdit = (preset) => {
+    setEditPreset(preset);
+    setEditPages(PRESET_PAGES[preset] || PRESET_PAGES.standard);
+  };
+
+  const handleSavePermissions = async () => {
+    if (!editingDept) return;
+    try {
+      await updateMutation.mutateAsync({
+        id: editingDept._id,
+        data: {
+          permissionPreset: editPreset,
+          pagePermissions: editPages,
+        },
+      });
+      setEditingDept(null);
+    } catch (err) {
+      alert(err.response?.data?.error || err.message);
+    }
+  };
+
+  const hasPermissionEdits =
+    !!editingDept &&
+    (editPreset !== editPresetBaseline || !stableJsonEqual(editPages, editPagesBaseline));
+
+  const { revert: revertPermissionEdits } = useUnsavedChanges({
+    hasChanges: hasPermissionEdits,
+    onSave: handleSavePermissions,
+    onCancel: () => {
+      setEditPages(cloneSnapshot(editPagesBaseline));
+      setEditPreset(editPresetBaseline);
+    },
+    isSaving: updateMutation.isPending,
+    enabled: false,
+  });
+
+  const handleDelete = async (dept) => {
+    const ok = await confirm({
+      title: 'Delete department?',
+      message: `Remove "${dept.name}"? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      type: 'danger',
+    });
+    if (!ok) return;
+    try {
+      await deleteMutation.mutateAsync(dept._id);
+    } catch (err) {
+      alert(err.response?.data?.error || err.message);
+    }
+  };
+
+  const selectedPresetHelp = PERMISSION_PRESET_OPTIONS.find((o) => o.value === newPreset)?.description;
+
+  return (
+    <>
+      <section className="space-y-4 h-fit">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Building2 size={14} className="text-[var(--color-action-primary)]" />
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)]">Departments</h4>
+          </div>
+          <Button
+            variant="secondary"
+            size="xs"
+            onClick={() => setTeamReportOpen(true)}
+            className="!text-[9px] font-black uppercase"
+          >
+            <BarChart3 size={12} className="mr-1" />
+            Team Report
+          </Button>
+        </div>
+
+        <div className="space-y-2">
+          <Input
+            placeholder="New department name..."
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            className="!py-1 !text-[11px]"
+          />
+          <div className="flex gap-2 items-center">
+            <select
+              value={newPreset}
+              onChange={(e) => setNewPreset(e.target.value)}
+              className="flex-1 px-2 py-1.5 bg-[var(--color-bg-primary)] border border-[var(--color-bg-border)] rounded-[var(--radius-atomic)] text-[11px] outline-none"
+              title="Starting template — customize per department after creation"
+            >
+              {PERMISSION_PRESET_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+            <Button
+              onClick={handleCreate}
+              disabled={createMutation.isPending || !newName.trim()}
+              size="sm"
+              className="whitespace-nowrap font-black uppercase text-[10px]"
+            >
+              Add
+            </Button>
+          </div>
+          {selectedPresetHelp && (
+            <p className="text-[9px] text-[var(--color-text-muted)] leading-snug">{selectedPresetHelp}</p>
+          )}
+        </div>
+
+        <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+          {departments.length === 0 ? (
+            <div className="text-center py-6 opacity-40">
+              <p className="text-[9px] font-black uppercase tracking-widest">No departments yet</p>
+            </div>
+          ) : departments.map((dept) => {
+            const count = memberCounts[dept._id] || 0;
+            const pages = resolveDepartmentPages(dept);
+            return (
+              <div
+                key={dept._id}
+                className="py-2 border-b border-[var(--color-bg-border)] last:border-b-0"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-bold uppercase tracking-tight text-[10px] truncate">{dept.name}</span>
+                  <Badge variant="info" className="!text-[9px] shrink-0">{count} {count === 1 ? 'Member' : 'Members'}</Badge>
+                </div>
+                <div className="flex items-center justify-between mt-2 gap-2">
+                  <Badge variant="slate" className="!text-[8px] uppercase font-mono">
+                    {pages.length} pages enabled
+                  </Badge>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => openEdit(dept)}
+                      className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] p-1 transition-colors"
+                      title="Edit page access"
+                    >
+                      <Pencil size={12} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setReportDept(dept)}
+                      className="text-blue-500 hover:text-blue-600 p-1 transition-colors"
+                      title="Monthly report"
+                    >
+                      <FileText size={12} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(dept)}
+                      disabled={deleteMutation.isPending}
+                      className="text-rose-500 hover:text-rose-600 p-1 transition-colors"
+                      title="Delete department"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <ModalShell isOpen={!!editingDept} onClose={() => setEditingDept(null)} size="lg">
+        <ModalHeader
+          title="Page Access"
+          subtitle={editingDept?.name}
+          onClose={() => setEditingDept(null)}
+        />
+        <ModalBody className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[9px] font-black uppercase tracking-widest text-[var(--color-text-muted)]">Quick template:</span>
+            {PERMISSION_PRESET_OPTIONS.map((o) => (
+              <button
+                key={o.value}
+                type="button"
+                onClick={() => applyPresetToEdit(o.value)}
+                className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-wide border transition-colors ${
+                  editPreset === o.value
+                    ? 'border-[var(--color-action-primary)] bg-[var(--color-action-primary)]/10 text-[var(--color-action-primary)]'
+                    : 'border-[var(--color-bg-border)] text-[var(--color-text-muted)] hover:border-[var(--color-text-muted)]'
+                }`}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+
+          <PagePermissionsEditor selectedPages={editPages} onChange={setEditPages} />
+
+          <div className="flex items-center justify-between pt-2 border-t border-[var(--color-bg-border)]">
+            <span className="text-[10px] text-[var(--color-text-muted)]">{editPages.length} pages selected</span>
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={revertPermissionEdits}
+            disabled={!hasPermissionEdits || updateMutation.isPending}
+          >
+            Discard
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="success"
+            onClick={handleSavePermissions}
+            disabled={!hasPermissionEdits || updateMutation.isPending}
+          >
+            {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </ModalFooter>
+      </ModalShell>
+
+      <ModalShell isOpen={!!reportDept} onClose={() => setReportDept(null)} size="full">
+        <ModalHeader
+          title="Department report"
+          subtitle={reportDept?.name}
+          onClose={() => setReportDept(null)}
+        />
+        <ModalBody className="max-h-[80vh] overflow-y-auto">
+          <DepartmentMonthlyReportPanel
+            departmentId={reportDept?._id}
+            departmentName={reportDept?.name}
+            isOpen={!!reportDept}
+            onClose={() => setReportDept(null)}
+          />
+        </ModalBody>
+      </ModalShell>
+
+      <ModalShell isOpen={teamReportOpen} onClose={() => setTeamReportOpen(false)} size="full">
+        <ModalHeader title="Team report" onClose={() => setTeamReportOpen(false)} />
+        <ModalBody className="max-h-[80vh] overflow-y-auto">
+          <TeamMonthlyReportPanel isOpen={teamReportOpen} />
+        </ModalBody>
+      </ModalShell>
+    </>
+  );
+};
+
+export default DepartmentsPanel;

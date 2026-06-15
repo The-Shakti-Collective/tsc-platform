@@ -1,0 +1,159 @@
+const normalizeId = (value) => {
+  if (!value) return null;
+  if (typeof value === 'string') return value;
+  return String(value._id || value);
+};
+
+const assignmentUserId = (assignment) =>
+  normalizeId(assignment?.userId?._id || assignment?.userId);
+
+const assignmentAssignerId = (assignment) =>
+  normalizeId(assignment?.assignedBy?._id || assignment?.assignedBy);
+
+const isDelegatedAssignment = (assignment) => {
+  const assigneeId = assignmentUserId(assignment);
+  const assignerId = assignmentAssignerId(assignment);
+  return Boolean(assigneeId && assignerId && assigneeId !== assignerId);
+};
+
+const getAssignmentForUser = (assignments, userId) => {
+  const uid = normalizeId(userId);
+  if (!uid || !assignments?.length) return null;
+  return assignments.find((a) => assignmentUserId(a) === uid) || null;
+};
+
+/** True when this user's completion must go through review (assigned by someone else). */
+const requiresReviewForUser = (assignments, userId) => {
+  const mine = getAssignmentForUser(assignments, userId);
+  if (!mine) return false;
+  const assigneeId = assignmentUserId(mine);
+  const assignerId = assignmentAssignerId(mine);
+  return Boolean(assignerId && assigneeId && assignerId !== assigneeId);
+};
+
+const getDelegatedAssignments = (assignments) =>
+  (assignments || []).filter(isDelegatedAssignment);
+
+const getReviewQueueAssignmentFilter = (userId) => {
+  const uid = normalizeId(userId);
+  return {
+    assignedBy: uid,
+    $expr: { $ne: ['$userId', '$assignedBy'] },
+  };
+};
+
+/** Drop self-review rows and tasks the viewer cannot approve. */
+const filterReviewQueueTasks = (
+  tasks,
+  user,
+  getAssignments = (t) => t?.assignments || t?.assignees || [],
+  { platformOwnerId } = {}
+) =>
+  (tasks || []).filter((task) => {
+    const assignments = getAssignments(task);
+    return canUserApproveOrRollback(user, assignments, { platformOwnerId });
+  });
+
+/** Reviewer may approve if they assigned at least one delegated assignee on an in-review task. */
+const canUserApproveReview = (user, assignments) => {
+  const uid = normalizeId(user?._id || user);
+  if (!uid) return false;
+  return getDelegatedAssignments(assignments).some(
+    (a) => assignmentAssignerId(a) === uid
+  );
+};
+
+/** Platform owner or task creator may approve; assigner may approve delegated work. */
+const canUserApproveOrRollback = (user, assignments, { platformOwnerId, taskCreatedBy } = {}) => {
+  const uid = normalizeId(user?._id || user);
+  if (!uid) return false;
+  if (platformOwnerId && uid === normalizeId(platformOwnerId)) return true;
+  if (taskCreatedBy && uid === normalizeId(taskCreatedBy)) return true;
+  return canUserApproveReview(user, assignments);
+};
+
+/** Creator, assignee, assigner, or platform owner may rollback in-review or reopen done tasks. */
+const canUserRollbackTask = (user, task, assignments, { platformOwnerId, taskCreatedBy } = {}) => {
+  const uid = normalizeId(user?._id || user);
+  if (!uid) return false;
+  const status = String(task?.status || '').toLowerCase();
+  if (status !== 'in-review' && status !== 'done') return false;
+  if (platformOwnerId && uid === normalizeId(platformOwnerId)) return true;
+  if (taskCreatedBy && uid === normalizeId(taskCreatedBy)) return true;
+  if (canUserApproveReview(user, assignments)) return true;
+  return (assignments || []).some((a) => assignmentUserId(a) === uid);
+};
+
+/**
+ * True when this user's completion must route through review.
+ * Covers corrupted assignment rows (assigner reset on edit) when task still has delegated work.
+ */
+const needsReviewOnComplete = (assignments, userId, { mentionOnly = false, taskCreatedBy = null } = {}) => {
+  if (mentionOnly) return true;
+  const uid = normalizeId(userId);
+  if (!uid) return false;
+  const mine = getAssignmentForUser(assignments, uid);
+  if (!mine) return false;
+  if (assignmentAssignerId(mine) === uid) {
+    return false;
+  }
+  if (requiresReviewForUser(assignments, uid)) return true;
+  const delegated = getDelegatedAssignments(assignments);
+  if (delegated.length > 0 && !canUserApproveReview({ _id: uid }, assignments)) return true;
+  if (taskCreatedBy && normalizeId(taskCreatedBy) !== uid) return true;
+  return false;
+};
+
+/** Task has no delegated assignees — self-work only; should never stay in-review. */
+const isSelfWorkOnlyTask = (assignments) =>
+  (assignments || []).length > 0 && getDelegatedAssignments(assignments).length === 0;
+
+/** Default daily-log hours credited to reviewer on approval. */
+const REVIEW_DEFAULT_HOURS = 0.25;
+
+/** Daily log title/message for reviewer time (assigner-only credit). */
+const REVIEW_LOG_LABEL = '[review]';
+
+/** True when user assigned delegated work to others but is not the delegated assignee. */
+const isAssignerOnlyReviewer = (assignments, userId) => {
+  const uid = normalizeId(userId);
+  if (!uid) return false;
+  const delegated = getDelegatedAssignments(assignments);
+  if (!delegated.length) return false;
+  const isAssigner = delegated.some((a) => assignmentAssignerId(a) === uid);
+  if (!isAssigner) return false;
+  const isDelegatedAssignee = delegated.some((a) => assignmentUserId(a) === uid);
+  return !isDelegatedAssignee;
+};
+
+/** Assignees only; creator lives on task.createdBy */
+const normalizeAssigneeIds = (assigneeIds, creatorId) => {
+  const creator = normalizeId(creatorId);
+  return [...new Set((assigneeIds || []).map((id) => normalizeId(id)).filter(Boolean))]
+    .filter((id) => !creator || id !== creator);
+};
+
+/** @deprecated Use normalizeAssigneeIds */
+const mergeAssigneeIdsWithCreator = (assigneeIds, creatorId) => normalizeAssigneeIds(assigneeIds, creatorId);
+
+module.exports = {
+  normalizeId,
+  assignmentUserId,
+  assignmentAssignerId,
+  isDelegatedAssignment,
+  getAssignmentForUser,
+  requiresReviewForUser,
+  needsReviewOnComplete,
+  getDelegatedAssignments,
+  getReviewQueueAssignmentFilter,
+  filterReviewQueueTasks,
+  canUserApproveReview,
+  canUserApproveOrRollback,
+  canUserRollbackTask,
+  isSelfWorkOnlyTask,
+  mergeAssigneeIdsWithCreator,
+  normalizeAssigneeIds,
+  REVIEW_DEFAULT_HOURS,
+  REVIEW_LOG_LABEL,
+  isAssignerOnlyReviewer,
+};
