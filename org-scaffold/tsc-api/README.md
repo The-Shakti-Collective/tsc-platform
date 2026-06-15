@@ -1,4 +1,8 @@
-# tsc-api
+# tsc-api — DEPRECATED
+
+> **Do not extract.** Use `tsc-platform/apps/api`. See [DEPRECATED.md](./DEPRECATED.md).
+
+# tsc-api (historical scaffold)
 
 NestJS backend — single source of truth for TSC business data.
 

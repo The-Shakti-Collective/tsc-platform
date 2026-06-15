@@ -1,12 +1,14 @@
 # CoreKnot observability setup
 
+> **Aligned with:** [architecture/DEPLOYMENT-ARCHITECTURE.md](./architecture/DEPLOYMENT-ARCHITECTURE.md) · Shared stack: Sentry, PostHog, BetterStack (Platform + CoreKnot)
+
 Wire error tracking, product analytics, and uptime for CoreKnot API (Express) + Vite client.
 
 ## Quick start (local dev)
 
 ### Why the dashboard shows “Add keys in .env.local”
 
-The **Analytics & Monitoring** widget on `/dashboard` (admin only) opens external dashboards. Tiles still link to useful defaults (Sentry org, PostHog app, BetterStack uptime, Datadog app) even before keys are set.
+The **Analytics & Monitoring** widget on `/dashboard` (admin only) opens external dashboards for **Sentry**, **PostHog**, and **BetterStack**. Tiles still link to useful defaults (Sentry org, PostHog app, BetterStack uptime) even before keys are set. **Datadog is not shown on the widget** — RUM/APM can still be wired via `lib/datadog.js` and server env (see below).
 
 The badge means **client SDK keys are missing** — not that the link is broken:
 
@@ -15,7 +17,6 @@ The badge means **client SDK keys are missing** — not that the link is broken:
 | Sentry | `VITE_SENTRY_DSN` or `VITE_SENTRY_ORG_URL` |
 | PostHog | `VITE_POSTHOG_KEY`, `VITE_POSTHOG_PROJECT_ID`, or `VITE_POSTHOG_PROJECT_URL` |
 | BetterStack | No badge (default uptime URL always works); optional `VITE_BETTERSTACK_DASHBOARD_URL` for a deep link |
-| Datadog | `VITE_DD_APPLICATION_ID` / `VITE_DD_CLIENT_TOKEN` or `VITE_DATADOG_DASHBOARD_URL` |
 
 Vite reads `VITE_*` only at **dev-server start** or **build** — restart after editing `.env.local`.
 
@@ -34,12 +35,6 @@ VITE_POSTHOG_PROJECT_ID=
 VITE_SENTRY_ORG_URL=
 VITE_POSTHOG_PROJECT_URL=
 VITE_BETTERSTACK_DASHBOARD_URL=
-VITE_DATADOG_DASHBOARD_URL=
-
-# Datadog RUM (optional)
-VITE_DD_APPLICATION_ID=
-VITE_DD_CLIENT_TOKEN=
-VITE_DD_SITE=datadoghq.com
 ```
 
 ### Server — `apps/coreknot/server/.env`
@@ -57,17 +52,17 @@ Optional: `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, `SENTRY_TRACES_SAMPLE_RATE`, `
 1. **Sentry** — [sentry.io](https://sentry.io) → org **The Shakti Collective** → projects **coreknot-web** (client DSN → `VITE_SENTRY_DSN`) and **coreknot-api** (server DSN → `SENTRY_DSN`). Project Settings → Client Keys (DSN).
 2. **PostHog** — [us.posthog.com](https://us.posthog.com) → create **CoreKnot** project → Settings → Project API Key (`phc_…` → `VITE_POSTHOG_KEY`). Project ID is in the URL: `/project/468824` → `VITE_POSTHOG_PROJECT_ID=468824`.
 3. **BetterStack** — [BetterStack Uptime](https://betterstack.com/uptime) → **Heartbeats** → copy URL → `BETTERSTACK_HEARTBEAT_URL` on server. Optional: copy your monitors page URL → `VITE_BETTERSTACK_DASHBOARD_URL`.
-4. **Datadog** (optional) — RUM app → `VITE_DD_APPLICATION_ID` + `VITE_DD_CLIENT_TOKEN`; APM → `DD_API_KEY` on server.
+4. **Datadog** (optional, not on dashboard widget) — RUM via `VITE_DD_*` in `.env.local` + `initDatadogRum()` in `main.jsx`; APM → `DD_API_KEY` on server.
 
 ### After setting env
 
 1. Restart Vite: `pnpm --filter coreknot-client dev` (or your usual client dev command).
 2. Restart CoreKnot server: `pnpm --filter coreknot-server dev`.
-3. Hard-refresh `/dashboard` as admin — Sentry/PostHog/Datadog badges should clear when keys present; BetterStack never badges on default link.
+3. Hard-refresh `/dashboard` as admin — Sentry/PostHog badges should clear when keys present; BetterStack never badges on default link.
 
 ### Verify checklist
 
-- [ ] Widget footer shows `N/4 instrumented` (not `add VITE_* keys…`)
+- [ ] Widget footer shows `N/3 instrumented` (not `add VITE_* keys…`)
 - [ ] Each tile opens correct dashboard in new tab
 - [ ] PostHog Live events show `$pageview` while navigating app
 - [ ] Sentry test error appears in **coreknot-web** project
@@ -93,7 +88,7 @@ Optional: `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, `SENTRY_TRACES_SAMPLE_RATE`, `
 | Errors (client) | Sentry | Vercel env |
 | Product analytics | PostHog | Vercel env |
 | Uptime | BetterStack heartbeat | Render / Railway env |
-| APM (optional) | Datadog | Both (already scaffolded) |
+| APM (optional) | Datadog | Server + client RUM scaffold (`lib/datadog.js`; not on dashboard widget) |
 
 ## Environment variables
 
@@ -135,10 +130,9 @@ VITE_SENTRY_ORG_URL=https://sentry.io/organizations/the-shakti-collective/
 VITE_POSTHOG_PROJECT_URL=https://us.posthog.com/project/YOUR_PROJECT_ID
 VITE_POSTHOG_PROJECT_ID=YOUR_PROJECT_ID
 VITE_BETTERSTACK_DASHBOARD_URL=https://uptime.betterstack.com/
-VITE_DATADOG_DASHBOARD_URL=https://app.datadoghq.com/
 ```
 
-When unset, the widget still opens all four tools with org defaults. Tiles show **Add keys in .env.local** until SDK keys (or override URLs) are set — except BetterStack, which always uses the public uptime URL.
+When unset, the widget still opens all three tools with org defaults. Tiles show **Add keys in .env.local** until SDK keys (or override URLs) are set — except BetterStack, which always uses the public uptime URL.
 
 ---
 

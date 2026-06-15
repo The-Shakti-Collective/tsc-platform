@@ -1,31 +1,34 @@
-# org-scaffold
+# org-scaffold — Historical Repository Templates
 
-Copy-ready repository scaffolds for The Shakti Collective multi-repo migration.
+> **Status:** Partially superseded by [docs/architecture/REPOSITORY-GOVERNANCE.md](../docs/architecture/REPOSITORY-GOVERNANCE.md)  
+> **Do not deploy from this folder.**
 
-**Do not push from this folder directly.** Copy each subdirectory into its own GitHub repo under [The-Shakti-Collective](https://github.com/The-Shakti-Collective).
+## Target repos (KEEP)
 
-## Repositories
+| Folder | Target GitHub repo | Notes |
+|--------|-------------------|-------|
+| `tsc-infra/` | TheShaktiCollective/tsc-infra | Extract DNS, Railway, Vercel templates |
+| `tsc-shared/` | TheShaktiCollective/tsc-shared | Published `@tsc/*` |
+| `tsc-docs/` | TheShaktiCollective/tsc-docs | OpenAPI site |
 
-| Folder | Target GitHub repo |
-|--------|-------------------|
-| `tsc-shared/` | The-Shakti-Collective/tsc-shared |
-| `tsc-api/` | The-Shakti-Collective/tsc-api |
-| `tsc-coreknot/` | The-Shakti-Collective/tsc-coreknot |
-| `tsc-community/` | The-Shakti-Collective/tsc-community |
-| `tsc-web/` | The-Shakti-Collective/tsc-web |
-| `tsc-infra/` | The-Shakti-Collective/tsc-infra |
-| `tsc-docs/` | The-Shakti-Collective/tsc-docs |
+## Deprecated scaffolds (do not create repos)
 
-## Master documentation
+| Folder | Superseded by |
+|--------|---------------|
+| `tsc-api/` | `tsc-platform/apps/api` |
+| `tsc-community/` | `tsc-platform/apps/community` |
+| `tsc-web/` | `tsc-platform/apps/website` |
+| `tsc-coreknot/` | `tsc-platform/apps/coreknot/` (extract later to `tsc-coreknot` repo) |
 
-See `.agents/shakti-collective-org-setup.md` for org architecture and [.specify/operations/setup-runbook.md](../.specify/operations/setup-runbook.md) for full production setup + `gh` bootstrap commands.
+## Canonical architecture
 
-## Migration order
+See [docs/architecture/MASTER-PRODUCTION-ARCHITECTURE.md](../docs/architecture/MASTER-PRODUCTION-ARCHITECTURE.md).
+
+## Migration order (when extracting)
 
 1. tsc-infra
-2. **tsc-shared** (publish `@tsc/*` first)
-3. tsc-api
-4. tsc-coreknot → tsc-community
-5. tsc-docs → tsc-web
+2. tsc-shared (publish packages)
+3. tsc-coreknot (from monorepo `apps/coreknot/`)
+4. tsc-docs
 
-Fix monorepo build blockers **before** extracting app repos.
+**Do not** extract tsc-api, tsc-community, or tsc-web as separate repos.

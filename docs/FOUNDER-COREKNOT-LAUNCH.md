@@ -1,8 +1,9 @@
 # CoreKnot production launch — founder checklist
 
-Run this **after** migration code is on `main` and CI is green. Agents cannot set Dashboard secrets or DNS — this is your copy-paste runbook.
+> **Aligned with:** [architecture/DEPLOYMENT-ARCHITECTURE.md](./architecture/DEPLOYMENT-ARCHITECTURE.md) · [architecture/MONGO-SUNSET-REPORT.md](./architecture/MONGO-SUNSET-REPORT.md)  
+> **Target end state:** Vercel + Railway + Neon + Redis — **no Mongo, no Supabase.** Parallel-run may temporarily require `MONGODB_URI_PROD` (30 days).
 
-**Target:** Vercel (`coreknot.in`) → Railway API (`api.coreknot.in`) → Neon Postgres + Upstash Redis. **No Mongo. No Supabase.**
+Run this **after** migration code is on `main` and CI is green. Agents cannot set Dashboard secrets or DNS — this is your copy-paste runbook.
 
 Rollback: [apps/coreknot/docs/DEPLOY_ROLLBACK.md](../apps/coreknot/docs/DEPLOY_ROLLBACK.md)
 

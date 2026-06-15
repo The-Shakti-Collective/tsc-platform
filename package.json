@@ -31,6 +31,7 @@
                     "test:e2e:community":  "pnpm --filter @tsc/e2e test:community:audit",
                     "test:e2e:audit":  "pnpm --filter @tsc/e2e test:coreknot:audit && pnpm --filter @tsc/e2e test:frontend:audit",
                     "test:migration:api-smoke":  "pnpm --filter @tsc/e2e test:migration:api-smoke",
+                    "openapi:export":  "pnpm --filter @tsc/api openapi:export",
                     "ci":  "node scripts/turbo-or-fallback.mjs run lint typecheck test build",
                     "ci:fallback":  "pnpm -r run lint \u0026\u0026 pnpm -r run typecheck \u0026\u0026 pnpm -r run test \u0026\u0026 pnpm --filter @tsc/api... run build",
                     "setup":  "powershell -ExecutionPolicy Bypass -File scripts/setup.ps1",

@@ -1,5 +1,8 @@
 # CoreKnot production runbook
 
+> **Aligned with:** [architecture/DEPLOYMENT-ARCHITECTURE.md](./architecture/DEPLOYMENT-ARCHITECTURE.md) · [architecture/COREKNOT-BOUNDARY.md](./architecture/COREKNOT-BOUNDARY.md)  
+> **Deploy target:** Railway (API + workers) + Vercel (client). Render config is legacy — do not use for new environments.
+
 End-to-end guide to deploy and operate CoreKnot in production.
 
 **Domains (canonical):**
@@ -17,8 +20,8 @@ Complete founder-owned setup before first deploy.
 
 | Provider | Purpose | Founder doc |
 |----------|---------|-------------|
-| **Neon** | Postgres (`DATABASE_URL`) when store flags use postgres | Step 4 Railway + migration docs |
-| **MongoDB Atlas** | Legacy primary until full postgres cutover | `MONGODB_URI_PROD` |
+| **Neon** | Postgres primary (`DATABASE_URL`) — all P0 store flags | [PRODUCTION-CUTOVER.md](./migration/PRODUCTION-CUTOVER.md) |
+| **MongoDB Atlas** | Dual-write shadow during 30-day parallel run | `MONGODB_URI_PROD` |
 | **Upstash / Railway Redis** | Mail campaigns (`REDIS_URL`) | [mail-campaign-workers.md](./migration/mail-campaign-workers.md) |
 | **Resend** | Transactional + campaign mail | Verify `theshakticollective.in` domain |
 | **Clerk** | SSO cutover (optional; legacy JWT still supported) | [FOUNDER-TASKS.md](../.specify/agents/execution/FOUNDER-TASKS.md) Step 2 |
@@ -55,16 +58,31 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```env
 NODE_ENV=production
 PORT=5000
-MONGODB_URI_PROD=mongodb+srv://...
+DATABASE_URL=postgresql://...@neon.tech/...?sslmode=require
+MONGODB_URI_PROD=mongodb+srv://...   # parallel-run dual-write (remove after sunset)
 JWT_SECRET=<64+ char secret>
 ENCRYPTION_KEY=<64 hex chars>
 REDIS_URL=rediss://...
 RESEND_API_KEY=re_...
 FRONTEND_URL=https://coreknot.in
 CORS_ALLOWED_ORIGINS=https://coreknot.in,https://www.coreknot.in
+
+# Postgres cutover (non-secret — see docs/migration/PRODUCTION-CUTOVER.md)
+COREKNOT_POSTGRES_ENABLED=true
+COREKNOT_AUTH_STORE=postgres
+COREKNOT_TENANT_STORE=postgres
+COREKNOT_PROJECTS_STORE=postgres
+COREKNOT_TASKS_STORE=postgres
+COREKNOT_CRM_STORE=postgres
+COREKNOT_ARTISTS_STORE=postgres
+COREKNOT_DISABLE_GRIDFS_BACKUP=true
+BACKUP_DESTINATION=neon
+SUPABASE_SECONDARY_ENABLED=false
 ```
 
-**Optional:** `SENTRY_DSN`, `BETTERSTACK_HEARTBEAT_URL`, Clerk keys, Postgres flags — see `apps/coreknot/server/.env.example`.
+**Optional:** `SENTRY_DSN`, `BETTERSTACK_HEARTBEAT_URL`, Clerk keys — see `apps/coreknot/server/.env.example`.
+
+**Pre-deploy:** `pnpm migrate:coreknot:verify-cutover:ping`
 
 ### 2b. CoreKnot worker (separate service)
 
@@ -193,7 +211,7 @@ From [FOUNDER-TASKS.md](../.specify/agents/execution/FOUNDER-TASKS.md):
 4. ☐ Railway — API + worker services, env vars
 5. ☐ Vercel — client project, `RENDER_API_PROXY_URL`
 6. ☐ Upstash Redis — `REDIS_URL` on API + worker
-7. ☐ Neon — `DATABASE_URL` when postgres flags enabled
+7. ☐ Neon — `DATABASE_URL` + PITR enabled; P0 postgres flags (see PRODUCTION-CUTOVER.md)
 8. ☐ Resend — domain verified, `RESEND_API_KEY`
 9. ☐ Sentry + PostHog + BetterStack — see observability doc
 10. ☐ Atlas IP allowlist for Railway/Render egress
@@ -205,9 +223,10 @@ From [FOUNDER-TASKS.md](../.specify/agents/execution/FOUNDER-TASKS.md):
 
 | File | Purpose |
 |------|---------|
+| `docs/migration/PRODUCTION-CUTOVER.md` | Neon primary deploy steps |
 | `ENVIRONMENT_GUIDE.md` | Local/staging/prod env matrix |
 | `apps/coreknot/server/.env.example` | API env template |
 | `apps/coreknot/client/.env.example` | Client env template |
-| `apps/coreknot/render.yaml` | Render Blueprint reference |
+| `docs/archive/render.coreknot.legacy.yaml` | Legacy Render blueprint (Railway is authority) |
 | `apps/coreknot/server/railway.toml` | Railway health + start |
 | `docs/migration/mail-campaign-workers.md` | Worker deploy |

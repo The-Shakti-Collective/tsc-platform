@@ -1,22 +1,26 @@
 # TSC Platform
 
-The Sound Collective monorepo — API, community app, shared packages.
+The Shakti Collective monorepo — Platform API, Website, Community, and shared packages.
 
-**Agent entry point:** [AGENTS.md](./AGENTS.md) · **Architecture index:** [.specify/MASTER.md](./.specify/MASTER.md)  
-**Local dev:** [.specify/infrastructure/local-dev.md](./.specify/infrastructure/local-dev.md) · **Monorepo:** [.specify/architecture/monorepo-structure.md](./.specify/architecture/monorepo-structure.md) · **Env vars:** [ENVIRONMENT_GUIDE.md](./ENVIRONMENT_GUIDE.md)
+**Architecture (canonical):** [docs/architecture/MASTER-PRODUCTION-ARCHITECTURE.md](./docs/architecture/MASTER-PRODUCTION-ARCHITECTURE.md)  
+**Agent entry point:** [AGENTS.md](./AGENTS.md) · **Developer index:** [.specify/MASTER.md](./.specify/MASTER.md)  
+**Setup / deploy / ops:** [docs/SETUP.md](./docs/SETUP.md) · [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) · [docs/RUNBOOK.md](./docs/RUNBOOK.md)  
+**Env vars:** [ENV-STANDARD.md](./docs/architecture/ENV-STANDARD.md) · [ENVIRONMENT_GUIDE.md](./ENVIRONMENT_GUIDE.md)
 
-| Platform | Role |
-|----------|------|
-| **GitHub Organization (TheShaktiCollective)** | Central home for all code repositories |
-| **tsc-api** | Main backend and business logic |
-| **tsc-coreknot** | Internal CRM, artist management, finance, operations |
-| **tsc-community** | Public community platform for artists, fans, managers |
-| **tsc-web** | Marketing website, landing pages, SEO |
-| **tsc-shared** | Shared types, contracts, permissions, constants |
-| **Neon PostgreSQL** | Main database (source of truth) |
-| **Railway** | Backend hosting and Redis hosting |
-| **Vercel** | Frontend hosting (Website, Community, CoreKnot) |
-| **Clerk** | Authentication and user management |
+| Component | Role |
+|-----------|------|
+| **tsc-platform** (this repo) | Monorepo — `apps/api`, `apps/website`, `apps/community`, `packages/*` |
+| **tsc-coreknot** | Internal CRM, finance, operations — extract target: `apps/coreknot/` |
+| **tsc-shared** | Published `@tsc/*` packages |
+| **tsc-infra** / **tsc-docs** | Infrastructure templates and public API docs |
+| **Neon PostgreSQL** | Shared database (source of truth) |
+| **Railway** | Platform API + CoreKnot API/workers |
+| **Vercel** | Website, Community, CoreKnot client |
+| **Clerk** | Authentication and identity |
+
+Deprecated standalone repos (`tsc-api`, `tsc-community`, `tsc-web`) — see [REPOSITORY-GOVERNANCE.md](./docs/architecture/REPOSITORY-GOVERNANCE.md).
+
+Tech debt elimination: [docs/elimination/README.md](./docs/elimination/README.md).
 
 ## TL;DR
 

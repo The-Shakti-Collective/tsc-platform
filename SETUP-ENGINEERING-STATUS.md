@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-14  
 **Scope:** In-repo setup phases 1–8 executed; phases 9–17 documented for founder  
-**Founder steps:** [SETUP-FOUNDER-RUNBOOK.md](./SETUP-FOUNDER-RUNBOOK.md)
+**Founder steps:** [docs/archive/SETUP-FOUNDER-RUNBOOK.md](./docs/archive/SETUP-FOUNDER-RUNBOOK.md) (historical) · canonical: [.specify/agents/execution/FOUNDER-TASKS.md](./.specify/agents/execution/FOUNDER-TASKS.md)
 
 ---
 
@@ -129,9 +129,9 @@ node apps/api/dist/main.js         → Nest boots (with DATABASE_URL)
 
 | Phase | Owner | Action |
 |-------|-------|--------|
-| 9 Railway deploy + secrets | Founder | [SETUP-FOUNDER-RUNBOOK.md §5](./SETUP-FOUNDER-RUNBOOK.md) |
-| 10 Vercel projects + token | Founder | [SETUP-FOUNDER-RUNBOOK.md §7](./SETUP-FOUNDER-RUNBOOK.md) |
-| 11 Cloudflare DNS | Founder | [SETUP-FOUNDER-RUNBOOK.md §6](./SETUP-FOUNDER-RUNBOOK.md) |
+| 9 Railway deploy + secrets | Founder | [FOUNDER-TASKS.md](./.specify/agents/execution/FOUNDER-TASKS.md) |
+| 10 Vercel projects + token | Founder | [FOUNDER-TASKS.md](./.specify/agents/execution/FOUNDER-TASKS.md) |
+| 11 Cloudflare DNS | Founder | [FOUNDER-TASKS.md](./.specify/agents/execution/FOUNDER-TASKS.md) |
 | 12 Redis prod URL | Founder | Step 3 + Railway vars |
 | 13 Observability tokens | Founder | Step 8 |
 | 14 Security (helmet, throttler, audience-os guard) | Engineering P1 | Not implemented this pass |

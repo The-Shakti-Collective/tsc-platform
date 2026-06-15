@@ -1,6 +1,7 @@
-# CoreKnot — Render Blueprint reference
-# Deploy from monorepo root with rootDir: apps/coreknot/server (or use Railway — see railway.toml)
-# Docs: docs/coreknot-production-runbook.md · docs/migration/mail-campaign-workers.md
+# LEGACY — CoreKnot Render Blueprint (archived 2026-06-15)
+# Deploy authority: Railway — see apps/coreknot/server/railway.toml
+# Do NOT use for new deploys. Rollback: copy back to apps/coreknot/render.yaml
+# Docs: docs/DEPLOYMENT.md · docs/elimination/DEPLOYMENT-CERTIFICATE.md
 
 services:
   - type: web
@@ -17,7 +18,6 @@ services:
         value: false
       - key: PORT
         value: 10000
-      # Postgres cutover (Neon primary — see docs/migration/PRODUCTION-CUTOVER.md)
       - key: COREKNOT_POSTGRES_ENABLED
         value: true
       - key: COREKNOT_AUTH_STORE
@@ -38,10 +38,6 @@ services:
         value: neon
       - key: SUPABASE_SECONDARY_ENABLED
         value: false
-      # Set in Render Dashboard (never commit secrets):
-      # DATABASE_URL (Neon), MONGODB_URI_PROD (parallel-run dual-write), REDIS_URL
-      # JWT_SECRET, ENCRYPTION_KEY, RESEND_API_KEY
-      # SENTRY_DSN, BETTERSTACK_HEARTBEAT_URL, CORS_ALLOWED_ORIGINS
 
   - type: worker
     name: coreknot-worker-staging
@@ -54,7 +50,6 @@ services:
         value: production
       - key: RUN_WORKERS
         value: true
-      # Same shared secrets as coreknot-api-staging
 
 cronJobs:
   - name: coreknot-keep-warm
@@ -66,4 +61,3 @@ cronJobs:
     envVars:
       - key: KEEP_WARM_URL
         value: https://YOUR-RENDER-SERVICE.onrender.com/api/health
-      # Or: https://YOUR-PRODUCTION-API-HEALTH (custom domain api.coreknot.in/api/health)
