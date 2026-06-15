@@ -14,7 +14,7 @@ import {
 bootstrapSentry();
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   const prefix = resolveApiGlobalPrefix();
   app.setGlobalPrefix(prefix);
   app.enableCors({

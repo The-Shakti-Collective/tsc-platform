@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { getSentryGlobalFilterProvider } from './sentry.bootstrap';
 
 import { AuthModule } from './common/auth/auth.module';
+import { RateLimitModule } from './common/rate-limit/rate-limit.module';
 import { PrismaModule } from './common/database/prisma.module';
 
 import { HealthModule } from './modules/health/health.module';
@@ -101,6 +102,28 @@ import { WorkspaceModule } from './modules/workspace/workspace.module';
 import { ProjectModule } from './modules/project/project.module';
 import { TaskModule } from './modules/task/task.module';
 
+import { UsersModule } from './modules/users/users.module';
+import { OrganizationsModule } from './modules/organizations/organizations.module';
+import { TeamsModule } from './modules/teams/teams.module';
+import { CrmModule } from './modules/crm/crm.module';
+import { InquiriesModule } from './modules/inquiries/inquiries.module';
+import { CalendarModule } from './modules/calendar/calendar.module';
+import { GigsModule } from './modules/gigs/gigs.module';
+import { InvoicesModule } from './modules/invoices/invoices.module';
+import { ReleasesModule } from './modules/releases/releases.module';
+import { RoyaltiesModule } from './modules/royalties/royalties.module';
+import { ContentModule } from './modules/content/content.module';
+import { DistributionModule } from './modules/distribution/distribution.module';
+import { IntegrationsModule } from './modules/integrations/integrations.module';
+import { AuditModule } from './modules/audit/audit.module';
+import { MarketplaceModule } from './modules/marketplace/marketplace.module';
+import { MessagingModule } from './modules/messaging/messaging.module';
+import { AiModule } from './modules/ai/ai.module';
+import { AdminModule } from './modules/admin/admin.module';
+import { CoreknotCompatModule } from './modules/coreknot-compat/coreknot-compat.module';
+import { MediaModule } from './modules/media/media.module';
+import { ClerkWebhookModule } from './modules/clerk-webhook/clerk-webhook.module';
+
 const sentryProvider = getSentryGlobalFilterProvider();
 const sentryProviders = sentryProvider ? [sentryProvider] : [];
 
@@ -111,6 +134,8 @@ const sentryProviders = sentryProvider ? [sentryProvider] : [];
     PrismaModule,
 
     AuthModule,
+
+    RateLimitModule,
 
     HealthModule,
 
@@ -211,6 +236,48 @@ const sentryProviders = sentryProvider ? [sentryProvider] : [];
     ProjectModule,
 
     TaskModule,
+
+    UsersModule,
+
+    OrganizationsModule,
+
+    TeamsModule,
+
+    CrmModule,
+
+    InquiriesModule,
+
+    ClerkWebhookModule,
+
+    CalendarModule,
+
+    GigsModule,
+
+    InvoicesModule,
+
+    ReleasesModule,
+
+    RoyaltiesModule,
+
+    ContentModule,
+
+    DistributionModule,
+
+    IntegrationsModule,
+
+    AuditModule,
+
+    MarketplaceModule,
+
+    MessagingModule,
+
+    AiModule,
+
+    AdminModule,
+
+    CoreknotCompatModule,
+
+    MediaModule,
 
   ],
 
