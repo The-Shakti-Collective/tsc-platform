@@ -7,9 +7,6 @@ import { MobileNav } from './mobile-nav';
 
 const navLinks = [
   { href: '/opportunities', label: 'Opportunities' },
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/directory', label: 'Directory' },
-  { href: '/events', label: 'Events' },
   { href: '/about', label: 'About' },
 ];
 
@@ -45,8 +42,8 @@ export function SiteHeaderStub({ hideDevBadge = false }: SiteHeaderStubProps) {
           <Button asChild variant="ghost" size="sm" className="text-brand-teal-deep">
             <Link href="/sign-in">Sign in</Link>
           </Button>
-          <Button asChild size="sm" className="bg-brand-green hover:bg-brand-teal-mid">
-            <Link href="/sign-up">Join</Link>
+          <Button asChild size="sm" className="cursor-pointer bg-brand-pumpkin hover:bg-brand-amber">
+            <Link href="/sign-up">Create Passport</Link>
           </Button>
         </div>
         <MobileNav

@@ -1,5 +1,5 @@
-import { PlaceholderPage } from '@/components/layout/placeholder-page';
+import { MembersDirectory } from '@/components/members/members-directory';
 
 export default function ArtistsPage() {
-  return <PlaceholderPage title="Artists" description="Artist directory — future sprint." />;
+  return <MembersDirectory />;
 }

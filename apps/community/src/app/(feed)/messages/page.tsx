@@ -1,5 +1,5 @@
-import { PlaceholderPage } from '@/components/layout/placeholder-page';
+import { MessagesInbox } from '@/components/messages/messages-inbox';
 
 export default function MessagesPage() {
-  return <PlaceholderPage title="Messages" description="DMs — not in Sprint 1 scope." />;
+  return <MessagesInbox />;
 }
