@@ -293,9 +293,6 @@ importers:
 
   apps/coreknot/client:
     dependencies:
-      '@coreknot/contracts':
-        specifier: workspace:*
-        version: link:../shared/contracts
       '@datadog/browser-rum':
         specifier: ^6.33.0
         version: 6.33.0

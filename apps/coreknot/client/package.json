@@ -25,7 +25,6 @@
     "lighthouse:report": "node scripts/lighthouse-report-only.mjs"
   },
   "dependencies": {
-    "@coreknot/contracts": "workspace:*",
     "@datadog/browser-rum": "^6.33.0",
     "@fontsource-variable/geist": "^5.2.8",
     "@hookform/resolvers": "^5.4.0",
