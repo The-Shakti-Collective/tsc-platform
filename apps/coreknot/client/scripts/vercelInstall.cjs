@@ -17,10 +17,29 @@ const run = (cmd, cwd) => {
   });
 };
 
-if (fs.existsSync(path.join(REPO_ROOT, 'pnpm-lock.yaml'))) {
-  run('pnpm install --frozen-lockfile', REPO_ROOT);
-} else {
-  console.warn('[vercelInstall] monorepo lockfile missing — standalone npm install in client');
+const standaloneInstall = () => {
+  console.warn('[vercelInstall] standalone npm install in client');
   run('node scripts/generateVercelConfig.cjs', CLIENT_ROOT);
-  run('npm install', CLIENT_ROOT);
+  run('npm install --no-workspaces', CLIENT_ROOT);
+};
+
+const monorepoInstall = () => {
+  try {
+    run('pnpm install --frozen-lockfile', REPO_ROOT);
+    return;
+  } catch (err) {
+    console.warn('[vercelInstall] frozen lockfile install failed — retrying without frozen lockfile');
+  }
+  run('pnpm install --no-frozen-lockfile', REPO_ROOT);
+};
+
+if (fs.existsSync(path.join(REPO_ROOT, 'pnpm-lock.yaml'))) {
+  try {
+    monorepoInstall();
+  } catch (err) {
+    console.warn('[vercelInstall] monorepo pnpm install failed — falling back to standalone npm');
+    standaloneInstall();
+  }
+} else {
+  standaloneInstall();
 }

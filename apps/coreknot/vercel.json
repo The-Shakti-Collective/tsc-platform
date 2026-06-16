@@ -1,4 +1,6 @@
 {
+  "framework": null,
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -13,6 +15,13 @@
       "destination": "/index.html"
     }
   ],
+  "build": {
+    "env": {
+      "VITE_API_URL": "https://api.coreknot.in",
+      "RENDER_API_PROXY_URL": "https://api.coreknot.in",
+      "COREKNOT_DEPLOY": "true"
+    }
+  },
   "buildCommand": "node scripts/vercelBuild.cjs",
   "installCommand": "node scripts/vercelInstall.cjs"
 }
