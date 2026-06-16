@@ -1,0 +1,228 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+.harshad-page {
+  --hd-terracotta: #c4542f;
+  --hd-terracotta-deep: #a84325;
+  --hd-burgundy: #5c1828;
+  --hd-burgundy-deep: #3d1019;
+  --hd-cream: #fff5e8;
+  --hd-cream-warm: #ffecd1;
+  font-family: 'Alata', sans-serif;
+  color: #fff;
+  background: var(--hd-cream);
+}
+
+.harshad-page .font-editorial {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+.harshad-texture {
+  position: absolute;
+  inset: 0;
+  opacity: 0.14;
+  background-image: url('/artists/harshadduhita/texture.png');
+  background-repeat: repeat;
+  background-size: 320px auto;
+  pointer-events: none;
+}
+
+.harshad-divider {
+  display: block;
+  width: 100%;
+  line-height: 0;
+  overflow: hidden;
+}
+
+.harshad-divider svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.harshad-hero-glow {
+  position: absolute;
+  inset: -12%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 236, 209, 0.55) 0%, rgba(196, 84, 47, 0) 68%);
+  pointer-events: none;
+}
+
+.harshad-portrait-ring {
+  position: relative;
+  border-radius: 50% / 46%;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255, 245, 232, 0.35),
+    0 24px 80px rgba(61, 16, 25, 0.35);
+}
+
+.harshad-portrait-ring img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.harshad-card-burgundy {
+  background: linear-gradient(165deg, var(--hd-burgundy) 0%, var(--hd-burgundy-deep) 100%);
+  border-radius: 1.25rem;
+  box-shadow: 0 20px 50px rgba(61, 16, 25, 0.25);
+}
+
+.harshad-timeline-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(to bottom, transparent, rgba(255, 245, 232, 0.55), transparent);
+}
+
+.harshad-spiral {
+  position: absolute;
+  width: min(28vw, 220px);
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.harshad-spiral--left {
+  left: 2%;
+  top: 12%;
+}
+
+.harshad-spiral--right {
+  right: 2%;
+  bottom: 8%;
+  transform: scaleX(-1);
+}
+
+.harshad-genre-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 1.35rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 245, 232, 0.65);
+  color: #fff;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.harshad-genre-pill:hover {
+  background: rgba(255, 245, 232, 0.12);
+  transform: translateY(-2px);
+}
+
+.harshad-media-card {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 0.35rem;
+  box-shadow: 0 0 0 3px rgba(196, 84, 47, 0.35), 0 24px 60px rgba(92, 24, 40, 0.18);
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.harshad-media-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.55), 0 32px 70px rgba(92, 24, 40, 0.28);
+}
+
+.harshad-media-card img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.harshad-media-card:hover img {
+  transform: scale(1.04);
+}
+
+.harshad-media-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(61, 16, 25, 0.82) 0%, rgba(61, 16, 25, 0.08) 55%, transparent 100%);
+  pointer-events: none;
+}
+
+.harshad-play-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  background: rgba(255, 245, 232, 0.92);
+  color: var(--hd-burgundy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+}
+
+.harshad-media-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.harshad-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.75rem;
+  border-radius: 9999px;
+  background: #fff;
+  color: var(--hd-burgundy);
+  font-weight: 700;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.harshad-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+}
+
+.harshad-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  color: #fff;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.harshad-btn-outline:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.harshad-contact-panel {
+  background:
+    linear-gradient(180deg, rgba(92, 24, 40, 0.96), rgba(61, 16, 25, 0.98)),
+    url('/patterns/textures/paper.svg');
+  background-size: auto, 200px 200px;
+}
+
+.harshad-page .marquee-row {
+  animation-duration: 36s;
+}
+
+.harshad-page .marquee-tag {
+  border-color: rgba(255, 245, 232, 0.45);
+  background: transparent;
+  color: #fff;
+}
+
+@media (max-width: 767px) {
+  .harshad-timeline-line {
+    display: none;
+  }
+}

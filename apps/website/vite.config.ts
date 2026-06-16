@@ -32,11 +32,6 @@ const MPA_ROUTE_ENTRIES = Object.values(ROUTES)
   .map((file) => ({ file, path: fileToRoutePath(file) }))
   .sort((a, b) => b.path.length - a.path.length);
 
-/** Clean URLs served from public/ (not Vite HTML entries). */
-const PUBLIC_STATIC_PAGES: Record<string, string> = {
-  '/harshadduhita': '/harshadduhita/index.html',
-};
-
 function shouldBypassMpaFallback(pathname: string): boolean {
   if (pathname.startsWith('/@') || pathname.startsWith('/__vite')) return true;
   if (pathname.startsWith('/node_modules/')) return true;
@@ -68,13 +63,6 @@ function mpaDevFallback(): Connect.NextHandleFunction {
         res.end();
         return;
       }
-    }
-
-    const publicPage = PUBLIC_STATIC_PAGES[normalized];
-    if (publicPage) {
-      req.url = `${publicPage}${search}`;
-      next();
-      return;
     }
 
     for (const { file, path } of MPA_ROUTE_ENTRIES) {

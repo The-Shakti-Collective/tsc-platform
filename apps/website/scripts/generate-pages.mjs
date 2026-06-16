@@ -6,6 +6,7 @@ import { mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { renderArtistPage } from './layout-helpers.mjs';
+import { renderHarshadduhitaPage } from './harshadduhita-page.mjs';
 import { SECTION_PAD, WIDTH, PRIMARY_CTA, SECONDARY_CTA, EYEBROW, H2, BODY } from './design-tokens.mjs';
 import {
   marketingHero,
@@ -40,7 +41,7 @@ const site = JSON.parse(readFileSync(join(root, 'src/data/siteContent.json'), 'u
 const roster = JSON.parse(readFileSync(join(root, 'src/data/rosterArtists.json'), 'utf8'));
 const constants = JSON.parse(readFileSync(join(root, 'src/data/constants.json'), 'utf8'));
 
-function shell({ title, description, layout = 'marketing', main, script }) {
+function shell({ title, description, layout = 'marketing', main, mainClass = 'min-h-screen bg-cream', script }) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -50,7 +51,7 @@ function shell({ title, description, layout = 'marketing', main, script }) {
 </head>
 <body data-layout="${layout}">
 <!-- partial:header -->
-<main class="min-h-screen bg-cream">${main}</main>
+<main class="${mainClass}">${main}</main>
 <!-- partial:footer -->
 ${script ? `<script type="module" src="${script}"></script>` : '<script type="module" src="/src/js/pages/generic.js"></script>'}
 </body>
@@ -410,9 +411,22 @@ writePage(
   formShell('Artist Path — TSC', 'Personalized growth roadmap application.', 'artist-path', '5', '/src/js/forms/artist-path.js'),
 );
 
-// ─── Artist profiles — canonical 9-section blueprint (harshadduhita = Wix export in public/)
+// ─── Artist profiles — canonical blueprint (harshadduhita uses editorial reference layout)
 for (const artist of roster.ROSTER_ARTISTS) {
-  if (artist.slug === 'harshadduhita') continue;
+  if (artist.slug === 'harshadduhita') {
+    writePage(
+      `${artist.slug}/index.html`,
+      shell({
+        title: `${artist.name} | TSC`,
+        description: artist.tagline,
+        layout: 'marketing',
+        mainClass: 'harshad-page min-h-screen',
+        main: renderHarshadduhitaPage(artist),
+        script: '/src/js/pages/harshadduhita.js',
+      }),
+    );
+    continue;
+  }
   writePage(
     `${artist.slug}/index.html`,
     shell({
