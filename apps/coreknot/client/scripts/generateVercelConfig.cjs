@@ -173,6 +173,9 @@ const payload = {
   ...(Object.prototype.hasOwnProperty.call(template, 'framework')
     ? { framework: template.framework }
     : {}),
+  ...(Object.prototype.hasOwnProperty.call(template, 'outputDirectory')
+    ? { outputDirectory: template.outputDirectory }
+    : {}),
   ...(template.buildCommand ? { buildCommand: template.buildCommand } : {}),
   ...(template.installCommand ? { installCommand: template.installCommand } : {}),
 };

@@ -21,6 +21,7 @@
     }
   },
   "framework": null,
+  "outputDirectory": null,
   "buildCommand": "node scripts/vercelBuildOutput.cjs",
   "installCommand": "echo coreknot-install-via-build"
 }

@@ -6,9 +6,8 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 const CLIENT_ROOT = path.join(__dirname, '..');
+const REPO_ROOT = path.join(CLIENT_ROOT, '..', '..');
 const DIST = path.join(CLIENT_ROOT, 'dist');
-const OUT = path.join(CLIENT_ROOT, '.vercel', 'output');
-const STATIC = path.join(OUT, 'static');
 
 const run = (cmd) => {
   console.log(`[vercelBuildOutput] ${cmd}`);
@@ -29,6 +28,32 @@ const copyDir = (src, dest) => {
   }
 };
 
+const proxyUrl = String(
+  process.env.RENDER_API_PROXY_URL || process.env.VITE_API_URL || 'https://api.coreknot.in',
+).replace(/\/$/, '');
+
+const buildConfig = () => ({
+  version: 3,
+  routes: [
+    { src: '/api/(.*)', dest: `${proxyUrl}/api/$1` },
+    { src: '/socket.io/(.*)', dest: `${proxyUrl}/socket.io/$1` },
+    { handle: 'filesystem' },
+    { src: '/(.*)', dest: '/index.html' },
+  ],
+});
+
+const writeBuildOutput = (outDir) => {
+  const staticDir = path.join(outDir, 'static');
+  fs.rmSync(outDir, { recursive: true, force: true });
+  fs.mkdirSync(staticDir, { recursive: true });
+  copyDir(DIST, staticDir);
+  fs.writeFileSync(
+    path.join(outDir, 'config.json'),
+    `${JSON.stringify(buildConfig(), null, 2)}\n`,
+    'utf8',
+  );
+};
+
 run('node scripts/vercelInstall.cjs');
 run('node scripts/vercelBuild.cjs');
 
@@ -37,23 +62,24 @@ if (!fs.existsSync(DIST)) {
   process.exit(1);
 }
 
-fs.rmSync(OUT, { recursive: true, force: true });
-fs.mkdirSync(STATIC, { recursive: true });
-copyDir(DIST, STATIC);
+const clientOut = path.join(CLIENT_ROOT, '.vercel', 'output');
+writeBuildOutput(clientOut);
+console.log('[vercelBuildOutput] wrote client .vercel/output');
 
-const proxyUrl = String(
-  process.env.RENDER_API_PROXY_URL || process.env.VITE_API_URL || 'https://api.coreknot.in',
-).replace(/\/$/, '');
+if (process.env.VERCEL === '1') {
+  const monorepoPkg = path.join(REPO_ROOT, 'package.json');
+  if (fs.existsSync(monorepoPkg)) {
+    try {
+      const pkg = JSON.parse(fs.readFileSync(monorepoPkg, 'utf8'));
+      if (pkg.workspaces || pkg.name === 'tsc-platform') {
+        const monorepoOut = path.join(REPO_ROOT, '.vercel', 'output');
+        writeBuildOutput(monorepoOut);
+        console.log('[vercelBuildOutput] mirrored .vercel/output to monorepo root');
+      }
+    } catch (err) {
+      console.warn('[vercelBuildOutput] skip monorepo mirror:', err.message);
+    }
+  }
+}
 
-const config = {
-  version: 3,
-  routes: [
-    { src: '/api/(.*)', dest: `${proxyUrl}/api/$1` },
-    { src: '/socket.io/(.*)', dest: `${proxyUrl}/socket.io/$1` },
-    { handle: 'filesystem' },
-    { src: '/(.*)', dest: '/index.html' },
-  ],
-};
-
-fs.writeFileSync(path.join(OUT, 'config.json'), `${JSON.stringify(config, null, 2)}\n`, 'utf8');
-console.log('[vercelBuildOutput] wrote .vercel/output for prebuilt deploy');
+console.log('[vercelBuildOutput] ready for Build Output API deploy');
