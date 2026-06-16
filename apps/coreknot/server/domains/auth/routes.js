@@ -56,8 +56,11 @@ router.post('/logout', logout);
 router.post('/google-login', googleLogin);
 router.post('/oauth-establish', authLoginLimiter, validateBody(oauthEstablishBody), oauthEstablishSession);
 router.get('/google/redirect-uri', (req, res) => {
-  const { resolveGoogleRedirectUri } = require('../../utils/googleAuth');
-  res.json({ redirectUri: resolveGoogleRedirectUri(req) });
+  const { isGoogleOAuthConfigured, resolveGoogleRedirectUri } = require('../../utils/googleAuth');
+  res.json({
+    redirectUri: resolveGoogleRedirectUri(req),
+    available: isGoogleOAuthConfigured(),
+  });
 });
 router.get('/google', googleAuthRedirect);
 router.get('/google/callback', googleAuthCallback);

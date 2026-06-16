@@ -10,7 +10,11 @@ const {
 } = require('../../../utils/authSession');
 const { setAuthCookie } = require('../../../utils/authCookie');
 const { finishAuthSession, listUserSessions, removeSession, ensureSession } = require('../../../utils/sessionRegistry');
-const { createOAuth2Client, resolveGoogleRedirectUri } = require('../../../utils/googleAuth');
+const {
+  createOAuth2Client,
+  isGoogleOAuthConfigured,
+  resolveGoogleRedirectUri,
+} = require('../../../utils/googleAuth');
 const { validatePasswordStrength } = require('../../../utils/passwordValidation');
 const { normalizePasswordInput, passwordCandidatesForCompare } = require('../../../utils/passwordAuth');
 const { normalizePersonName } = require('../../../utils/sanitizer');
@@ -237,6 +241,9 @@ exports.login = async (req, res) => {
 };
 
 exports.googleLogin = async (req, res) => {
+  if (!isGoogleOAuthConfigured()) {
+    return apiError(res, 'Google sign-in is not configured', 503, { code: 'GOOGLE_OAUTH_UNAVAILABLE' });
+  }
   try {
     const { tokenId } = req.body;
     const ticket = await oauth2Client.verifyIdToken({
@@ -363,6 +370,14 @@ exports.changeRequiredPassword = async (req, res) => {
 };
 
 exports.googleAuthRedirect = (req, res) => {
+  if (!isGoogleOAuthConfigured()) {
+    const ua = String(req.headers['user-agent'] || '').toLowerCase();
+    const wantsJson = ua.includes('axios') || (req.accepts('json') && !req.accepts('html'));
+    if (wantsJson) {
+      return apiError(res, 'Google sign-in is not configured', 503, { code: 'GOOGLE_OAUTH_UNAVAILABLE' });
+    }
+    return res.redirect(`${FRONTEND_URL}/login?error=google_unavailable`);
+  }
   if (req.headers['user-agent'] && req.headers['user-agent'].toLowerCase().includes('axios')) {
     return res.status(401).json({ error: 'Unauthorized API access' });
   }
@@ -389,6 +404,9 @@ exports.googleAuthRedirect = (req, res) => {
 };
 
 exports.googleAuthCallback = async (req, res) => {
+  if (!isGoogleOAuthConfigured()) {
+    return apiError(res, 'Google sign-in is not configured', 503, { code: 'GOOGLE_OAUTH_UNAVAILABLE' });
+  }
   try {
     const { code, state } = req.query;
     const redirectUri = resolveGoogleRedirectUri(req);
