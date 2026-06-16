@@ -93,6 +93,29 @@ function createLegacyRepository({ MongoModel, entityType, flagName }) {
     if (filter.included !== undefined) {
       shaped = shaped.filter((row) => row.included === filter.included);
     }
+    if (filter.leadId) {
+      if (filter.leadId.$in && Array.isArray(filter.leadId.$in)) {
+        const set = new Set(filter.leadId.$in.map((id) => String(id)));
+        shaped = shaped.filter((row) => set.has(String(row.leadId)));
+      } else {
+        const leadId = String(filter.leadId);
+        shaped = shaped.filter((row) => String(row.leadId) === leadId);
+      }
+    }
+    if (filter.action) {
+      if (filter.action.$in && Array.isArray(filter.action.$in)) {
+        const set = new Set(filter.action.$in);
+        shaped = shaped.filter((row) => set.has(row.action));
+      } else {
+        shaped = shaped.filter((row) => row.action === filter.action);
+      }
+    }
+    if (filter.configKey) {
+      shaped = shaped.filter((row) => row.configKey === filter.configKey);
+    }
+    if (filter.crmType) {
+      shaped = shaped.filter((row) => row.crmType === filter.crmType);
+    }
 
     if (options.sortField) {
       const field = options.sortField;
@@ -146,6 +169,7 @@ function createLegacyRepository({ MongoModel, entityType, flagName }) {
 
   function hasComplexMongoFilter(filter = {}) {
     if (filter.$or || filter.$and) return true;
+    if (filter.leadId && typeof filter.leadId === 'object' && filter.leadId.$in) return true;
     if (filter.date && typeof filter.date === 'object' && (filter.date.$gte || filter.date.$lte)) {
       return false;
     }
@@ -182,7 +206,10 @@ function createLegacyRepository({ MongoModel, entityType, flagName }) {
       lean: () => promise(),
       select: () => chain,
       populate: () => chain,
-      sort: (spec) => { sortSpec = spec; return chain; },
+      sort: (spec) => {
+        sortSpec = typeof spec === 'string' ? { [spec]: 1 } : spec;
+        return chain;
+      },
       skip: (n) => { skipVal = n; return chain; },
       limit: (n) => { limitVal = n; return chain; },
       session: () => chain,
@@ -247,6 +274,20 @@ function createLegacyRepository({ MongoModel, entityType, flagName }) {
       return created;
     },
 
+    async insertMany(docs = [], options = {}) {
+      if (!usePostgres(options) || shouldMirrorMongo()) {
+        return mongoRepo.insertMany
+          ? mongoRepo.insertMany(docs, options)
+          : Promise.all(docs.map((doc) => mongoRepo.create(doc)));
+      }
+      const created = [];
+      for (const doc of docs) {
+        // eslint-disable-next-line no-await-in-loop
+        created.push(await writePrimary(doc));
+      }
+      return created;
+    },
+
     async findOneAndUpdate(filter, update, options = {}) {
       if (shouldWritePostgresFirst(isPostgresEnabled)) {
         const existing = await this.findOne(filter, options);
@@ -306,6 +347,17 @@ function createLegacyRepository({ MongoModel, entityType, flagName }) {
         }
       }
       return result;
+    },
+
+    async findOneAndDelete(filter, options = {}) {
+      const doc = await this.findOne(filter, options);
+      if (!doc) return null;
+      await this.deleteOne(filter, options);
+      return doc;
+    },
+
+    async findByIdAndDelete(id, options = {}) {
+      return this.findOneAndDelete({ _id: id }, options);
     },
 
     mirrorToPostgres,

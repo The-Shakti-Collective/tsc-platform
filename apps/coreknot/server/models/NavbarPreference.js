@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const tenantPlugin = require('../plugins/tenantPlugin');
+const { DEFAULT_NAVBAR_GROUPS } = require('../constants/customizationDefaults');
 
 const navbarPreferenceSchema = new mongoose.Schema({
   userId: {
@@ -33,54 +34,7 @@ const navbarPreferenceSchema = new mongoose.Schema({
 navbarPreferenceSchema.index({ userId: 1 });
 navbarPreferenceSchema.plugin(tenantPlugin);
 
-// Default navbar groups — 3-zone usage-driven IA
-const DEFAULT_NAVBAR_GROUPS = [
-  {
-    id: 'primary',
-    title: 'Primary',
-    order: 1,
-    visible: true,
-    isCustom: false,
-    flat: true,
-    pages: [
-      { path: '/dashboard', label: 'Dashboard', order: 1, visible: true },
-      { path: '/projects', label: 'Projects', order: 2, visible: true },
-      { path: '/todo', label: 'Todo', order: 3, visible: true },
-      { path: '/inbox', label: 'Inbox', order: 4, visible: true },
-      { path: '/attendance', label: 'Attendance', order: 5, visible: true },
-    ],
-  },
-  {
-    id: 'tools',
-    title: 'Tools',
-    order: 2,
-    visible: true,
-    isCustom: false,
-    defaultOpen: true,
-    pages: [
-      { path: '/calendar', label: 'Calendar', order: 1, visible: true },
-      { path: '/logs', label: 'Daily Logs', order: 2, visible: true },
-      { path: '/notes', label: 'Notes', order: 3, visible: true },
-      { path: '/assets', label: 'Assets', order: 4, visible: true },
-      { path: '/schedule', label: 'Schedule', order: 5, visible: true },
-      { path: '/emails', label: 'Emails', order: 6, visible: true },
-    ],
-  },
-  {
-    id: 'hubs',
-    title: 'Modules',
-    order: 3,
-    visible: true,
-    isCustom: false,
-    defaultOpen: false,
-    pages: [
-      { path: '/crm', label: 'CRM', order: 1, visible: true },
-      { path: '/office', label: 'People & Office', order: 2, visible: true },
-      { path: '/management', label: 'Management', order: 3, visible: true },
-      { path: '/admin/console', label: 'Admin', order: 4, visible: true },
-    ],
-  },
-];
+// Default navbar groups — canonical source: constants/customizationDefaults.js
 
 module.exports = mongoose.model('NavbarPreference', navbarPreferenceSchema);
 module.exports.DEFAULT_NAVBAR_GROUPS = DEFAULT_NAVBAR_GROUPS;

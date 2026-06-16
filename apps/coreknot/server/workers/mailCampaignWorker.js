@@ -1,6 +1,7 @@
 const { Worker } = require('bullmq');
 const IORedis = require('ioredis');
 const logger = require('../utils/logger');
+const { captureException } = require('../utils/sentry');
 const { getRedisUrl } = require('../utils/wslRedis');
 const { QUEUE_NAME, JOB_CAMPAIGN_SEND, closeMailCampaignQueue } = require('../services/mailCampaignQueue');
 const { processCampaignBatch } = require('../services/mailCampaignBatch');
@@ -71,10 +72,18 @@ const initMailCampaignWorker = () => {
 
   worker.on('failed', (job, err) => {
     logger.error('mailCampaignWorker', `Job ${job?.id} failed`, { error: err.message });
+    captureException(err, {
+      label: 'mailCampaignJobFailed',
+      jobId: job?.id,
+      jobName: job?.name,
+      campaignId: job?.data?.campaignId,
+      batchIndex: job?.data?.batchIndex,
+    });
   });
 
   worker.on('error', (err) => {
     logger.error('mailCampaignWorker', 'Worker error', { error: err.message });
+    captureException(err, { label: 'mailCampaignWorkerError' });
   });
 
   logger.info('mailCampaignWorker', `BullMQ worker listening on ${QUEUE_NAME}`);

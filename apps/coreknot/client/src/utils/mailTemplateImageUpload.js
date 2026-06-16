@@ -1,4 +1,4 @@
-import { uploadFiles } from './uploadthing';
+import axios from 'axios';
 
 export const MAIL_TEMPLATE_IMAGE_UPLOADER = 'mailTemplateImageUploader';
 
@@ -34,10 +34,23 @@ export const insertImageInQuill = (quill, url) => {
 
 export const uploadMailTemplateImage = async (file) => {
   if (!file) throw new Error('No image selected');
-  const uploadRes = await uploadFiles(MAIL_TEMPLATE_IMAGE_UPLOADER, { files: [file] });
-  const uploaded = uploadRes?.[0];
-  const url = uploaded?.url || uploaded?.ufsUrl;
-  if (!url) throw new Error('Image upload failed');
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await axios.post('/api/mail/templates/upload-image', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      'x-skip-toast': 'true',
+    },
+    withCredentials: true,
+    timeout: 0,
+  });
+
+  const uploaded = res.data?.data;
+  const url = uploaded?.url;
+  if (!url) throw new Error(res.data?.message || 'Image upload failed');
+
   return {
     url,
     name: uploaded?.name || file.name,

@@ -3,6 +3,8 @@
 
 generator client {
   provider = "prisma-client-js"
+  // Package-local output avoids Windows EPERM on hoisted pnpm @prisma/client store.
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -783,15 +785,16 @@ model Venue {
 }
 
 model Community {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  description String?
-  city        String?
-  genres      String[] @default([])
-  artistId    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  description     String?
+  bannerImageUrl  String?
+  city            String?
+  genres          String[] @default([])
+  artistId        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   artist             Artist?                         @relation(fields: [artistId], references: [id], onDelete: SetNull)
   members            CommunityMember[]

@@ -1,6 +1,5 @@
-const mongoose = require('mongoose');
-const Campaign = require('../models/Campaign');
-const MailCampaign = require('../models/MailCampaign');
+const { isObjectIdString } = require('../../../utils/mongoId');
+const { campaignRepository, mailCampaignRepository } = require('../../../repositories/mailRepositories');
 const MailEvent = require('../models/MailEvent');
 const Lead = require('../../../models/Lead');
 const { updateEmailTags } = require('../../../services/mailService');
@@ -35,17 +34,19 @@ async function resolveMailEventTenantId(camp, cleanEmail) {
   return resolveDefaultTenantId();
 }
 
-async function saveCampaignDoc(camp, cleanEmail) {
+async function saveCampaignDoc(camp, cleanEmail, repo) {
   if (!camp) return;
-  if (!camp.tenantId) {
-    const tenantId = await resolveMailEventTenantId(camp, cleanEmail);
-    if (tenantId) camp.tenantId = tenantId;
+  const plain = camp.toObject ? camp.toObject() : { ...camp };
+  if (!plain.tenantId) {
+    const tenantId = await resolveMailEventTenantId(plain, cleanEmail);
+    if (tenantId) plain.tenantId = tenantId;
   }
-  if (!camp.tenantId) {
-    console.warn(`[Resend Webhook] Skipping campaign save — no tenantId for ${camp._id}`);
+  if (!plain.tenantId) {
+    console.warn(`[Resend Webhook] Skipping campaign save — no tenantId for ${plain._id}`);
     return;
   }
-  await camp.save();
+  const store = repo || (plain.campaignId ? campaignRepository : mailCampaignRepository);
+  await store.saveDocument(plain);
 }
 
 /** updateEmailTags uses doc.save(); webhook has no ALS tenant — Lead tags via bypass, PersonHub best-effort */
@@ -69,29 +70,51 @@ async function safeUpdateEmailTags(cleanEmail, tag, status) {
 async function lookupCampaignByTag(campaignTag, recipientTag) {
   if (!campaignTag) return { camp: null, isCore: true, recipient: null };
 
-  let camp = await Campaign.findOne({ campaignId: campaignTag }).setOptions(WEBHOOK_BYPASS);
-  if (!camp && mongoose.Types.ObjectId.isValid(campaignTag)) {
-    camp = await Campaign.findById(campaignTag).setOptions(WEBHOOK_BYPASS);
+  let camp = await campaignRepository.findOne({ campaignId: campaignTag }, { bypass: true }).lean();
+  if (!camp && isObjectIdString(campaignTag)) {
+    camp = await campaignRepository.findById(campaignTag, { bypass: true }).lean();
   }
   if (camp) {
-    const recipient = camp.recipients?.id
-      ? camp.recipients.id(recipientTag)
-      : camp.recipients?.find((r) => r._id && r._id.toString() === recipientTag);
-    return { camp, isCore: true, recipient: recipient || null };
+    const recipient = camp.recipients?.find((r) => r._id && r._id.toString() === recipientTag);
+    return { camp, isCore: true, recipient: recipient || null, repo: campaignRepository };
   }
 
-  camp = await MailCampaign.findOne({ campaignId: campaignTag }).setOptions(WEBHOOK_BYPASS);
-  if (!camp && mongoose.Types.ObjectId.isValid(campaignTag)) {
-    camp = await MailCampaign.findById(campaignTag).setOptions(WEBHOOK_BYPASS);
+  camp = await mailCampaignRepository.findOne({ campaignId: campaignTag }, { bypass: true }).lean();
+  if (!camp && isObjectIdString(campaignTag)) {
+    camp = await mailCampaignRepository.findById(campaignTag, { bypass: true }).lean();
   }
   if (camp) {
-    const recipient = camp.recipients?.id
-      ? camp.recipients.id(recipientTag)
-      : camp.recipients?.find((r) => r._id && r._id.toString() === recipientTag);
-    return { camp, isCore: false, recipient: recipient || null };
+    const recipient = camp.recipients?.find((r) => r._id && r._id.toString() === recipientTag);
+    return { camp, isCore: false, recipient: recipient || null, repo: mailCampaignRepository };
   }
 
   return { camp: null, isCore: true, recipient: null };
+}
+
+async function findOneCoreCampaign(filter) {
+  return campaignRepository.findOne(filter, { bypass: true }).lean();
+}
+
+async function findOneMailCampaign(filter) {
+  return mailCampaignRepository.findOne(filter, { bypass: true }).lean();
+}
+
+async function findLatestCoreByEmail(email) {
+  const rows = await campaignRepository.find({ 'recipients.email': email }, { bypass: true }).sort('-updatedAt').lean();
+  return rows[0] || null;
+}
+
+async function findLatestMailByEmail(email) {
+  const rows = await mailCampaignRepository.find({ 'recipients.email': email }, { bypass: true }).sort('-updatedAt').lean();
+  return rows[0] || null;
+}
+
+async function findCoreCampaignsByEmail(email) {
+  return campaignRepository.find({ 'recipients.email': email }, { bypass: true }).lean();
+}
+
+async function findMailCampaignsByEmail(email) {
+  return mailCampaignRepository.find({ 'recipients.email': email }, { bypass: true }).lean();
 }
 
 async function createResendMailEvent(payload, tenantId) {
@@ -172,12 +195,12 @@ async function handleTrackResendWebhook(req, res) {
     }
 
     if (!camp && emailId) {
-      camp = await Campaign.findOne({ 'recipients.messageId': emailId }).setOptions(WEBHOOK_BYPASS);
+      camp = await findOneCoreCampaign({ 'recipients.messageId': emailId });
       if (camp) {
         recipient = camp.recipients.find((r) => r.messageId === emailId);
       }
       if (!camp) {
-        camp = await MailCampaign.findOne({ 'recipients.messageId': emailId }).setOptions(WEBHOOK_BYPASS);
+        camp = await findOneMailCampaign({ 'recipients.messageId': emailId });
         if (camp) {
           isCore = false;
           recipient = camp.recipients.find((r) => r.messageId === emailId);
@@ -186,12 +209,12 @@ async function handleTrackResendWebhook(req, res) {
     }
 
     if (!recipient) {
-      camp = await Campaign.findOne({ 'recipients.email': cleanEmail }).sort({ updatedAt: -1 }).setOptions(WEBHOOK_BYPASS);
+      camp = await findLatestCoreByEmail(cleanEmail);
       if (camp) {
         isCore = true;
         recipient = camp.recipients.find((r) => r.email && r.email.toLowerCase() === cleanEmail);
       } else {
-        camp = await MailCampaign.findOne({ 'recipients.email': cleanEmail }).sort({ updatedAt: -1 }).setOptions(WEBHOOK_BYPASS);
+        camp = await findLatestMailByEmail(cleanEmail);
         if (camp) {
           isCore = false;
           recipient = camp.recipients.find((r) => r.email && r.email.toLowerCase() === cleanEmail);
@@ -243,10 +266,10 @@ async function handleTrackResendWebhook(req, res) {
         } else {
           camp.stats.bounced = (camp.stats.bounced || 0) + 1;
         }
-        await saveCampaignDoc(camp, cleanEmail);
+        await saveCampaignDoc(camp, cleanEmail, isCore ? campaignRepository : mailCampaignRepository);
       }
 
-      const coreCamps = await Campaign.find({ 'recipients.email': cleanEmail }).setOptions(WEBHOOK_BYPASS);
+      const coreCamps = await findCoreCampaignsByEmail(cleanEmail);
       for (const c of coreCamps) {
         let changed = false;
         c.recipients?.forEach((r) => {
@@ -258,11 +281,11 @@ async function handleTrackResendWebhook(req, res) {
         if (changed) {
           if (!c.metrics) c.metrics = { totalSent: 0, opened: 0, clicked: 0, bounced: 0 };
           c.metrics.bounced = (c.metrics.bounced || 0) + 1;
-          await saveCampaignDoc(c, cleanEmail);
+          await saveCampaignDoc(c, cleanEmail, campaignRepository);
         }
       }
 
-      const mailCamps = await MailCampaign.find({ 'recipients.email': cleanEmail }).setOptions(WEBHOOK_BYPASS);
+      const mailCamps = await findMailCampaignsByEmail(cleanEmail);
       for (const mc of mailCamps) {
         let changed = false;
         mc.recipients?.forEach((r) => {
@@ -273,7 +296,7 @@ async function handleTrackResendWebhook(req, res) {
         });
         if (changed) {
           mc.stats.bounced = (mc.stats.bounced || 0) + 1;
-          await saveCampaignDoc(mc, cleanEmail);
+          await saveCampaignDoc(mc, cleanEmail, mailCampaignRepository);
         }
       }
 
@@ -307,7 +330,7 @@ async function handleTrackResendWebhook(req, res) {
           } else {
             camp.stats.opened = (camp.stats.opened || 0) + 1;
           }
-          await saveCampaignDoc(camp, cleanEmail);
+          await saveCampaignDoc(camp, cleanEmail, isCore ? campaignRepository : mailCampaignRepository);
         }
       }
 
@@ -352,7 +375,7 @@ async function handleTrackResendWebhook(req, res) {
           } else {
             camp.stats.clicked = (camp.stats.clicked || 0) + 1;
           }
-          await saveCampaignDoc(camp, cleanEmail);
+          await saveCampaignDoc(camp, cleanEmail, isCore ? campaignRepository : mailCampaignRepository);
         }
       }
 
@@ -377,7 +400,7 @@ async function handleTrackResendWebhook(req, res) {
       if (recipient) {
         if (recipient.status === 'Pending') {
           recipient.status = 'Sent';
-          await saveCampaignDoc(camp, cleanEmail);
+          await saveCampaignDoc(camp, cleanEmail, isCore ? campaignRepository : mailCampaignRepository);
         }
       }
 
@@ -461,12 +484,12 @@ async function handleApiResendWebhook(req, res) {
     }
 
     if (!camp && emailId) {
-      camp = await Campaign.findOne({ 'recipients.messageId': emailId }).setOptions(WEBHOOK_BYPASS);
+      camp = await findOneCoreCampaign({ 'recipients.messageId': emailId });
       if (camp) {
         recipient = camp.recipients.find((r) => r.messageId === emailId);
       }
       if (!camp) {
-        camp = await MailCampaign.findOne({ 'recipients.messageId': emailId }).setOptions(WEBHOOK_BYPASS);
+        camp = await findOneMailCampaign({ 'recipients.messageId': emailId });
         if (camp) {
           isCore = false;
           recipient = camp.recipients.find((r) => r.messageId === emailId);
@@ -475,12 +498,12 @@ async function handleApiResendWebhook(req, res) {
     }
 
     if (!recipient) {
-      camp = await Campaign.findOne({ 'recipients.email': cleanEmail }).sort({ updatedAt: -1 }).setOptions(WEBHOOK_BYPASS);
+      camp = await findLatestCoreByEmail(cleanEmail);
       if (camp) {
         isCore = true;
         recipient = camp.recipients.find((r) => r.email && r.email.toLowerCase() === cleanEmail);
       } else {
-        camp = await MailCampaign.findOne({ 'recipients.email': cleanEmail }).sort({ updatedAt: -1 }).setOptions(WEBHOOK_BYPASS);
+        camp = await findLatestMailByEmail(cleanEmail);
         if (camp) {
           isCore = false;
           recipient = camp.recipients.find((r) => r.email && r.email.toLowerCase() === cleanEmail);
@@ -536,10 +559,10 @@ async function handleApiResendWebhook(req, res) {
         } else {
           camp.stats.bounced = (camp.stats.bounced || 0) + 1;
         }
-        await saveCampaignDoc(camp, cleanEmail);
+        await saveCampaignDoc(camp, cleanEmail, isCore ? campaignRepository : mailCampaignRepository);
       }
 
-      const coreCamps = await Campaign.find({ 'recipients.email': cleanEmail }).setOptions(WEBHOOK_BYPASS);
+      const coreCamps = await findCoreCampaignsByEmail(cleanEmail);
       for (const c of coreCamps) {
         let changed = false;
         c.recipients?.forEach((r) => {
@@ -551,11 +574,11 @@ async function handleApiResendWebhook(req, res) {
         if (changed) {
           if (!c.metrics) c.metrics = { totalSent: 0, opened: 0, clicked: 0, bounced: 0 };
           c.metrics.bounced = (c.metrics.bounced || 0) + 1;
-          await saveCampaignDoc(c, cleanEmail);
+          await saveCampaignDoc(c, cleanEmail, campaignRepository);
         }
       }
 
-      const mailCamps = await MailCampaign.find({ 'recipients.email': cleanEmail }).setOptions(WEBHOOK_BYPASS);
+      const mailCamps = await findMailCampaignsByEmail(cleanEmail);
       for (const mc of mailCamps) {
         let changed = false;
         mc.recipients?.forEach((r) => {
@@ -566,7 +589,7 @@ async function handleApiResendWebhook(req, res) {
         });
         if (changed) {
           mc.stats.bounced = (mc.stats.bounced || 0) + 1;
-          await saveCampaignDoc(mc, cleanEmail);
+          await saveCampaignDoc(mc, cleanEmail, mailCampaignRepository);
         }
       }
 
@@ -608,7 +631,7 @@ async function handleApiResendWebhook(req, res) {
           } else {
             camp.stats.opened = (camp.stats.opened || 0) + 1;
           }
-          await saveCampaignDoc(camp, cleanEmail);
+          await saveCampaignDoc(camp, cleanEmail, isCore ? campaignRepository : mailCampaignRepository);
         }
       }
 
@@ -654,7 +677,7 @@ async function handleApiResendWebhook(req, res) {
           } else {
             camp.stats.clicked = (camp.stats.clicked || 0) + 1;
           }
-          await saveCampaignDoc(camp, cleanEmail);
+          await saveCampaignDoc(camp, cleanEmail, isCore ? campaignRepository : mailCampaignRepository);
         }
       }
 
@@ -684,7 +707,7 @@ async function handleApiResendWebhook(req, res) {
       if (recipient) {
         if (recipient.status === 'Pending') {
           recipient.status = 'Sent';
-          await saveCampaignDoc(camp, cleanEmail);
+          await saveCampaignDoc(camp, cleanEmail, isCore ? campaignRepository : mailCampaignRepository);
         }
       }
 

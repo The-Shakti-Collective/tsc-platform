@@ -24,15 +24,15 @@ const updateRecipientFields = async (Model, campaignId, recipientId, fields, inc
   await Model.findByIdAndUpdate(
     campaignId,
     update,
-    { arrayFilters: [{ 'elem._id': recipientId }], ...BYPASS },
+    { arrayFilters: [{ 'elem._id': recipientId }], ...BYPASS, bypass: true },
   );
 };
 
 const incrementCampaignCounter = async (Model, campaignId, isLegacy, legacyField, coreField) => {
   if (isLegacy) {
-    await Model.findByIdAndUpdate(campaignId, { $inc: { [`stats.${legacyField}`]: 1 } }, BYPASS);
+    await Model.findByIdAndUpdate(campaignId, { $inc: { [`stats.${legacyField}`]: 1 } }, { ...BYPASS, bypass: true });
   } else {
-    await Model.findByIdAndUpdate(campaignId, { $inc: { [`metrics.${coreField}`]: 1 } }, BYPASS);
+    await Model.findByIdAndUpdate(campaignId, { $inc: { [`metrics.${coreField}`]: 1 } }, { ...BYPASS, bypass: true });
   }
 };
 
@@ -168,16 +168,15 @@ const resolveSender = async (campaign, profileId, jobIndex) => {
 const processEmailJobInner = async ({
   campaignId, recipientId, email, subject, content, profileId, isLegacy, jobIndex, tenantId,
 }) => {
-  const Campaign = require('../models/Campaign');
-  const MailCampaign = require('../models/MailCampaign');
+  const { campaignRepository, mailCampaignRepository } = require('../../../repositories/mailRepositories');
   const MailEvent = require('../models/MailEvent');
   const { isCampaignStopped } = require('./campaignQueueState');
 
-  let Model = Campaign;
-  let campaign = await Campaign.findById(campaignId).populate('senderProfileId').populate('senderProfileIds').setOptions(BYPASS);
+  let Model = campaignRepository;
+  let campaign = await campaignRepository.findById(campaignId, { bypass: true }).populate('senderProfileId').populate('senderProfileIds').lean();
   if (!campaign) {
-    campaign = await MailCampaign.findById(campaignId).populate('senderProfileId').setOptions(BYPASS);
-    Model = MailCampaign;
+    campaign = await mailCampaignRepository.findById(campaignId, { bypass: true }).populate('senderProfileId').lean();
+    Model = mailCampaignRepository;
     isLegacy = true;
   }
   if (!campaign) return;
@@ -186,9 +185,7 @@ const processEmailJobInner = async ({
   const logEvent = (payload) => logCampaignEvent(MailEvent, { ...payload, tenantId: resolvedTenantId });
 
   const getRecipient = () => (
-    campaign.recipients?.id
-      ? campaign.recipients.id(recipientId)
-      : campaign.recipients?.find((r) => r._id?.toString() === recipientId?.toString() || r.email === email)
+    campaign.recipients?.find((r) => r._id?.toString() === recipientId?.toString() || r.email === email)
   );
 
   const skipRecipientAsCancelled = async (reason) => {
@@ -203,16 +200,16 @@ const processEmailJobInner = async ({
   };
 
   const checkCompletion = async () => {
-    const freshCamp = await Model.findById(campaignId).select('recipients status').lean();
+    const freshCamp = await Model.findById(campaignId, { bypass: true }).select('recipients status').lean();
     if (freshCamp?.recipients) {
       const isDone = freshCamp.recipients.every((r) => r.status !== 'Pending' && r.status !== 'Queued');
       if (isDone && freshCamp.status !== 'Stopped') {
-        await Model.findByIdAndUpdate(campaignId, { $set: { status: 'Completed' } });
+        await Model.findByIdAndUpdate(campaignId, { $set: { status: 'Completed' } }, { bypass: true });
       }
     }
   };
 
-  const freshCamp = await Model.findById(campaignId).select('status').lean();
+  const freshCamp = await Model.findById(campaignId, { bypass: true }).select('status').lean();
   if (freshCamp?.status === 'Stopped' || isCampaignStopped(campaignId)) {
     logger.info('Email Processor', `Skipping send — campaign ${campaignId} is stopped`);
     await skipRecipientAsCancelled('Campaign stopped');

@@ -1,8 +1,4 @@
-const mongoose = require('mongoose');
-const Lead = require('../models/Lead');
-const leadRepository = require('../repositories/leadRepository');
-const EMI = require('../models/EMI');
-const CRMImport = require('../models/CRMImport');
+const { leadRepository, emiRepository, crmImportRepository } = require('../repositories');
 const {
   sanitizeEmail,
   isValidEmail,
@@ -67,21 +63,21 @@ async function findExistingLeadIdentityConflict(leadData, user) {
 
   if (leadData.phone) {
     const variants = phoneLookupVariants(leadData.phone);
-    const byPhone = await Lead.findOne({ ...base, phone: { $in: variants } })
+    const byPhone = await leadRepository.findOne({ ...base, phone: { $in: variants } })
       .setOptions(TENANT_SAFE_LOOKUP)
       .lean();
     if (byPhone) return byPhone;
   }
 
   if (leadData.email) {
-    const byEmail = await Lead.findOne({ ...base, email: String(leadData.email).toLowerCase() })
+    const byEmail = await leadRepository.findOne({ ...base, email: String(leadData.email).toLowerCase() })
       .setOptions(TENANT_SAFE_LOOKUP)
       .lean();
     if (byEmail) return byEmail;
   }
 
   if (leadData.rowId) {
-    const byRow = await Lead.findOne({ ...base, rowId: leadData.rowId })
+    const byRow = await leadRepository.findOne({ ...base, rowId: leadData.rowId })
       .setOptions(TENANT_SAFE_LOOKUP)
       .lean();
     if (byRow) return byRow;
@@ -271,7 +267,7 @@ async function createLead(user, body) {
 
   let lead;
   try {
-    lead = await Lead.create(leadData);
+    lead = await leadRepository.create(leadData);
   } catch (err) {
     if (err?.code === 11000) {
       return {
@@ -336,7 +332,7 @@ async function updateLead(user, leadId, body) {
 
   if (updates.phone) {
     const variants = phoneLookupVariants(updates.phone);
-    const phoneDup = await Lead.findOne({
+    const phoneDup = await leadRepository.findOne({
       _id: { $ne: leadId },
       tenantId: currentLead.tenantId,
       phone: { $in: variants },
@@ -358,7 +354,7 @@ async function updateLead(user, leadId, body) {
   }
 
   if (updates.email) {
-    const emailDup = await Lead.findOne({
+    const emailDup = await leadRepository.findOne({
       _id: { $ne: leadId },
       tenantId: currentLead.tenantId,
       email: updates.email,
@@ -387,7 +383,7 @@ async function updateLead(user, leadId, body) {
     }
   }
 
-  const lead = await Lead.findByIdAndUpdate(leadId, {
+  const lead = await leadRepository.findByIdAndUpdate(leadId, {
     ...updates,
     ...followupPatch,
     lockedBy: user._id.toString(),
@@ -413,25 +409,21 @@ async function updateLead(user, leadId, body) {
 }
 
 async function deleteLead(user, leadId, queryParams = {}) {
-  if (!mongoose.Types.ObjectId.isValid(leadId)) {
-    return { error: 'Invalid lead id', status: 400 };
-  }
-
-  const query = { _id: new mongoose.Types.ObjectId(leadId) };
+  const query = { _id: leadId };
   applyCrmScopeToQuery(query, user, queryParams);
 
-  const lead = await Lead.findOne(query).lean();
+  const lead = await leadRepository.findOne(query).lean();
   if (!lead) return { error: 'Lead not found', status: 404 };
 
   await auditService.logLeadDeletion(lead, user._id);
-  await Lead.findOneAndDelete({ _id: lead._id });
+  await leadRepository.findOneAndDelete({ _id: lead._id });
   return { message: `Lead "${lead.name}" permanently deleted.` };
 }
 
 async function addNote(user, leadId, text) {
   if (!text || !text.trim()) return { error: 'Note text is required', status: 400 };
 
-  const lead = await Lead.findByIdAndUpdate(leadId, {
+  const lead = await leadRepository.findByIdAndUpdate(leadId, {
     $push: {
       notes: {
         text: text.trim(),
@@ -447,26 +439,26 @@ async function addNote(user, leadId, text) {
 }
 
 async function resetCRM(user, reason) {
-  await Lead.deleteMany({});
-  await EMI.deleteMany({});
-  await CRMImport.deleteMany({});
+  await leadRepository.deleteMany({});
+  await emiRepository.deleteMany({});
+  await crmImportRepository.deleteMany({});
   await auditService.logSystemReset(user, reason);
   return { message: 'CRM ecosystem successfully purged.' };
 }
 
 async function getEmis(leadId) {
-  return EMI.find({ leadId }).sort('installmentNo').lean();
+  return emiRepository.find({ leadId }).sort('installmentNo').lean();
 }
 
 async function createEmi(leadId, body) {
   const emiData = { ...pick(body, ALLOWED_EMI_FIELDS), leadId };
-  const emi = await EMI.create(emiData);
+  const emi = await emiRepository.create(emiData);
   return { emi, status: 201 };
 }
 
 async function updateEmi(emiId, body) {
   const updates = pick(body, ALLOWED_EMI_FIELDS);
-  const emi = await EMI.findByIdAndUpdate(emiId, updates, { new: true });
+  const emi = await emiRepository.findByIdAndUpdate(emiId, updates, { new: true });
   return { emi };
 }
 

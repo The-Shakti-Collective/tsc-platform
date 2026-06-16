@@ -1,4 +1,6 @@
-/** dashboard domain models — canonical re-exports from server/models */
+/** dashboard domain models — postgres-first via customization store */
+const { dashboardPresetRepository } = require('../../../repositories/customizationRepositories');
+
 module.exports = {
-  DashboardPreset: require('../../../models/DashboardPreset'),
+  DashboardPreset: dashboardPresetRepository,
 };

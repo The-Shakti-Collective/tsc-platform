@@ -1,5 +1,4 @@
-const Campaign = require('../models/Campaign');
-const MailCampaign = require('../models/MailCampaign');
+const { campaignRepository, mailCampaignRepository } = require('../../../repositories/mailRepositories');
 const MailEvent = require('../models/MailEvent');
 const { aggregateWithTenant } = require('../../../repositories/aggregateWithTenant');
 
@@ -20,8 +19,8 @@ const engagedRecipientPipeline = [
 
 async function getEngagedEmails() {
   const [coreRecipientEmails, mailRecipientEmails, eventEmails] = await Promise.all([
-    aggregateWithTenant(Campaign, engagedRecipientPipeline),
-    aggregateWithTenant(MailCampaign, engagedRecipientPipeline),
+    campaignRepository.aggregate(engagedRecipientPipeline),
+    mailCampaignRepository.aggregate(engagedRecipientPipeline),
     aggregateWithTenant(MailEvent, [
       { $match: { eventType: { $in: ['Open', 'Click', 'Send'] }, email: { $type: 'string', $ne: '' } } },
       {
@@ -41,7 +40,7 @@ async function getEngagedEmails() {
 
 async function getCumulativeTagMetrics(userId) {
   const [coreAgg, mailAgg] = await Promise.all([
-    aggregateWithTenant(Campaign, [
+    campaignRepository.aggregate([
       { $match: { createdBy: userId } },
       {
         $group: {
@@ -52,7 +51,7 @@ async function getCumulativeTagMetrics(userId) {
         },
       },
     ]),
-    aggregateWithTenant(MailCampaign, [
+    mailCampaignRepository.aggregate([
       { $match: { createdBy: userId } },
       {
         $group: {
@@ -69,8 +68,8 @@ async function getCumulativeTagMetrics(userId) {
 
 async function getUserCampaignRecipients(userId) {
   const [coreCamps, mailCamps] = await Promise.all([
-    Campaign.find({ createdBy: userId }, 'recipients').lean(),
-    MailCampaign.find({ createdBy: userId }, 'recipients').lean(),
+    campaignRepository.find({ createdBy: userId }).select('recipients').lean(),
+    mailCampaignRepository.find({ createdBy: userId }).select('recipients').lean(),
   ]);
   return { coreCamps, mailCamps };
 }

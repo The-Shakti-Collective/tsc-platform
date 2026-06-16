@@ -18,8 +18,16 @@ const initSentry = () => {
     Sentry.init({
       dsn,
       environment: process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || 'development',
-      release: process.env.SENTRY_RELEASE || process.env.RENDER_GIT_COMMIT || undefined,
+      release:
+        process.env.SENTRY_RELEASE
+        || process.env.RAILWAY_GIT_COMMIT_SHA
+        || process.env.RENDER_GIT_COMMIT
+        || undefined,
       tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE) || 0.1,
+      enableLogs: true,
+      integrations: [
+        Sentry.consoleLoggingIntegration({ levels: ['log', 'warn', 'error'] }),
+      ],
     });
     initialized = true;
     return true;
@@ -74,11 +82,17 @@ const clearSentryUser = () => {
   }
 };
 
+const getSentryLogger = () => {
+  const Sentry = getSentry();
+  return Sentry?.logger ?? null;
+};
+
 module.exports = {
   initSentry,
   setupSentryExpress,
   captureException,
   setSentryUser,
   clearSentryUser,
+  getSentryLogger,
   isSentryEnabled: () => initialized,
 };

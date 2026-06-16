@@ -1,5 +1,4 @@
-const Lead = require('../models/Lead');
-const CRMAudit = require('../models/CRMAudit');
+const { leadRepository, crmAuditRepository } = require('../repositories');
 const { isCorruptLeadPhone } = require('../../person/identity');
 const { isQaTestRecord } = require('../../../services/qa/qaTestData');
 const { bypassOptions } = require('../../../infrastructure/database/bypassTenantPolicy');
@@ -22,7 +21,7 @@ async function clearBlockingDuplicateLead(duplicate) {
   if (!duplicate) return false;
   const row = duplicate.toObject ? duplicate.toObject() : duplicate;
   if (isCorruptLeadPhone(row.phone) || isQaTestRecord(row)) {
-    await Lead.deleteOne({ _id: row._id }).setOptions(BYPASS);
+    await leadRepository.deleteOne({ _id: row._id }).setOptions(BYPASS);
     return true;
   }
   return false;
@@ -30,7 +29,7 @@ async function clearBlockingDuplicateLead(duplicate) {
 
 /** Merge non-empty fields from source into keeper, then delete source. */
 async function mergeCorruptLeadIntoKeeper(keeperId, sourceLead, extraUpdates = {}) {
-  const keeper = await Lead.findById(keeperId);
+  const keeper = await leadRepository.findById(keeperId);
   if (!keeper) return null;
 
   const mergeFields = ALLOWED_LEAD_FIELDS.filter((f) => f !== 'phone' && f !== 'email');
@@ -44,11 +43,11 @@ async function mergeCorruptLeadIntoKeeper(keeperId, sourceLead, extraUpdates = {
   }
 
   if (Object.keys(patch).length) {
-    await Lead.findByIdAndUpdate(keeperId, patch, BYPASS);
+    await leadRepository.findByIdAndUpdate(keeperId, patch, BYPASS);
   }
-  await CRMAudit.deleteMany({ leadId: sourceLead._id }).setOptions(BYPASS);
-  await Lead.deleteOne({ _id: sourceLead._id }).setOptions(BYPASS);
-  return Lead.findById(keeperId);
+  await crmAuditRepository.deleteMany({ leadId: sourceLead._id }).setOptions(BYPASS);
+  await leadRepository.deleteOne({ _id: sourceLead._id }).setOptions(BYPASS);
+  return leadRepository.findById(keeperId);
 }
 
 module.exports = {

@@ -1,5 +1,6 @@
-const mongoose = require('mongoose');
 const { config } = require('../config');
+const { isMongoRequired } = require('../infrastructure/postgres/prismaClient');
+const { getMongoose, isMongoReady } = require('../services/mongoConnectionService');
 const { getApiDomainManifest } = require('./registerRoutes');
 const { CRON_JOBS, QUEUE_WORKERS } = require('../jobs/registry');
 const { isRedisAvailable } = require('../services/backgroundQueue');
@@ -15,11 +16,12 @@ function formatDomainList(domains, max = 8) {
 }
 
 function mongoStatus() {
-  const state = mongoose.connection.readyState;
-  if (state === 1) {
-    const db = mongoose.connection.db?.databaseName || 'unknown';
+  if (!isMongoRequired()) return 'optional — postgres-primary (not loaded)';
+  if (isMongoReady()) {
+    const db = getMongoose().connection.db?.databaseName || 'unknown';
     return `connected — ${db}`;
   }
+  const state = getMongoose().connection.readyState;
   if (state === 2) return 'connecting…';
   return 'disconnected';
 }

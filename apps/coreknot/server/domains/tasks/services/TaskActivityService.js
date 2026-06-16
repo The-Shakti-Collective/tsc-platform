@@ -2,6 +2,9 @@ const Task = require('../models/Task');
 const TaskAssignment = require('../models/TaskAssignment');
 const TaskActivity = require('../models/TaskActivity');
 const TaskMentionReceipt = require('../models/TaskMentionReceipt');
+const { canUseMongoModels } = require('../../../services/mongoConnectionService');
+
+const canUseMentionReceiptStore = () => canUseMongoModels();
 const Project = require('../../../models/Project');
 const User = require('../../../models/User');
 const { sanitizeName } = require('../../../utils/sanitizer');
@@ -373,6 +376,8 @@ const bumpMentionReceipts = async (taskId, recipientIds, actorId, session) => {
   const { isQaExcludedUserId } = require('../../../utils/qaExcludedUsers');
   const qaActive = isQaProbeActive();
 
+  if (!canUseMentionReceiptStore()) return;
+
   for (const recipientId of recipientIds) {
     const rid = recipientId?.toString?.() || recipientId;
     if (!rid || rid === actorStr) continue;
@@ -477,6 +482,7 @@ const postMessage = async (taskId, user, body, session) => {
 };
 
 const markMentionsRead = async (taskId, userId) => {
+  if (!canUseMentionReceiptStore()) return;
   await TaskMentionReceipt.findOneAndUpdate(
     { userId, taskId },
     { $set: { unreadCount: 0 } }
@@ -485,6 +491,7 @@ const markMentionsRead = async (taskId, userId) => {
 
 const getUnreadMentionCountsByTask = async (userId, taskIds) => {
   if (!userId || !taskIds?.length) return {};
+  if (!canUseMentionReceiptStore()) return {};
 
   const receipts = await TaskMentionReceipt.find({
     userId,
@@ -504,10 +511,12 @@ const purgeActivityForTasks = async (taskIds) => {
   if (!taskIds?.length) return { activities: 0, receipts: 0 };
   const ids = taskIds.map((id) => id?.toString?.() || id).filter(Boolean);
 
-  const [actResult, receiptResult] = await Promise.all([
-    TaskActivity.deleteMany({ taskId: { $in: ids } }),
-    TaskMentionReceipt.deleteMany({ taskId: { $in: ids } }),
-  ]);
+  const actResult = canUseMentionReceiptStore()
+    ? await TaskActivity.deleteMany({ taskId: { $in: ids } })
+    : { deletedCount: 0 };
+  const receiptResult = canUseMentionReceiptStore()
+    ? await TaskMentionReceipt.deleteMany({ taskId: { $in: ids } })
+    : { deletedCount: 0 };
 
   return {
     activities: actResult.deletedCount || 0,

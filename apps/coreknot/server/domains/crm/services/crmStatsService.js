@@ -1,24 +1,33 @@
-const mongoose = require('mongoose');
-const Lead = require('../models/Lead');
 const { applyCrmScopeToQuery, resolveCrmScope } = require('../../../utils/crmScope');
-const { aggregateWithTenant } = require('../../../repositories/aggregateWithTenant');
+const { isPostgresCrmEnabled } = require('../../../infrastructure/postgres/prismaClient');
+const { computeStatsFromFilter, computeRepSummary } = require('./crmStatsPostgres');
 
 async function getCRMStats(user, queryParams = {}) {
-  const { calculateStats } = require('../../../workers/statsWorker');
   const scopeQuery = {};
   applyCrmScopeToQuery(scopeQuery, user, queryParams);
   const { restrictToOwn } = resolveCrmScope(user, queryParams.crmType);
   const matchStage = restrictToOwn && user?._id
     ? {
       ...scopeQuery,
-      assignedRepId: scopeQuery.assignedRepId || new mongoose.Types.ObjectId(user._id),
+      assignedRepId: scopeQuery.assignedRepId || user._id,
     }
     : { ...scopeQuery };
 
+  if (isPostgresCrmEnabled()) {
+    return computeStatsFromFilter(matchStage);
+  }
+
+  const { calculateStats } = require('../../../workers/statsWorker');
   return calculateStats(matchStage);
 }
 
 async function getRepSummary() {
+  if (isPostgresCrmEnabled()) {
+    return computeRepSummary();
+  }
+
+  const Lead = require('../models/Lead');
+  const { aggregateWithTenant } = require('../../../repositories/aggregateWithTenant');
   const summary = await aggregateWithTenant(Lead, [
     {
       $group: {

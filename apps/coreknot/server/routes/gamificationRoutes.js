@@ -6,7 +6,7 @@ const dailyMissionRepository = require('../repositories/dailyMissionRepository')
 const xpAuditLogRepository = require('../repositories/xpAuditLogRepository');
 const { findStaffUsersPostgres } = require('../repositories/staffUserRepository');
 const { protect } = require('../middleware/authMiddleware');
-const mongoose = require('mongoose');
+const { isObjectIdString } = require('../utils/mongoId');
 const logger = require('../utils/logger');
 const { getCurrentWeekRange, getPreviousWeekRange } = require('../utils/attendanceDate');
 const { ACTION_LABELS } = require('../../shared/gamificationRules');
@@ -250,7 +250,7 @@ router.get('/leaderboard', protect, async (req, res) => {
 router.get('/leaderboard/:userId/breakdown', protect, async (req, res) => {
   try {
     const { userId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
+    if (!isObjectIdString(userId)) {
       return res.status(400).json({ error: 'Invalid userId' });
     }
 

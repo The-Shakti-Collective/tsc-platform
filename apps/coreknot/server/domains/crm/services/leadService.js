@@ -1,4 +1,4 @@
-const Lead = require('../models/Lead');
+const { leadRepository } = require('../repositories');
 const backgroundQueue = require('../../../services/backgroundQueue');
 const followupCache = require('../../../services/followupCache');
 const ContactService = require('../../../services/ContactService');
@@ -24,7 +24,7 @@ class LeadService {
       err.statusCode = 400;
       throw err;
     }
-    const newLead = await Lead.create(sanitizedData);
+    const newLead = await leadRepository.create(sanitizedData);
     
     // Explicit Side-Effects
     await backgroundQueue.queueHolySheetSync(newLead._id);
@@ -100,10 +100,10 @@ class LeadService {
 
   /** @param {UpdateLeadBody} updateData */
   async updateLead(query, updateData) {
-    const existingLead = await Lead.findOne(query).select('nextFollowupDate nextFollowupTime reminderSent notifiedOverdue');
+    const existingLead = await leadRepository.findOne(query).select('nextFollowupDate nextFollowupTime reminderSent notifiedOverdue');
     const withResets = this.applyFollowupReminderResets(updateData, existingLead);
     const sanitizedUpdate = this.sanitizeAndNormalizeUpdate(withResets);
-    const updatedLead = await Lead.findOneAndUpdate(query, sanitizedUpdate, { new: true });
+    const updatedLead = await leadRepository.findOneAndUpdate(query, sanitizedUpdate, { new: true });
     
     if (updatedLead) {
       await backgroundQueue.queueHolySheetSync(updatedLead._id);
@@ -117,7 +117,7 @@ class LeadService {
   }
 
   async upsertLead(query, updateData, session = null) {
-    const existingLead = await Lead.findOne(query).select('nextFollowupDate nextFollowupTime reminderSent notifiedOverdue');
+    const existingLead = await leadRepository.findOne(query).select('nextFollowupDate nextFollowupTime reminderSent notifiedOverdue');
     const withResets = this.applyFollowupReminderResets(updateData, existingLead);
     const sanitizedUpdate = this.sanitizeAndNormalizeUpdate(withResets);
     
@@ -130,7 +130,7 @@ class LeadService {
     const options = { upsert: true, new: true, runValidators: true };
     if (session) options.session = session;
     
-    const upsertedLead = await Lead.findOneAndUpdate(query, sanitizedUpdate, options);
+    const upsertedLead = await leadRepository.findOneAndUpdate(query, sanitizedUpdate, options);
     
     if (upsertedLead && !session) { // Defer side-effects if using session until commit
       await backgroundQueue.queueHolySheetSync(upsertedLead._id);
@@ -147,7 +147,7 @@ class LeadService {
     await backgroundQueue.queueHolySheetSync(leadId);
     await backgroundQueue.queueCsvBackup();
     try {
-      const lead = await Lead.findById(leadId);
+      const lead = await leadRepository.findById(leadId);
       if (lead) await followupCache.cacheFollowup(lead);
     } catch(err) {}
   }

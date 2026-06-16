@@ -10,7 +10,7 @@ async function runDocumentOcr(buffer, mimeType) {
 }
 const { queueGamificationEvent } = require('../services/backgroundQueue');
 const {
-  utapi,
+  deleteStoredFile,
   handleUploadFilesManyRequest,
   handleUploadSingleRequest,
 } = require('../utils/uploadthingServer');
@@ -414,7 +414,7 @@ const deleteFolder = async (req, res) => {
     for (const doc of childDocs) {
       if (doc.fileKey) {
         try {
-          await utapi.deleteFiles(doc.fileKey);
+          await deleteStoredFile(doc.fileKey);
         } catch (err) {
           console.error('UploadThing delete failed:', err.message);
         }
@@ -490,7 +490,7 @@ const deleteDocument = async (req, res) => {
 
     if (doc.fileKey) {
       try {
-        await utapi.deleteFiles(doc.fileKey);
+        await deleteStoredFile(doc.fileKey);
       } catch (err) {
         console.error('UploadThing delete failed:', err.message);
       }

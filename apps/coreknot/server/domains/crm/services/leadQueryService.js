@@ -1,7 +1,6 @@
-const mongoose = require('mongoose');
-const Lead = require('../models/Lead');
 const leadRepository = require('../repositories/leadRepository');
 const { isPostgresCrmEnabled } = require('../../../infrastructure/postgres/prismaClient');
+const { isObjectIdString } = require('../../../utils/mongoId');
 const { escapeRegExp } = require('../../person/identity');
 const { applyCrmScopeToQuery } = require('../../../utils/crmScope');
 const {
@@ -78,8 +77,8 @@ function buildLeadListQuery(user, queryParams) {
   if (queryParams.assignedRepId && queryParams.assignedRepId !== 'all') {
     if (queryParams.assignedRepId === 'unassigned' || queryParams.assignedRepId === 'null') {
       query.assignedRepId = null;
-    } else if (mongoose.Types.ObjectId.isValid(queryParams.assignedRepId)) {
-      query.assignedRepId = new mongoose.Types.ObjectId(queryParams.assignedRepId);
+    } else if (queryParams.assignedRepId === 'unassigned' || queryParams.assignedRepId === 'null') {
+      query.assignedRepId = null;
     } else {
       query.assignedRepId = queryParams.assignedRepId;
     }
@@ -229,12 +228,12 @@ async function fetchLeadsPaginated(user, queryParams) {
 
   if (hasFollowupQuery) {
     const [statsResult, countResult] = await Promise.all([
-      Lead.aggregate([
+      leadRepository.aggregate([
         { $match: query },
         ...followupStages,
         buildFollowupStatsGroupStage(),
       ]),
-      Lead.aggregate([
+      leadRepository.aggregate([
         { $match: query },
         ...followupStages,
         ...(tabMatchStage ? [tabMatchStage] : []),
@@ -244,10 +243,10 @@ async function fetchLeadsPaginated(user, queryParams) {
     tabStats = statsResult[0] || { today: 0, overdue: 0, upcoming: 0 };
     total = countResult[0]?.total || 0;
   } else {
-    total = await Lead.countDocuments(query);
+    total = await leadRepository.countDocuments(query);
   }
 
-  const leads = await Lead.aggregate(pipeline);
+  const leads = await leadRepository.aggregate(pipeline);
   return {
     leads,
     total,
@@ -267,11 +266,11 @@ async function fetchLeadById(user, leadId, queryParams = {}) {
     return { lead };
   }
 
-  if (!mongoose.Types.ObjectId.isValid(leadId)) {
+  if (!isObjectIdString(leadId) && !isPostgresCrmEnabled()) {
     return { error: 'Invalid lead id', status: 400 };
   }
 
-  const query = { _id: new mongoose.Types.ObjectId(leadId) };
+  const query = { _id: leadId };
   applyCrmScopeToQuery(query, user, queryParams);
 
   const pipeline = [
@@ -299,7 +298,7 @@ async function fetchLeadById(user, leadId, queryParams = {}) {
     },
   ];
 
-  const [lead] = await Lead.aggregate(pipeline);
+  const [lead] = await leadRepository.aggregate(pipeline);
   if (!lead) return { error: 'Lead not found', status: 404 };
   await enrichLeadDetail(lead);
   return { lead };
@@ -311,7 +310,7 @@ async function streamLeadExport(res, { format: exportFormat }) {
     res.setHeader('Content-Disposition', 'attachment; filename=leads_export.json');
     res.write('[');
     let isFirst = true;
-    const cursor = Lead.find({}).populate('assignedRepId', 'name').lean().cursor();
+    const cursor = leadRepository.find({}).populate('assignedRepId', 'name').lean().cursor();
 
     cursor.on('data', (doc) => {
       if (!isFirst) res.write(',');
@@ -332,7 +331,7 @@ async function streamLeadExport(res, { format: exportFormat }) {
   const fields = ['name', 'email', 'phone', 'city', 'leadStatus', 'callStatus', 'leadQuality', 'remarks', 'assignedRep', 'createdAt'];
   res.write(`${fields.join(',')}\n`);
 
-  const cursor = Lead.find({}).populate('assignedRepId', 'name').lean().cursor();
+  const cursor = leadRepository.find({}).populate('assignedRepId', 'name').lean().cursor();
 
   cursor.on('data', (l) => {
     const row = [
@@ -362,7 +361,7 @@ async function findLeadsInDateRange(rangeStart, rangeEnd) {
   if (rangeStart) dateFilter.$gte = rangeStart;
   if (rangeEnd) dateFilter.$lte = rangeEnd;
   const query = (rangeStart || rangeEnd) ? { createdAt: dateFilter } : {};
-  return Lead.find(query).lean();
+  return leadRepository.find(query).lean();
 }
 
 module.exports = {

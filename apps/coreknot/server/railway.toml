@@ -1,11 +1,24 @@
-# Legacy reference — canonical config: apps/coreknot/server/railway.json
-# Railway Dashboard → Config file: /apps/coreknot/server/railway.json
+# Canonical config: apps/coreknot/server/railway.json (prefer JSON in Railway Dashboard)
+# Root Directory MUST be repo root (/), NOT apps/coreknot/server.
+# API: RUN_WORKERS=false · Worker: RUN_WORKERS=true (same config file, env differs)
 
 [build]
 builder = "NIXPACKS"
 nixpacksConfigPath = "apps/coreknot/server/nixpacks.toml"
+watchPatterns = [
+  "apps/coreknot/server/**",
+  "apps/coreknot/shared/**",
+  "packages/database/**",
+  "pnpm-lock.yaml",
+  "pnpm-workspace.yaml",
+  "package.json",
+  "scripts/create-coreknot-deploy-bundle.mjs",
+  "scripts/railway-start-coreknot.mjs",
+  "scripts/verify-coreknot-deploy-bundle.mjs",
+]
 
 [deploy]
+preDeployCommand = ["pnpm --filter @tsc/database exec prisma migrate deploy"]
 startCommand = "node scripts/railway-start-coreknot.mjs"
 healthcheckPath = "/api/health/ready"
 healthcheckTimeout = 180

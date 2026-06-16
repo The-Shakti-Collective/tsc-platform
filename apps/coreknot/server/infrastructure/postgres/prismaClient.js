@@ -17,11 +17,18 @@ const isPostgresConfigured = () => Boolean(
   process.env.DATABASE_URL && String(process.env.DATABASE_URL).trim(),
 );
 
-const isPostgresStoreEnabled = (flagName) => (
-  isPostgresConfigured()
-  && process.env.COREKNOT_POSTGRES_ENABLED !== 'false'
-  && process.env[flagName] === 'postgres'
-);
+/** Store flags that default to postgres when unset (Wave 2 cutover complete). */
+const POSTGRES_DEFAULT_STORE_FLAGS = new Set(['COREKNOT_CUSTOMIZATION_STORE']);
+
+const isPostgresStoreEnabled = (flagName) => {
+  if (!isPostgresConfigured() || process.env.COREKNOT_POSTGRES_ENABLED === 'false') {
+    return false;
+  }
+  const value = process.env[flagName];
+  if (value === 'postgres') return true;
+  if (value === 'mongo') return false;
+  return POSTGRES_DEFAULT_STORE_FLAGS.has(flagName);
+};
 
 const isPostgresAuthEnabled = () => isPostgresStoreEnabled('COREKNOT_AUTH_STORE');
 
@@ -52,6 +59,8 @@ const isPostgresGamificationEnabled = () => isPostgresStoreEnabled('COREKNOT_GAM
 const isPostgresCalendarEnabled = () => isPostgresStoreEnabled('COREKNOT_CALENDAR_STORE');
 
 const isPostgresNotificationsEnabled = () => isPostgresStoreEnabled('COREKNOT_NOTIFICATIONS_STORE');
+
+const isPostgresCustomizationEnabled = () => isPostgresStoreEnabled('COREKNOT_CUSTOMIZATION_STORE');
 
 /** When false, local dev may run without Mongo (postgres-only). Default: mongo required. */
 const isMongoRequired = () => process.env.COREKNOT_MONGO_REQUIRED !== 'false';
@@ -112,6 +121,7 @@ module.exports = {
   isPostgresGamificationEnabled,
   isPostgresCalendarEnabled,
   isPostgresNotificationsEnabled,
+  isPostgresCustomizationEnabled,
   isMongoRequired,
   isPostgresLegacyAuthDataEnabled,
   pingPostgres,

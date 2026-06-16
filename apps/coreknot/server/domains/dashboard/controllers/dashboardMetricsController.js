@@ -1,8 +1,12 @@
-const Lead = require('../../../models/Lead');
 const logger = require('../../../utils/logger');
 const { buildCumulativeRegisteredLocationBreakdown } = require('../../../utils/campaignRegisteredLocation');
 const { getEngagedEmails, getCumulativeTagMetrics } = require('../../mail/services/mailMetricsService');
 const { aggregateWithTenant } = require('../../../repositories/aggregateWithTenant');
+const leadRepository = require('../../../repositories/leadRepository');
+const { isMongoReady } = require('../../../services/mongoConnectionService');
+const { isPostgresCrmEnabled, isMongoRequired } = require('../../../infrastructure/postgres/prismaClient');
+
+const preferRepository = (storeEnabled) => storeEnabled() || !isMongoReady();
 
 const normalizeLocation = (raw) =>
   String(raw || 'unknown')
@@ -92,6 +96,25 @@ exports.getLocationLeads = async (req, res) => {
       ? { email: { $in: engagedEmails } }
       : { emailStatus: 'Active' };
 
+    if (preferRepository(isPostgresCrmEnabled)) {
+      const leads = await leadRepository.find(matchQuery).lean();
+      const matchedLeads = leads
+        .filter((lead) => normalizeLocation(lead.location || lead.city) === targetLoc)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const total = matchedLeads.length;
+      const data = matchedLeads.slice(skip, skip + limit);
+      return res.status(200).json({
+        data,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit) || 0,
+        },
+      });
+    }
+
+    const Lead = require('../../../models/Lead');
     const pipeline = [
       { $match: matchQuery },
       {

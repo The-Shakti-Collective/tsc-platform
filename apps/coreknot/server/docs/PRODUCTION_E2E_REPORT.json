@@ -1,0 +1,181 @@
+{
+  "generatedAt": "2026-06-16T08:56:29.764Z",
+  "base": "http://localhost:5000",
+  "counts": {
+    "PASS": 24,
+    "FAIL": 0,
+    "BLOCKED": 0,
+    "SKIPPED": 0
+  },
+  "passRate": 100,
+  "results": [
+    {
+      "flow": "Health",
+      "status": "PASS",
+      "endpoint": "GET /api/health",
+      "httpStatus": 200,
+      "notes": "status=HEALTHY"
+    },
+    {
+      "flow": "Health ready",
+      "status": "PASS",
+      "endpoint": "GET /api/health/ready",
+      "httpStatus": 200,
+      "notes": "postgres:ok, mongodb:ok, redis:ok, supabase:fail"
+    },
+    {
+      "flow": "Login (unauth me)",
+      "status": "PASS",
+      "endpoint": "GET /api/auth/me",
+      "httpStatus": 401,
+      "notes": "returns 401 as expected"
+    },
+    {
+      "flow": "Workspace (unauth)",
+      "status": "PASS",
+      "endpoint": "GET /api/projects/workspaces",
+      "httpStatus": 401,
+      "notes": "returns 401 as expected"
+    },
+    {
+      "flow": "Tasks (unauth)",
+      "status": "PASS",
+      "endpoint": "GET /api/tasks",
+      "httpStatus": 401,
+      "notes": "returns 401 as expected"
+    },
+    {
+      "flow": "CRM (unauth)",
+      "status": "PASS",
+      "endpoint": "GET /api/crm/leads",
+      "httpStatus": 401,
+      "notes": "returns 401 as expected"
+    },
+    {
+      "flow": "Dashboard (unauth)",
+      "status": "PASS",
+      "endpoint": "GET /api/dashboard/summary",
+      "httpStatus": 401,
+      "notes": "returns 401 as expected"
+    },
+    {
+      "flow": "Mail (unauth)",
+      "status": "PASS",
+      "endpoint": "GET /api/campaigns",
+      "httpStatus": 401,
+      "notes": "returns 401 as expected"
+    },
+    {
+      "flow": "Calendar (unauth)",
+      "status": "PASS",
+      "endpoint": "GET /api/calendar",
+      "httpStatus": 401,
+      "notes": "returns 401 as expected"
+    },
+    {
+      "flow": "Login",
+      "status": "PASS",
+      "endpoint": "POST /api/auth/dev-bypass",
+      "httpStatus": 200,
+      "notes": "user=dev-admin@example.com"
+    },
+    {
+      "flow": "Auth /me",
+      "status": "PASS",
+      "endpoint": "GET /api/auth/me",
+      "httpStatus": 200,
+      "notes": "email=dev-admin@example.com"
+    },
+    {
+      "flow": "Workspace load",
+      "status": "PASS",
+      "endpoint": "GET /api/projects/workspaces",
+      "httpStatus": 200,
+      "notes": "count=14"
+    },
+    {
+      "flow": "Projects",
+      "status": "PASS",
+      "endpoint": "GET /api/projects",
+      "httpStatus": 200,
+      "notes": "count=34"
+    },
+    {
+      "flow": "Tasks",
+      "status": "PASS",
+      "endpoint": "GET /api/tasks?limit=10",
+      "httpStatus": 200,
+      "notes": "returned=392"
+    },
+    {
+      "flow": "CRM",
+      "status": "PASS",
+      "endpoint": "GET /api/crm/leads?limit=5",
+      "httpStatus": 200,
+      "notes": "leads=5"
+    },
+    {
+      "flow": "CRM stats",
+      "status": "PASS",
+      "endpoint": "GET /api/crm/stats",
+      "httpStatus": 200,
+      "notes": "stats loaded"
+    },
+    {
+      "flow": "Dashboard",
+      "status": "PASS",
+      "endpoint": "GET /api/dashboard/summary",
+      "httpStatus": 200,
+      "notes": "summary loaded"
+    },
+    {
+      "flow": "Mail",
+      "status": "PASS",
+      "endpoint": "GET /api/campaigns",
+      "httpStatus": 200,
+      "notes": "campaigns=0"
+    },
+    {
+      "flow": "Calendar",
+      "status": "PASS",
+      "endpoint": "GET /api/calendar",
+      "httpStatus": 200,
+      "notes": "events=0"
+    },
+    {
+      "flow": "DB: Workspace owner not member",
+      "status": "PASS",
+      "endpoint": "SQL boundary check",
+      "httpStatus": null,
+      "notes": "count=0"
+    },
+    {
+      "flow": "DB: Task assignee not workspace member",
+      "status": "PASS",
+      "endpoint": "SQL boundary check",
+      "httpStatus": null,
+      "notes": "count=0"
+    },
+    {
+      "flow": "DB: Project member not workspace member",
+      "status": "PASS",
+      "endpoint": "SQL boundary check",
+      "httpStatus": null,
+      "notes": "count=0"
+    },
+    {
+      "flow": "DB: Lead assigned to non-member (boundary)",
+      "status": "PASS",
+      "endpoint": "SQL boundary check",
+      "httpStatus": null,
+      "notes": "count=0"
+    },
+    {
+      "flow": "DB: Task/project workspace mismatch",
+      "status": "PASS",
+      "endpoint": "SQL boundary check",
+      "httpStatus": null,
+      "notes": "0 mismatches in sample"
+    }
+  ]
+}

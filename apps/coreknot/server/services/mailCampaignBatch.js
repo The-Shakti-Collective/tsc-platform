@@ -77,14 +77,16 @@ const markCampaignFailed = async (Model, campaignId, message) => {
   await Model.updateOne(
     { _id: campaignId },
     { $set: { status: 'Failed', lastError: message, failedAt: new Date() } },
-  ).setOptions(BYPASS);
+    { ...BYPASS, bypass: true },
+  );
 };
 
 const markCampaignSending = async (Model, campaignId) => {
   await Model.updateOne(
     { _id: campaignId },
     { $set: { status: 'Sending', queuedAt: undefined } },
-  ).setOptions(BYPASS);
+    { ...BYPASS, bypass: true },
+  );
 };
 
 const markCampaignCompletedIfDone = async (Model, campaignId) => {
@@ -93,7 +95,8 @@ const markCampaignCompletedIfDone = async (Model, campaignId) => {
     await Model.updateOne(
       { _id: campaignId },
       { $set: { status: 'Completed', completedAt: new Date() } },
-    ).setOptions(BYPASS);
+      { ...BYPASS, bypass: true },
+    );
     return true;
   }
   return false;
@@ -123,7 +126,7 @@ async function processCampaignBatch({ campaignId, batchIndex = 0, batchSize, ten
   const sendDelayMs = getSendDelayMs();
 
   return runWithWorkerTenant(tenantId, async () => {
-    const freshStatus = await Model.findById(campaign._id).select('status').setOptions(BYPASS).lean();
+    const freshStatus = await Model.findById(campaign._id, { bypass: true }).select('status').lean();
     if (!freshStatus || freshStatus.status === 'Stopped' || isCampaignStopped(id)) {
       return { processed: 0, hasMore: false, stopped: true };
     }
@@ -134,11 +137,10 @@ async function processCampaignBatch({ campaignId, batchIndex = 0, batchSize, ten
 
     await markInvalidPendingRecipients(Model, campaign._id);
 
-    const meta = await Model.findById(campaign._id)
+    const meta = await Model.findById(campaign._id, { bypass: true })
       .select('status subject title content senderProfileId senderProfileIds senderMode signature includeSignature removeUnsubscribe variableMapping variableFallbacks mailTemplateId attachments campaignId systemProvider resendFromEmail')
       .populate('senderProfileId')
       .populate('senderProfileIds')
-      .setOptions(BYPASS)
       .lean();
 
     if (!meta || meta.status === 'Stopped' || isCampaignStopped(id)) {

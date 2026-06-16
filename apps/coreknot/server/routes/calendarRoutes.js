@@ -3,11 +3,23 @@ const router = express.Router();
 const { protect, requirePageAccess } = require('../middleware/authMiddleware');
 const { isAdminUser } = require('../utils/departmentPermissions');
 const calendarRepository = require('../repositories/calendarRepository');
+const projectRepository = require('../repositories/projectRepository');
+const taskRepository = require('../repositories/taskRepository');
 const { seedMusicContentCalendar } = require('../services/musicCalendarSeedService');
 const Task = require('../models/Task');
 const TaskAssignment = require('../models/TaskAssignment');
 const Project = require('../models/Project');
 const User = require('../models/User');
+const { isMongoReady } = require('../services/mongoConnectionService');
+const {
+  isPostgresProjectsEnabled,
+  isPostgresTasksEnabled,
+  isPostgresCalendarEnabled,
+  getPrismaClient,
+} = require('../infrastructure/postgres/prismaClient');
+const { resolvePersonId, resolveMongoId } = require('../infrastructure/postgres/syncMappingHelper');
+
+const preferRepository = (storeEnabled) => storeEnabled() || !isMongoReady();
 const { dispatchEmailPayload } = require('../services/mailDriver');
 const GamificationService = require('../services/gamificationService');
 const { validateCalendarEventRange, buildDateTimeFromParts, toDateKey } = require('../utils/dateValidation');
@@ -28,13 +40,114 @@ router.use(protect);
 router.use(calendarPage);
 
 async function getUserProjectIds(userId) {
+  if (preferRepository(isPostgresProjectsEnabled)) {
+    const projects = await projectRepository.find({
+      $or: [{ members: userId }],
+    }).select('_id').lean();
+    return projects.map((p) => p._id);
+  }
   const projects = await Project.find({ members: userId }).select('_id').lean();
   return projects.map((p) => p._id);
 }
 
 async function getAssignedTaskIds(userId) {
+  if (preferRepository(isPostgresTasksEnabled)) {
+    const prisma = await getPrismaClient();
+    const personId = await resolvePersonId(String(userId));
+    if (!personId) return [];
+    const rows = await prisma.taskAssignee.findMany({
+      where: { personId },
+      select: { taskId: true },
+    });
+    const taskIds = await Promise.all(rows.map((row) => resolveMongoId('Task', row.taskId)));
+    return taskIds.filter(Boolean);
+  }
   const rows = await TaskAssignment.find({ userId }).select('taskId').lean();
   return rows.map((r) => r.taskId);
+}
+
+function eventOverlapsRange(ev, startDate, endDate) {
+  const evStart = ev.date ? new Date(ev.date) : null;
+  if (!evStart) return false;
+  const evEnd = ev.endDate ? new Date(ev.endDate) : evStart;
+  return evEnd >= startDate && evStart <= endDate;
+}
+
+function eventVisibleToUser(ev, userId, userProjectIds) {
+  if (ev.visibility === 'public') return true;
+  const createdBy = ev.createdBy?._id || ev.createdBy;
+  if (String(createdBy) === String(userId)) return true;
+  if (ev.visibility === 'project' && ev.projectId) {
+    const pid = String(ev.projectId?._id || ev.projectId);
+    return userProjectIds.some((id) => String(id) === pid);
+  }
+  return false;
+}
+
+async function fetchVisibleCalendarEvents(userId, userProjectIds, startDate, endDate) {
+  if (preferRepository(isPostgresCalendarEnabled)) {
+    const allEvents = await calendarRepository.find({}).lean();
+    return allEvents.filter(
+      (ev) => eventOverlapsRange(ev, startDate, endDate) && eventVisibleToUser(ev, userId, userProjectIds),
+    );
+  }
+
+  const eventQuery = {
+    $and: [
+      {
+        $or: [
+          { visibility: 'public' },
+          { createdBy: userId },
+          ...(userProjectIds.length
+            ? [{ visibility: 'project', projectId: { $in: userProjectIds } }]
+            : []),
+        ],
+      },
+      {
+        $or: [
+          { endDate: { $gte: startDate }, date: { $lte: endDate } },
+          { endDate: null, date: { $gte: startDate, $lte: endDate } },
+          { endDate: { $exists: false }, date: { $gte: startDate, $lte: endDate } },
+        ],
+      },
+    ],
+  };
+
+  return calendarRepository.find(eventQuery, { bypass: true })
+    .populate('createdBy', 'name avatar')
+    .populate('projectId', 'name workspace')
+    .lean();
+}
+
+function taskInDueDateRange(task, startDate, endDate) {
+  if (!task.dueDate) return false;
+  const due = new Date(task.dueDate);
+  return due >= startDate && due <= endDate;
+}
+
+async function fetchCalendarTasks(userId, assignedTaskIds, startDate, endDate) {
+  const taskOr = [
+    { createdBy: userId },
+    { mentionAccessIds: userId },
+  ];
+  if (assignedTaskIds.length) {
+    taskOr.push({ _id: { $in: assignedTaskIds } });
+  }
+
+  if (preferRepository(isPostgresTasksEnabled)) {
+    const rows = await taskRepository.find({
+      status: { $ne: 'done' },
+      $or: taskOr,
+    }).lean();
+    return rows.filter((t) => taskInDueDateRange(t, startDate, endDate));
+  }
+
+  const taskQuery = {
+    dueDate: { $gte: startDate, $lte: endDate, $ne: null },
+    status: { $ne: 'done' },
+    $or: taskOr,
+  };
+  return Task.find(taskQuery).populate('createdBy', 'name avatar').lean();
 }
 
 // GET /api/calendar — fetch all events visible to current user
@@ -45,32 +158,7 @@ router.get('/', validateQuery(calendarQuery), async (req, res) => {
     const endDate = req.query.end ? new Date(req.query.end) : new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000);
 
     const userProjectIds = await getUserProjectIds(req.user._id);
-
-    const eventQuery = {
-      $and: [
-        {
-          $or: [
-            { visibility: 'public' },
-            { createdBy: req.user._id },
-            ...(userProjectIds.length
-              ? [{ visibility: 'project', projectId: { $in: userProjectIds } }]
-              : []),
-          ],
-        },
-        {
-          $or: [
-            { endDate: { $gte: startDate }, date: { $lte: endDate } },
-            { endDate: null, date: { $gte: startDate, $lte: endDate } },
-            { endDate: { $exists: false }, date: { $gte: startDate, $lte: endDate } },
-          ],
-        },
-      ],
-    };
-
-    const events = await calendarRepository.find(eventQuery, { bypass: true })
-      .populate('createdBy', 'name avatar')
-      .populate('projectId', 'name workspace')
-      .lean();
+    const events = await fetchVisibleCalendarEvents(req.user._id, userProjectIds, startDate, endDate);
 
     const calendarOnly = events.map((ev) => ({
       ...ev,
@@ -80,21 +168,7 @@ router.get('/', validateQuery(calendarQuery), async (req, res) => {
     }));
 
     const assignedTaskIds = await getAssignedTaskIds(req.user._id);
-    const taskOr = [
-      { createdBy: req.user._id },
-      { mentionAccessIds: req.user._id },
-    ];
-    if (assignedTaskIds.length) {
-      taskOr.push({ _id: { $in: assignedTaskIds } });
-    }
-
-    const taskQuery = {
-      dueDate: { $gte: startDate, $lte: endDate, $ne: null },
-      status: { $ne: 'done' },
-      $or: taskOr,
-    };
-
-    const tasks = await Task.find(taskQuery).populate('createdBy', 'name avatar').lean();
+    const tasks = await fetchCalendarTasks(req.user._id, assignedTaskIds, startDate, endDate);
 
     const taskEvents = tasks.map((t) => {
       const dateKey = toDateKey(t.dueDate);

@@ -342,6 +342,41 @@ function filterVisibleServices(services) {
   });
 }
 
+async function probeR2() {
+  if (!require('../infrastructure/r2/r2Config').isR2Configured()) {
+    return serviceResult({
+      id: 'r2',
+      label: 'Cloudflare R2',
+      status: 'skipped',
+      state: 'not_configured',
+      detail: 'R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET, R2_ENDPOINT not set',
+    });
+  }
+
+  const r2 = require('../infrastructure/r2/r2StorageProvider');
+  const { latencyMs, value: probe, error } = await withLatency(() => r2.probeBucket());
+
+  if (error || probe === 'degraded') {
+    return serviceResult({
+      id: 'r2',
+      label: 'Cloudflare R2',
+      status: config.isProduction ? 'degraded' : 'skipped',
+      state: probe,
+      latencyMs,
+      error: error || 'Bucket probe failed',
+    });
+  }
+
+  return serviceResult({
+    id: 'r2',
+    label: 'Cloudflare R2',
+    status: probe === 'ok' ? 'ok' : 'degraded',
+    state: probe,
+    latencyMs,
+    detail: probe === 'degraded' ? 'Set R2_PUBLIC_URL for public asset reads' : null,
+  });
+}
+
 async function getAdminSystemHealth() {
   const services = filterVisibleServices(await Promise.all([
     probeMongo(),
@@ -350,6 +385,7 @@ async function getAdminSystemHealth() {
     probeRedis(),
     probeResend(),
     probeSupabase(),
+    probeR2(),
     probeBullmq(),
   ]));
 

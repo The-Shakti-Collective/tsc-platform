@@ -12,23 +12,31 @@ const {
   resendFilteredCampaignBody,
 } = require('../../../validation/schemas/campaigns');
 const campaignApiController = require('../controllers/campaignApiController');
+const r2 = require('../../../infrastructure/r2/r2StorageProvider');
+const { UPLOAD_DIR } = require('../../../utils/campaignAttachments');
 
 const emailsAccess = requirePageAccess('emails');
 
 router.use(protect, emailsAccess);
 
-const attachmentDir = path.join(__dirname, '../../../uploads/campaign-attachments');
-if (!fs.existsSync(attachmentDir)) fs.mkdirSync(attachmentDir, { recursive: true });
+if (!r2.isR2Configured() && !fs.existsSync(UPLOAD_DIR)) {
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
 
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: attachmentDir,
-    filename: (_req, file, cb) => {
-      cb(null, `${crypto.randomBytes(16).toString('hex')}_${file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')}`);
-    },
-  }),
-  limits: { fileSize: 10 * 1024 * 1024 },
-});
+const upload = r2.isR2Configured()
+  ? multer({
+      storage: multer.memoryStorage(),
+      limits: { fileSize: 10 * 1024 * 1024 },
+    })
+  : multer({
+      storage: multer.diskStorage({
+        destination: UPLOAD_DIR,
+        filename: (_req, file, cb) => {
+          cb(null, `${crypto.randomBytes(16).toString('hex')}_${file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')}`);
+        },
+      }),
+      limits: { fileSize: 10 * 1024 * 1024 },
+    });
 
 router.get('/', campaignApiController.list);
 router.post('/upload-attachment', upload.single('file'), campaignApiController.uploadAttachment);

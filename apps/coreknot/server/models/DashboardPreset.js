@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { VALID_DASHBOARD_COMPONENT_IDS } = require('../utils/dashboardComponents');
+const { DEPARTMENT_PRESETS } = require('../constants/customizationDefaults');
 
 const dashboardPresetSchema = new mongoose.Schema({
   userId: {
@@ -78,52 +79,7 @@ const dashboardPresetSchema = new mongoose.Schema({
 
 dashboardPresetSchema.index({ userId: 1, createdAt: -1 });
 
-// Department presets (static)
-const DEPARTMENT_PRESETS = {
-  sales: {
-    name: 'Sales Dashboard',
-    department: 'sales',
-    elements: [
-      { componentId: 'leaderboard', size: '3', order: 1, visible: true },
-      { componentId: 'announcements', size: '1', order: 2, visible: true },
-      { componentId: 'schedule', size: '1', order: 3, visible: true },
-      { componentId: 'todos-today', size: '1', order: 4, visible: true },
-      { componentId: 'notes', size: '1', order: 5, visible: true }
-    ]
-  },
-  development: {
-    name: 'Developer Dashboard',
-    department: 'development',
-    elements: [
-      { componentId: 'review-queue', size: '3', order: 1, visible: true },
-      { componentId: 'todos-today', size: '3', order: 2, visible: true },
-      { componentId: 'projects-today', size: '3', order: 3, visible: true },
-      { componentId: 'stats', size: '1', order: 4, visible: true },
-      { componentId: 'notes', size: '1', order: 5, visible: true }
-    ]
-  },
-  hr: {
-    name: 'HR Dashboard',
-    department: 'hr',
-    elements: [
-      { componentId: 'announcements', size: '3', order: 1, visible: true },
-      { componentId: 'schedule', size: '3', order: 2, visible: true },
-      { componentId: 'todos-today', size: '1', order: 3, visible: true },
-      { componentId: 'notes', size: '1', order: 4, visible: true }
-    ]
-  },
-  marketing: {
-    name: 'Marketing Dashboard',
-    department: 'marketing',
-    elements: [
-      { componentId: 'stats', size: '3', order: 1, visible: true },
-      { componentId: 'announcements', size: '1', order: 2, visible: true },
-      { componentId: 'schedule', size: '1', order: 3, visible: true },
-      { componentId: 'todos-today', size: '3', order: 4, visible: true },
-      { componentId: 'notes', size: '1', order: 5, visible: true }
-    ]
-  }
-};
+// Department presets (static) — canonical source: constants/customizationDefaults.js
 
 module.exports = mongoose.model('DashboardPreset', dashboardPresetSchema);
 module.exports.DEPARTMENT_PRESETS = DEPARTMENT_PRESETS;

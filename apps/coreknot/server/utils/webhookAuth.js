@@ -66,7 +66,7 @@ const verifyArtistEnquirySecret = (req) => {
 const verifyBookCallWebhookSecret = (req) => {
   const secret = process.env.BOOK_CALL_WEBHOOK_SECRET;
   if (!secret) {
-    return false;
+    return process.env.NODE_ENV !== 'production';
   }
   const received = req.headers['x-webhook-secret'];
   if (!received || typeof received !== 'string') return false;

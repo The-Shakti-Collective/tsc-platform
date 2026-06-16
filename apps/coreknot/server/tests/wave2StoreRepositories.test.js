@@ -33,10 +33,11 @@ describe('Wave 2 postgres store flags', () => {
 
 describe('Wave 2 legacy repositories', () => {
   it('exports dual-store helpers', () => {
-    const mailCampaignRepository = require('../repositories/mailCampaignRepository');
+    const { mailCampaignRepository, campaignRepository } = require('../repositories/mailRepositories');
     const attendanceRepository = require('../repositories/attendanceRepository');
     expect(typeof mailCampaignRepository.find).toBe('function');
     expect(typeof mailCampaignRepository.isPostgresEnabled).toBe('function');
+    expect(typeof campaignRepository.create).toBe('function');
     expect(typeof attendanceRepository.create).toBe('function');
   });
 });

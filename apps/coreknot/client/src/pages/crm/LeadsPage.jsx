@@ -26,6 +26,7 @@ import { crmQueryParamsForUser, isArtistOnlyCrmUser, isArtistCrmContext } from '
 import LeadArtistJourneySection from '../../components/crm/LeadArtistJourneySection';
 import ArtistCrmImportPanel from '../../components/crm/ArtistCrmImportPanel';
 import ArtistBookingEnquiryPanel from '../../components/crm/ArtistBookingEnquiryPanel';
+import TscBookCallLink from '../../components/crm/TscBookCallLink';
 import { isArtistBookingEnquiry } from '../../utils/artistBookingEnquiry';
 import { isLockedByOther, formatLockToast, closeLeadEditor } from '../../utils/crmLeadLock';
 
@@ -500,6 +501,8 @@ export default function LeadsPage() {
   const otherPipeline = Math.max(0, stats.totalLeads - stats.convertedLeads - meaningfulConnectCount);
 
   return (
+    <>
+    {!artistMode && <TscBookCallLink className="mb-3" />}
     <ListPageLayout
       containerClassName="!py-4"
       toolbarFill
@@ -1147,6 +1150,7 @@ export default function LeadsPage() {
         </form>
       </Modal>
     </ListPageLayout>
+    </>
   );
 }
 

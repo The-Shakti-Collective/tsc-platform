@@ -27,6 +27,17 @@ const errorHandler = (err, req, res, next) => {
     }, {});
   }
 
+  if (err.type === 'entity.parse.failed' || (err instanceof SyntaxError && /JSON/i.test(err.message || ''))) {
+    statusCode = 400;
+    message = 'Invalid JSON body';
+    code = 'INVALID_JSON';
+  }
+
+  if (err.message === 'Not allowed by CORS') {
+    statusCode = 403;
+    code = 'CORS_REJECTED';
+  }
+
   if (err.type === 'entity.too.large' || err.name === 'PayloadTooLargeError') {
     statusCode = 413;
     message = 'Request entity too large. Reduce HTML size, remove inline images, or upload attachments separately.';

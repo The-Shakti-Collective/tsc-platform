@@ -2,19 +2,62 @@
  * Task HTTP layer. Review/approve rules live in TaskService + shared/taskReviewRules.js —
  * keep client taskReview.js aligned with that shared module.
  */
-const mongoose = require('mongoose');
-const Task = require('../models/Task');
-const Project = require('../../../models/Project');
 const TaskService = require('../services/TaskService');
-const TaskAssignment = require('../models/TaskAssignment');
 const { resolvePlatformOwnerUser } = require('../../../utils/platformOwner');
 const { createNotification } = require('../../../services/notificationDispatcher');
 const logger = require('../../../utils/logger');
 const { isAdminUser } = require('../../../utils/departmentPermissions');
-const { withTransactionRetry } = require('../../../utils/mongoTransaction');
 const { scheduleRollup } = require('../../../utils/rollup');
 const { broadcastRealtimeEvent } = require('../../../config/realtime');
 const { getDateKey, APP_TIMEZONE } = require('../../../utils/attendanceDate');
+const {
+  isValidEntityId,
+  usesMongoSessions,
+  withTaskSession,
+} = require('../../../utils/taskMongo');
+const {
+  getPrismaClient,
+  isPostgresProjectsEnabled,
+  isPostgresTasksEnabled,
+} = require('../../../infrastructure/postgres/prismaClient');
+const projectRepository = require('../../../repositories/projectRepository');
+const taskRepository = require('../../../repositories/taskRepository');
+
+const lazyModel = (relPath) => {
+  let mod;
+  return () => {
+    if (!mod) {
+      // eslint-disable-next-line import/no-dynamic-require, global-require
+      mod = require(relPath);
+    }
+    return mod;
+  };
+};
+
+const getTaskModel = lazyModel('../models/Task');
+const getProjectModel = lazyModel('../../../models/Project');
+const getTaskAssignmentModel = lazyModel('../models/TaskAssignment');
+const getUserModel = lazyModel('../../../models/User');
+
+async function findTaskIdsForUser(userId) {
+  if (isPostgresTasksEnabled()) {
+    const prisma = await getPrismaClient();
+    const rows = await prisma.taskAssignee.findMany({
+      where: { personId: String(userId) },
+      select: { taskId: true },
+    });
+    return rows.map((row) => row.taskId);
+  }
+  const assignments = await getTaskAssignmentModel().find({ userId }).lean();
+  return assignments.map((a) => a.taskId);
+}
+
+async function findProjectById(projectId) {
+  if (isPostgresProjectsEnabled()) {
+    return projectRepository.findById(projectId);
+  }
+  return getProjectModel().findById(projectId).lean();
+}
 
 const BUG_SEVERITIES = new Set(['critical', 'high', 'medium', 'low']);
 const TZ_OFFSET = APP_TIMEZONE === 'UTC' ? '+00:00' : '+05:30';
@@ -76,7 +119,7 @@ const memberId = (value) => (value?._id || value)?.toString?.() || null;
 
 /** Ensure every user is on the bug/tech project and can assign tasks to the owner. */
 const syncTechProjectMembers = async (techProject, ownerId, session) => {
-  const User = require('../../../models/User');
+  const User = getUserModel();
   const allUsers = await User.find({}).select('_id').lean().session(session);
   const ownerStr = memberId(ownerId);
 
@@ -149,21 +192,23 @@ const pick = (src, keys) => {
 };
 
 exports.createTask = async (req, res, next) => {
-  const session = await mongoose.startSession();
   try {
-    let taskDto, pendingNotifications;
-    await session.withTransaction(async () => {
+    let taskDto;
+    let pendingNotifications;
+    await withTaskSession(async (session) => {
       const taskData = { ...pick(req.body, ALLOWED_CREATE), createdBy: req.user._id };
       if (!taskData.projectId || taskData.projectId === '[object Object]') delete taskData.projectId;
-      
+
       if (taskData.assignees) {
-        taskData.assignees = taskData.assignees.filter(a => typeof a === 'string' && mongoose.Types.ObjectId.isValid(a));
+        taskData.assignees = taskData.assignees.filter(
+          (a) => typeof a === 'string' && isValidEntityId(a),
+        );
       }
 
       const result = await TaskService.createTask(taskData, req.user, session);
       taskDto = result.taskDto;
       pendingNotifications = result.pendingNotifications;
-    });
+    }, { retry: false });
 
     dispatchTaskNotifications(pendingNotifications);
     broadcastRealtimeEvent('tasks', 'task_change', { taskId: taskDto._id, action: 'create' });
@@ -177,8 +222,6 @@ exports.createTask = async (req, res, next) => {
       return res.status(error.message.includes('not found') ? 404 : 403).json({ error: error.message });
     }
     next(error);
-  } finally {
-    session.endSession();
   }
 };
 
@@ -200,8 +243,7 @@ exports.getTasks = async (req, res, next) => {
     if (projectId) {
       queryFilter.projectId = projectId;
       if (!isAdminUser(req.user)) {
-        const Project = require('../../../models/Project');
-        const project = await Project.findById(projectId).lean();
+        const project = await findProjectById(projectId);
         const { getProjectRole } = require('../services/TaskService');
         const role = getProjectRole(project, req.user._id);
         if (!role) {
@@ -210,9 +252,7 @@ exports.getTasks = async (req, res, next) => {
       }
     } else {
       if (!isAdminUser(req.user)) {
-        const TaskAssignment = require('../models/TaskAssignment');
-        const assignments = await TaskAssignment.find({ userId: req.user._id }).lean();
-        const taskIds = assignments.map(a => a.taskId);
+        const taskIds = await findTaskIdsForUser(req.user._id);
 
         queryFilter.$or = [
           { createdBy: req.user._id },
@@ -242,9 +282,7 @@ exports.getTasks = async (req, res, next) => {
         },
       };
     } else if (scope === 'todo') {
-      const TaskAssignment = require('../models/TaskAssignment');
-      const assignments = await TaskAssignment.find({ userId: req.user._id }).lean();
-      const taskIds = assignments.map((a) => a.taskId);
+      const taskIds = await findTaskIdsForUser(req.user._id);
       queryFilter = {
         $or: [
           { createdBy: req.user._id },
@@ -271,7 +309,7 @@ exports.getTasks = async (req, res, next) => {
         const completedClauses = completedBase.$and || [completedBase];
         const activeQuery = { $and: [...activeClauses, { status: { $ne: 'done' } }] };
         const completedQuery = { $and: [...completedClauses, { status: 'done' }] };
-        const Task = require('../models/Task');
+        const taskRead = isPostgresTasksEnabled() ? taskRepository : getTaskModel();
 
         const [activeResult, completedResult, completedTotal, stats] = await Promise.all([
           TaskService.getTasks(activeQuery, {
@@ -288,7 +326,9 @@ exports.getTasks = async (req, res, next) => {
             limit: completedLimit,
             sort: completedSort,
           }),
-          Task.countDocuments(completedQuery),
+          isPostgresTasksEnabled()
+            ? taskRepository.countDocuments(completedQuery)
+            : getTaskModel().countDocuments(completedQuery),
           TaskService.getTodoStats(statsBaseFilter),
         ]);
 
@@ -338,7 +378,7 @@ exports.getTasks = async (req, res, next) => {
       const completedFilter = { $and: [...baseClauses, { status: 'done' }] };
       const completedSort = { completedAt: -1, updatedAt: -1, _id: -1 };
 
-      const Task = require('../models/Task');
+      const taskRead = isPostgresTasksEnabled() ? taskRepository : getTaskModel();
       const [activeTasks, completedResult, completedTotal] = await Promise.all([
         TaskService.getTasks(activeFilter, { userId: req.user._id }),
         TaskService.getTasks(completedFilter, {
@@ -348,7 +388,7 @@ exports.getTasks = async (req, res, next) => {
           sort: completedSort,
           completedListMode: true,
         }),
-        Task.countDocuments(completedFilter),
+        taskRead.countDocuments(completedFilter),
       ]);
 
       const activeList = Array.isArray(activeTasks) ? activeTasks : activeTasks.tasks || [];
@@ -380,9 +420,8 @@ exports.getTasks = async (req, res, next) => {
 };
 
 exports.updateTask = async (req, res, next) => {
-  const session = await mongoose.startSession();
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id) || req.params.id === '[object Object]') {
+    if (!isValidEntityId(req.params.id) || req.params.id === '[object Object]') {
       return res.status(400).json({ error: 'Invalid task ID format' });
     }
 
@@ -391,7 +430,7 @@ exports.updateTask = async (req, res, next) => {
     let pendingNotifications = [];
     let rollupMeta = null;
 
-    await withTransactionRetry(session, async () => {
+    await withTaskSession(async (session) => {
       const result = await TaskService.updateTask(req.params.id, updates, req.user, session);
       taskDto = result.taskDto;
       pendingNotifications = result.pendingNotifications || [];
@@ -433,14 +472,12 @@ exports.updateTask = async (req, res, next) => {
       return res.status(status).json({ error: error.message });
     }
     next(error);
-  } finally {
-    session.endSession();
   }
 };
 
 exports.getTask = async (req, res, next) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    if (!isValidEntityId(req.params.id)) {
       return res.status(400).json({ error: 'Invalid task ID format' });
     }
     const TaskActivityService = require('../services/TaskActivityService');
@@ -459,7 +496,7 @@ exports.getTask = async (req, res, next) => {
 
 exports.getTaskActivity = async (req, res, next) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    if (!isValidEntityId(req.params.id)) {
       return res.status(400).json({ error: 'Invalid task ID format' });
     }
     const TaskActivityService = require('../services/TaskActivityService');
@@ -478,9 +515,8 @@ exports.getTaskActivity = async (req, res, next) => {
 };
 
 exports.postTaskActivity = async (req, res, next) => {
-  const session = await mongoose.startSession();
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    if (!isValidEntityId(req.params.id)) {
       return res.status(400).json({ error: 'Invalid task ID format' });
     }
     const body = String(req.body?.body || '').trim();
@@ -491,7 +527,7 @@ exports.postTaskActivity = async (req, res, next) => {
     let activity;
     let notificationPayloads = [];
 
-    await withTransactionRetry(session, async () => {
+    await withTaskSession(async (session) => {
       const TaskActivityService = require('../services/TaskActivityService');
       const result = await TaskActivityService.postMessage(req.params.id, req.user, body, session);
       activity = result.activity;
@@ -517,21 +553,18 @@ exports.postTaskActivity = async (req, res, next) => {
       return res.status(403).json({ error: error.message });
     }
     next(error);
-  } finally {
-    session.endSession();
   }
 };
 
 exports.deleteTask = async (req, res, next) => {
-  const session = await mongoose.startSession();
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id) || req.params.id === '[object Object]') {
+    if (!isValidEntityId(req.params.id) || req.params.id === '[object Object]') {
       return res.status(400).json({ error: 'Invalid task ID format' });
     }
 
-    await session.withTransaction(async () => {
+    await withTaskSession(async (session) => {
       await TaskService.deleteTask(req.params.id, req.user, session);
-    });
+    }, { retry: false });
 
     broadcastRealtimeEvent('tasks', 'task_change', { taskId: req.params.id, action: 'delete' });
     res.json({ message: 'Task deleted' });
@@ -540,8 +573,6 @@ exports.deleteTask = async (req, res, next) => {
       return res.status(error.message.includes('not found') ? 404 : 403).json({ error: error.message });
     }
     next(error);
-  } finally {
-    session.endSession();
   }
 };
 
@@ -572,7 +603,6 @@ const calculateBugDueDate = (severity) => {
 };
 
 exports.reportBug = async (req, res, next) => {
-  const session = await mongoose.startSession();
   try {
     const { page, title, description, severity: rawSeverity } = req.body;
     if (!title?.trim()) {
@@ -580,25 +610,47 @@ exports.reportBug = async (req, res, next) => {
     }
 
     const severity = normalizeBugSeverity(rawSeverity);
-    let taskDto, pendingNotifications;
+    let taskDto;
+    let pendingNotifications;
 
-    await session.withTransaction(async () => {
+    await withTaskSession(async (session) => {
       const details = description?.trim() || '(No details provided)';
 
       const platformOwner = await resolvePlatformOwnerUser({ session }) || req.user;
 
-      let techProject = await Project.findOne({ name: /tech|maintenance/i }).session(session);
-      if (!techProject) {
-        techProject = await Project.create([{
-          name: 'Tech Stack & Maintenance',
-          description: 'Core application infrastructure, bug tracking, and continuous refactoring pipeline.',
-          status: 'active',
-          outletId: 'coreknot',
-          owner: platformOwner._id,
-          members: [platformOwner._id],
-          memberRoles: [{ user: platformOwner._id, role: 'manager' }]
-        }], { session });
-        techProject = techProject[0];
+      let techProject;
+      if (isPostgresProjectsEnabled()) {
+        const projects = await projectRepository.find({}).lean();
+        techProject = (Array.isArray(projects) ? projects : []).find(
+          (p) => /tech|maintenance/i.test(String(p.name || '')),
+        );
+        if (!techProject) {
+          const created = await projectRepository.create({
+            name: 'Tech Stack & Maintenance',
+            description: 'Core application infrastructure, bug tracking, and continuous refactoring pipeline.',
+            status: 'active',
+            outletId: 'coreknot',
+            owner: platformOwner._id,
+            members: [platformOwner._id],
+            memberRoles: [{ user: platformOwner._id, role: 'manager' }],
+          });
+          techProject = Array.isArray(created) ? created[0] : created;
+        }
+      } else {
+        const ProjectModel = getProjectModel();
+        techProject = await ProjectModel.findOne({ name: /tech|maintenance/i }).session(session);
+        if (!techProject) {
+          const created = await ProjectModel.create([{
+            name: 'Tech Stack & Maintenance',
+            description: 'Core application infrastructure, bug tracking, and continuous refactoring pipeline.',
+            status: 'active',
+            outletId: 'coreknot',
+            owner: platformOwner._id,
+            members: [platformOwner._id],
+            memberRoles: [{ user: platformOwner._id, role: 'manager' }],
+          }], { session });
+          techProject = created[0];
+        }
       }
 
       techProject = await syncTechProjectMembers(techProject, platformOwner._id, session);
@@ -612,20 +664,22 @@ exports.reportBug = async (req, res, next) => {
         assignees: [platformOwner._id.toString()],
         createdBy: req.user._id,
         dueDate: calculateBugDueDate(severity),
-        scheduleSlot: mapSeverityToScheduleSlot(severity)
+        scheduleSlot: mapSeverityToScheduleSlot(severity),
       };
 
       const result = await TaskService.createTask(taskData, req.user, session);
       taskDto = result.taskDto;
       pendingNotifications = result.pendingNotifications;
 
-      // Platform owner fixes bugs directly — self-assigned so completion does not route to reporter.
-      await TaskAssignment.deleteMany({ taskId: taskDto._id }).session(session);
-      await TaskAssignment.create([{
-        taskId: taskDto._id,
-        userId: platformOwner._id,
-        assignedBy: platformOwner._id,
-      }], { session });
+      if (usesMongoSessions()) {
+        const TaskAssignmentModel = getTaskAssignmentModel();
+        await TaskAssignmentModel.deleteMany({ taskId: taskDto._id }).session(session);
+        await TaskAssignmentModel.create([{
+          taskId: taskDto._id,
+          userId: platformOwner._id,
+          assignedBy: platformOwner._id,
+        }], { session });
+      }
 
       if (platformOwner._id.toString() !== req.user._id.toString()) {
         pendingNotifications.push({
@@ -640,7 +694,7 @@ exports.reportBug = async (req, res, next) => {
           iconType: 'user',
         });
       }
-    });
+    }, { retry: false });
 
     dispatchTaskNotifications(pendingNotifications);
     broadcastRealtimeEvent('tasks', 'task_change', { taskId: taskDto._id, action: 'create' });
@@ -651,7 +705,5 @@ exports.reportBug = async (req, res, next) => {
       return res.status(403).json({ error: error.message });
     }
     next(error);
-  } finally {
-    session.endSession();
   }
 };

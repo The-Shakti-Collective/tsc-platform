@@ -1,4 +1,4 @@
-const MailCampaign = require('../models/MailCampaign');
+const { mailCampaignRepository } = require('../../../repositories/mailRepositories');
 const MailEvent = require('../models/MailEvent');
 const EmailProfile = require('../models/EmailProfile');
 const Lead = require('../../../models/Lead');
@@ -7,9 +7,11 @@ const { dispatchCampaignJobs } = require('../../../services/queueService');
 
 exports.list = async (req, res) => {
   try {
-    const filter = isAdminUser(req.user) ? {} : { createdBy: req.user._id };
-    const campaigns = await MailCampaign.find(filter).sort('-createdAt').lean();
-    for (const camp of campaigns) {
+    const campaigns = await mailCampaignRepository.find({}).sort('-createdAt').lean();
+    const scoped = isAdminUser(req.user)
+      ? campaigns
+      : campaigns.filter((camp) => String(camp.createdBy) === String(req.user._id));
+    for (const camp of scoped) {
       const total = camp.recipients?.length || 0;
       let sent = 0; let opened = 0; let clicked = 0; let bounced = 0; let unsubscribed = 0; let invalid = 0;
       camp.recipients?.forEach((r) => {
@@ -22,7 +24,7 @@ exports.list = async (req, res) => {
       });
       camp.stats = { total, sent, opened, clicked, bounced, unsubscribed, invalid };
     }
-    res.json(campaigns);
+    res.json(scoped);
   } catch (err) {
     console.error('Get campaigns error:', err);
     res.status(500).json({ error: err.message });
@@ -57,7 +59,7 @@ exports.create = async (req, res) => {
       return true;
     });
 
-    const campaign = await MailCampaign.create({
+    const campaign = await mailCampaignRepository.create({
       ...rest,
       attachments: rest.attachments || [],
       recipients: allRecipients,
@@ -73,7 +75,7 @@ exports.create = async (req, res) => {
 
 exports.send = async (req, res) => {
   try {
-    const campaign = await MailCampaign.findById(req.params.id);
+    const campaign = await mailCampaignRepository.findById(req.params.id).lean();
     if (!campaign) return res.status(404).json({ error: 'Campaign not found' });
     if (!isAdminUser(req.user) && campaign.createdBy?.toString() !== req.user._id.toString()) {
       return res.status(403).json({ error: 'Not authorized to send this campaign' });
@@ -289,13 +291,13 @@ exports.testCampaign = async (req, res) => {
 
 exports.remove = async (req, res) => {
   try {
-    const campaign = await MailCampaign.findById(req.params.id);
+    const campaign = await mailCampaignRepository.findById(req.params.id).lean();
     if (!campaign) return res.status(404).json({ error: 'Campaign not found' });
     if (!isAdminUser(req.user) && campaign.createdBy?.toString() !== req.user._id.toString()) {
       return res.status(403).json({ error: 'Not authorized to delete this campaign' });
     }
     const campaignId = req.params.id;
-    await MailCampaign.findByIdAndDelete(campaignId);
+    await mailCampaignRepository.findByIdAndDelete(campaignId);
     await MailEvent.deleteMany({ campaignId });
     res.json({ message: 'Campaign and related tracking data deleted successfully' });
   } catch (err) {

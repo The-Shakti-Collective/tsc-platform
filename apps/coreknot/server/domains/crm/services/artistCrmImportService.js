@@ -1,7 +1,7 @@
 const fs = require('fs');
 const csv = require('csv-parser');
-const Lead = require('../models/Lead');
-const CRMImport = require('../models/CRMImport');
+const { leadRepository, crmImportRepository } = require('../repositories');
+const { isPostgresCrmEnabled } = require('../../../infrastructure/postgres/prismaClient');
 const User = require('../../../models/User');
 const Department = require('../../../models/Department');
 const ContactService = require('../../../services/ContactService');
@@ -374,7 +374,7 @@ async function loadBulkImportRegistry() {
     : [];
   const defaultAssigneeId = await assignLeadToArtistRep();
 
-  const existing = await Lead.find({ crmType: CRM_TYPES.ARTIST })
+  const existing = await leadRepository.find({ crmType: CRM_TYPES.ARTIST })
     .select('metadata.importRowKey phone email')
     .setOptions({ bypassTenant: true })
     .lean();
@@ -415,6 +415,32 @@ const BULK_WRITE_CHUNK = 1000;
 async function executeBulkLeadUpsert(docs) {
   if (!docs.length) return { upserted: 0, modified: 0, failed: 0 };
 
+  if (isPostgresCrmEnabled()) {
+    let upserted = 0;
+    let modified = 0;
+    let failed = 0;
+    for (const doc of docs) {
+      try {
+        const filter = {
+          crmType: CRM_TYPES.ARTIST,
+          'metadata.importRowKey': doc.metadata?.importRowKey,
+        };
+        const existing = await leadRepository.findOne(filter).setOptions({ bypassTenant: true });
+        if (existing) {
+          await leadRepository.findOneAndUpdate(filter, { $set: doc }, { bypassTenant: true });
+          modified += 1;
+        } else {
+          await leadRepository.create(doc);
+          upserted += 1;
+        }
+      } catch (err) {
+        failed += 1;
+        logger.warn('artistCrmBulk', 'Postgres upsert row failed', { error: err.message });
+      }
+    }
+    return { upserted, modified, failed };
+  }
+
   const now = new Date();
   let upserted = 0;
   let modified = 0;
@@ -444,6 +470,7 @@ async function executeBulkLeadUpsert(docs) {
     });
 
     try {
+      const Lead = require('../models/Lead');
       const result = await Lead.collection.bulkWrite(ops, { ordered: false });
       upserted += result.upsertedCount || 0;
       modified += result.modifiedCount || 0;
@@ -466,7 +493,7 @@ async function executeBulkLeadUpsert(docs) {
 
 async function bulkImportArtistCsvFiles({ files, userId, skipContacts = true }) {
   const registry = await loadBulkImportRegistry();
-  const importSession = await CRMImport.create({
+  const importSession = await crmImportRepository.create({
     filename: files.map((f) => f.filename).join('; '),
     leadCount: 0,
     crmType: CRM_TYPES.ARTIST,
@@ -538,7 +565,7 @@ async function bulkImportArtistCsvFiles({ files, userId, skipContacts = true }) 
   const bulkResult = await executeBulkLeadUpsert(preparedDocs);
 
   importSession.leadCount = preparedDocs.length;
-  await importSession.save();
+  await crmImportRepository.findByIdAndUpdate(importSession._id, { leadCount: preparedDocs.length });
 
   if (skipContacts) {
     logger.info('artistCrmBulk', 'Contact hub sync deferred — run reconcileDataHub if needed');
@@ -555,7 +582,7 @@ async function bulkImportArtistCsvFiles({ files, userId, skipContacts = true }) 
 
 async function findExistingLead(doc) {
   if (!doc.metadata?.importRowKey) return null;
-  return Lead.findOne({
+  return leadRepository.findOne({
     crmType: CRM_TYPES.ARTIST,
     'metadata.importRowKey': doc.metadata.importRowKey,
   }).setOptions({ bypassTenant: true });
@@ -566,23 +593,38 @@ function isDuplicateKeyError(err) {
 }
 
 async function saveArtistLead(existing, clean) {
-  if (!clean.email) existing.email = undefined;
-  try {
-    await existing.save();
-  } catch (saveErr) {
-    if (isDuplicateKeyError(saveErr) && String(saveErr.message).includes('phone')) {
-      existing.phone = syntheticArtistPhone(clean.metadata?.importRowKey || clean.name);
-      existing.metadata = {
-        ...(existing.metadata || {}),
-        importSyntheticPhone: true,
-        ...(clean.phone ? { originalPhone: clean.phone } : {}),
-      };
+  const payload = { ...clean };
+  if (!payload.email) payload.email = undefined;
+
+  const persist = async (doc) => {
+    if (typeof existing.save === 'function') {
+      Object.assign(existing, doc);
       await existing.save();
       return;
     }
+    await leadRepository.findOneAndUpdate(
+      { _id: existing._id },
+      { $set: doc },
+      { bypassTenant: true },
+    );
+  };
+
+  try {
+    await persist(payload);
+  } catch (saveErr) {
+    if (isDuplicateKeyError(saveErr) && String(saveErr.message).includes('phone')) {
+      payload.phone = syntheticArtistPhone(clean.metadata?.importRowKey || clean.name);
+      payload.metadata = {
+        ...(payload.metadata || {}),
+        importSyntheticPhone: true,
+        ...(clean.phone ? { originalPhone: clean.phone } : {}),
+      };
+      await persist(payload);
+      return;
+    }
     if (isDuplicateKeyError(saveErr) && String(saveErr.message).includes('email')) {
-      existing.email = undefined;
-      await existing.save();
+      payload.email = undefined;
+      await persist(payload);
       return;
     }
     throw saveErr;
@@ -624,7 +666,7 @@ async function createArtistLead(doc) {
   let lastErr;
   for (const build of attempts) {
     try {
-      return await Lead.create(build());
+      return await leadRepository.create(build());
     } catch (err) {
       lastErr = err;
       if (!isDuplicateKeyError(err)) throw err;
@@ -692,7 +734,7 @@ async function importArtistCsvFile({ filePath, filename, userId }) {
     : [];
   const defaultAssigneeId = await assignLeadToArtistRep();
 
-  const importSession = await CRMImport.create({
+  const importSession = await crmImportRepository.create({
     filename,
     leadCount: 0,
     crmType: CRM_TYPES.ARTIST,
@@ -745,7 +787,7 @@ async function importArtistCsvFile({ filePath, filename, userId }) {
   }
 
   importSession.leadCount = imported;
-  await importSession.save();
+  await crmImportRepository.findByIdAndUpdate(importSession._id, { leadCount: imported });
 
   return {
     importId: importSession._id,

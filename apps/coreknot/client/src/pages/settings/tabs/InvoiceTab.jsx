@@ -7,7 +7,7 @@ import { NexusModal } from '../../../components/ui/modals';;
 import WorkspaceProjectFields from '../../../components/forms/WorkspaceProjectFields';
 import { useProjects } from '../../../hooks/queries/projects';
 import { useWorkspaces, useMyReimbursements } from '../../../hooks/useTaskmasterQueries';
-import { uploadFiles } from '../../../utils/uploadthing';
+import { uploadReceiptFiles } from '../../../utils/financeUpload';
 import { formatProjectName } from '../../../utils/projectUtils';
 import { normalizeWorkspaceKey } from '../../../utils/workspaceColors';
 
@@ -150,9 +150,7 @@ export default function InvoiceTab() {
 
     setSubmitting(true);
     try {
-      const uploadRes = await uploadFiles('financeDocUploader', {
-        files: receiptFiles,
-      });
+      const uploadRes = await uploadReceiptFiles(receiptFiles);
 
       const attachments = uploadRes
         .map((uploaded, index) => mapUploadedFile(uploaded, receiptFiles[index]))

@@ -5,10 +5,16 @@ const CRMStatSnapshot = require('../models/CRMStatSnapshot');
 const logger = require('../utils/logger');
 const { aggregateWithTenant } = require('../repositories/aggregateWithTenant');
 const { runForEachTenant } = require('../utils/workerTenantContext');
+const { isPostgresCrmEnabled } = require('../infrastructure/postgres/prismaClient');
+const { computeStatsFromFilter } = require('../domains/crm/services/crmStatsPostgres');
 
 const { warmPipelineQuery } = require('../utils/crmPipelineFilters');
 
 const calculateStats = async (matchStage) => {
+  if (isPostgresCrmEnabled()) {
+    return computeStatsFromFilter(matchStage);
+  }
+
   const stats = await aggregateWithTenant(Lead, [
     { $match: matchStage },
     {

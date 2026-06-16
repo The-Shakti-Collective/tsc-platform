@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
 const {
   resolveMongoUri,
   assertSafeDbTarget,
   getMongooseConnectOptions,
 } = require('../config/database');
+const { isMongoRequired } = require('../infrastructure/postgres/prismaClient');
 
 const MONGO_UNAVAILABLE_CODE = 'DATABASE_UNAVAILABLE';
 const PUBLIC_UNAVAILABLE_MESSAGE =
@@ -12,8 +12,19 @@ const PUBLIC_UNAVAILABLE_MESSAGE =
 
 let connectPromise = null;
 let reconnectTimer = null;
+/** @type {typeof import('mongoose') | null} */
+let mongooseModule = null;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function getMongoose() {
+  if (!mongooseModule) {
+    // eslint-disable-next-line global-require
+    mongooseModule = require('mongoose');
+    mongooseModule.set('bufferCommands', false);
+  }
+  return mongooseModule;
+}
 
 function applyWindowsDnsPreference() {
   if (process.platform !== 'win32') return;
@@ -25,21 +36,31 @@ function applyWindowsDnsPreference() {
 }
 
 function applyMongooseDefaults() {
-  mongoose.set('bufferCommands', false);
+  if (!isMongoRequired()) return;
+  getMongoose();
 }
 
 function isMongoReady() {
-  return mongoose.connection.readyState === 1;
+  if (!isMongoRequired()) return false;
+  return getMongoose().connection.readyState === 1;
+}
+
+/** Safe to run Mongoose model queries (connected, or mongo still required and buffering). */
+function canUseMongoModels() {
+  if (!isMongoRequired()) return false;
+  return isMongoReady();
 }
 
 function isMongoConnecting() {
-  return mongoose.connection.readyState === 2;
+  if (!isMongoRequired()) return false;
+  return getMongoose().connection.readyState === 2;
 }
 
 function isMongoUnavailableError(err) {
   if (!err) return false;
   const name = String(err.name || '');
   const message = String(err.message || '');
+  if (name === 'MongooseError' && message.includes('bufferCommands = false')) return true;
   if (name === 'MongooseError' && message.includes('buffering timed out')) return true;
   if (name === 'MongoServerSelectionError') return true;
   if (name === 'MongoNetworkError') return true;
@@ -60,6 +81,7 @@ function mongoUnavailableMessage(err) {
 }
 
 function registerConnectionEventHandlers() {
+  const mongoose = getMongoose();
   if (mongoose.connection.__tscHandlersRegistered) return;
   mongoose.connection.__tscHandlersRegistered = true;
 
@@ -78,6 +100,7 @@ function registerConnectionEventHandlers() {
 }
 
 function scheduleReconnect(delayMs = 5000) {
+  if (!isMongoRequired()) return;
   if (reconnectTimer || process.env.NODE_ENV === 'test') return;
   reconnectTimer = setTimeout(() => {
     reconnectTimer = null;
@@ -91,6 +114,12 @@ function scheduleReconnect(delayMs = 5000) {
 }
 
 async function connectMongo({ reason = 'startup', maxAttempts = 5 } = {}) {
+  if (!isMongoRequired()) {
+    return null;
+  }
+
+  const mongoose = getMongoose();
+
   if (process.env.NODE_ENV === 'test') return mongoose.connection;
 
   if (isMongoReady()) return mongoose.connection;
@@ -136,6 +165,8 @@ async function connectMongo({ reason = 'startup', maxAttempts = 5 } = {}) {
 }
 
 function bootstrapMongoSideEffects() {
+  if (!isMongoRequired()) return;
+
   const { ensurePerformanceIndexes } = require('../scripts/ensureIndexes');
   ensurePerformanceIndexes().catch((err) => {
     console.warn('[INDEX] Performance index sync skipped:', err.message);
@@ -170,6 +201,7 @@ module.exports = {
   applyWindowsDnsPreference,
   applyMongooseDefaults,
   isMongoReady,
+  canUseMongoModels,
   isMongoConnecting,
   isMongoUnavailableError,
   mongoUnavailableMessage,

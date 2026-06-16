@@ -1,9 +1,13 @@
-const Campaign = require('./models/Campaign');
-const MailCampaign = require('./models/MailCampaign');
+const { campaignRepository, mailCampaignRepository } = require('../../repositories/mailRepositories');
 const { bypassOptions } = require('../../infrastructure/database/bypassTenantPolicy');
 
 const BYPASS = bypassOptions('campaign_facade');
 const isObjectIdHex = (id) => typeof id === 'string' && /^[0-9a-fA-F]{24}$/.test(id);
+
+const queryOpts = (options = {}) => ({
+  bypass: true,
+  ...options,
+});
 
 /**
  * Resolve a campaign by public campaignId or Mongo _id (same rules as GET /api/campaigns/:id).
@@ -14,47 +18,31 @@ const resolveCampaignByParam = async (id, options = {}) => {
 
   const key = String(id).trim();
   const { populate = false, lean = false, excludeRecipients = false } = options;
+  const opts = queryOpts({ bypass: true });
 
-  const applyQuery = (query, isLegacy = false) => {
-    query = query.setOptions(BYPASS);
-    if (excludeRecipients) {
-      query = query.select('-recipients');
-    }
-    if (populate && !isLegacy) {
-      query = query.populate('recipients.leadId', 'name email location city phone status artistType')
-        .populate('senderProfileId')
-        .populate('senderProfileIds');
-    } else if (populate && isLegacy) {
-      query = query.populate('recipients.leadId', 'name email location city phone status artistType')
-        .populate('senderProfileId');
-    }
+  const loadOne = async (repo, filter, isLegacy = false) => {
+    let query = repo.findOne(filter, opts);
+    if (excludeRecipients) query = query.select('-recipients');
     if (lean) query = query.lean();
-    return query;
+    else if (populate) query = query.populate('recipients.leadId').populate('senderProfileId').populate('senderProfileIds');
+    const campaign = await query;
+    if (!campaign) return null;
+    return { campaign, isLegacy, Model: repo };
   };
 
-  let campaign = await applyQuery(Campaign.findOne({ campaignId: key }));
-  let isLegacy = false;
-
-  if (!campaign && isObjectIdHex(key)) {
-    campaign = await applyQuery(Campaign.findById(key));
+  let resolved = await loadOne(campaignRepository, { campaignId: key });
+  if (!resolved && isObjectIdHex(key)) {
+    resolved = await loadOne(campaignRepository, { _id: key });
+  }
+  if (!resolved && isObjectIdHex(key)) {
+    resolved = await loadOne(mailCampaignRepository, { _id: key }, true);
   }
 
-  if (!campaign && isObjectIdHex(key)) {
-    campaign = await applyQuery(MailCampaign.findById(key), true);
-    isLegacy = !!campaign;
-  }
-
-  if (!campaign) return null;
-
-  return {
-    campaign,
-    isLegacy,
-    Model: isLegacy ? MailCampaign : Campaign,
-  };
+  return resolved;
 };
 
 /**
- * Unified access for Campaign + MailCampaign models without deleting either schema.
+ * Unified access for Campaign + MailCampaign without direct mongoose on postgres path.
  */
 async function findByIdOrCampaignId(id, options = {}) {
   return resolveCampaignByParam(id, options);
@@ -62,9 +50,10 @@ async function findByIdOrCampaignId(id, options = {}) {
 
 async function findAllForUser(userId, { isAdmin = false } = {}) {
   const filter = isAdmin ? {} : { createdBy: userId };
+  const opts = queryOpts({ bypass: true });
   const [mailCampaigns, coreCampaigns] = await Promise.all([
-    MailCampaign.find(filter).sort('-createdAt').lean().setOptions(BYPASS),
-    Campaign.find(filter).sort('-createdAt').lean().setOptions(BYPASS),
+    mailCampaignRepository.find(filter, opts).sort('-createdAt').lean(),
+    campaignRepository.find(filter, opts).sort('-createdAt').lean(),
   ]);
   return { mailCampaigns, coreCampaigns, all: [...mailCampaigns, ...coreCampaigns] };
 }
@@ -72,13 +61,13 @@ async function findAllForUser(userId, { isAdmin = false } = {}) {
 async function deleteCampaign(resolved) {
   if (!resolved?.campaign) return false;
   const { campaign, Model } = resolved;
-  await Model.findByIdAndDelete(campaign._id).setOptions(BYPASS);
+  await Model.findByIdAndDelete(campaign._id, queryOpts({ bypass: true }));
   return true;
 }
 
 module.exports = {
-  Campaign,
-  MailCampaign,
+  campaignRepository,
+  mailCampaignRepository,
   resolveCampaignByParam,
   isObjectIdHex,
   findByIdOrCampaignId,

@@ -1,22 +1,21 @@
-const Lead = require('../models/Lead');
-const CRMConfig = require('../models/CRMConfig');
+const { leadRepository, crmConfigRepository } = require('../repositories');
 const { mergeLeadStatusOptions } = require('../../../utils/crmPipelineFilters');
 const { getBookedCallsPublicConfig } = require('../../../utils/bookedCallsConfig');
 
 async function getCRMConfig() {
   const [callStatuses, leadStatuses, artistTypes, webinarDates, meaningfulConnectStatuses, sources, qualities] = await Promise.all([
-    Lead.distinct('callStatus'),
-    Lead.distinct('leadStatus'),
-    Lead.distinct('artistType'),
-    Lead.distinct('webinarDates'),
-    Lead.distinct('meaningfulConnect'),
-    Lead.distinct('source'),
-    Lead.distinct('leadQuality'),
+    leadRepository.distinct('callStatus'),
+    leadRepository.distinct('leadStatus'),
+    leadRepository.distinct('artistType'),
+    leadRepository.distinct('webinarDates'),
+    leadRepository.distinct('meaningfulConnect'),
+    leadRepository.distinct('source'),
+    leadRepository.distinct('leadQuality'),
   ]);
 
-  let configDoc = await CRMConfig.findOne({ configKey: 'default' });
+  let configDoc = await crmConfigRepository.findOne({ configKey: 'default' });
   if (!configDoc) {
-    configDoc = await CRMConfig.create({
+    configDoc = await crmConfigRepository.create({
       configKey: 'default',
       callStatuses: ['Pending', 'Connected', 'Busy', 'DNP', 'Switched Off'],
       leadStatuses: ['New', 'Interested', 'Not Interested', 'Followup', 'Converted'],

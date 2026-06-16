@@ -32,13 +32,12 @@ describe('webhookAuth book-call', () => {
     process.env = originalEnv;
   });
 
-  it('rejects unsigned book-call payload when secret is not configured', () => {
+  it('allows unsigned book-call payload in development when secret is not configured', () => {
     const req = { headers: {}, rawBody: Buffer.from('{}') };
     const res = mockRes();
 
-    expect(rejectUnlessBookCallAuthorized(req, res)).toBe(false);
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.body).toMatchObject({ success: false });
+    expect(rejectUnlessBookCallAuthorized(req, res)).toBe(true);
+    expect(res.status).not.toHaveBeenCalled();
   });
 
   it('rejects unsigned book-call payload when secret is configured', () => {

@@ -55,6 +55,7 @@
     "supabase:migrate": "node scripts/supabaseFastMigrate.js --prod",
     "supabase:migrate:local": "node scripts/supabaseFastMigrate.js",
     "backup:verify-supabase": "node scripts/verifySupabaseBackup.js",
+    "storage:verify-r2": "node scripts/verifyR2Storage.js",
     "dev:nodemon": "nodemon server.js"
   },
   "dependencies": {
@@ -93,6 +94,8 @@
     "mongodb": "^6.20.0",
     "mongoose": "^7.0.3",
     "multer": "^2.1.1",
+    "@aws-sdk/client-s3": "^3.758.0",
+    "@aws-sdk/s3-request-presigner": "^3.758.0",
     "node-cron": "^4.2.1",
     "node-ical": "^0.26.1",
     "nodemailer": "^8.0.7",

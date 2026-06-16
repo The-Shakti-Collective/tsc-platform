@@ -54,6 +54,19 @@ router.get('/usd-inr-rate', getUsdInrRate);
 router.post('/submit-invoice', validateBody(submitInvoiceBody), submitInvoice);
 router.get('/my-invoices', listMyInvoices);
 router.post('/upload-invoice', uploadRateLimit, upload.single('file'), uploadFile);
+router.post('/upload-receipts', uploadRateLimit, (req, res, next) => {
+  req.uploadPrefix = 'reimbursements';
+  upload.array('files', 12)(req, res, (err) => {
+    if (err?.code === 'LIMIT_FILE_COUNT') {
+      return res.status(400).json({
+        success: false,
+        message: 'Too many files in one batch (max 12). Upload in smaller groups.',
+      });
+    }
+    if (err) return next(err);
+    return uploadFilesMany(req, res);
+  });
+});
 
 // Ops-only invoice review routes (before /:id catch-all)
 router.get('/pending', financeAccess, listPendingInvoices);

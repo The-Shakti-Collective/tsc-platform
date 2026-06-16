@@ -1,10 +1,11 @@
 const crypto = require('crypto');
-const Campaign = require('../models/Campaign');
-const mailCampaignRepository = require('../../../repositories/mailCampaignRepository');
+const { campaignRepository, mailCampaignRepository } = require('../../../repositories/mailRepositories');
 const MailTemplate = require('../models/MailTemplate');
 const MailEvent = require('../models/MailEvent');
 const EmailLog = require('../models/EmailLog');
 const Lead = require('../../../models/Lead');
+const r2 = require('../../../infrastructure/r2/r2StorageProvider');
+const { campaignObjectKey } = require('../../../utils/campaignAttachments');
 const {
   getEffectiveTemplateContent,
   validateVariableMapping,
@@ -55,8 +56,8 @@ exports.list = async (req, res) => {
       { $sort: { createdAt: -1 } },
     ];
     const [coreCampaigns, mailCampaigns] = await Promise.all([
-      Campaign.aggregate(listPipeline),
-      mailCampaignRepository.mongoRepo.aggregate(listPipeline),
+      campaignRepository.aggregate(listPipeline),
+      mailCampaignRepository.aggregate(listPipeline),
     ]);
     const allCampaigns = [...coreCampaigns, ...mailCampaigns].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -96,10 +97,25 @@ exports.list = async (req, res) => {
 exports.uploadAttachment = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+    if (r2.isR2Configured()) {
+      const storageKey = `${crypto.randomBytes(16).toString('hex')}_${req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+      await r2.uploadObject({
+        key: campaignObjectKey(storageKey),
+        body: req.file.buffer,
+        contentType: req.file.mimetype,
+      });
+      return res.json({
+        filename: req.file.originalname,
+        contentType: req.file.mimetype,
+        storageKey,
+      });
+    }
+
     res.json({
       filename: req.file.originalname,
       contentType: req.file.mimetype,
-      storageKey: req.file.filename
+      storageKey: req.file.filename,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -379,7 +395,7 @@ exports.create = async (req, res) => {
       campaignPayload.variableFallbacks = variableFallbacks;
     }
 
-    const campaign = await Campaign.create(campaignPayload);
+    const campaign = await campaignRepository.create(campaignPayload);
 
     let dispatchResult = null;
     const sendableCount = allRecipients.filter((r) => r.status === 'Pending').length;
@@ -410,7 +426,8 @@ exports.dispatch = async (req, res) => {
       await Model.updateOne(
         { _id: campaign._id },
         { $set: { status: 'Queued' } },
-      ).setOptions(bypassOptions('CAMPAIGN_DISPATCH'));
+        { ...bypassOptions('CAMPAIGN_DISPATCH'), bypass: true },
+      );
     }
     const result = await dispatchCampaignJobs(campaign._id);
     res.status(result.async ? 202 : 200).json(result);
@@ -631,7 +648,7 @@ exports.resendFiltered = async (req, res) => {
         : source.variableMapping;
     }
 
-    const campaign = await Campaign.create(campaignPayload);
+    const campaign = await campaignRepository.create(campaignPayload);
     const result = await dispatchCampaignJobs(campaign._id);
 
     res.status(201).json({
@@ -675,7 +692,7 @@ exports.remove = async (req, res) => {
     const campId = campaign._id;
     const campaignTag = campaign.campaignId || String(campId);
 
-    await Model.findByIdAndDelete(campId).setOptions({ bypassTenant: true });
+    await Model.findByIdAndDelete(campId, { bypass: true });
     await EmailLog.deleteMany({ campaignId: { $in: [campaignTag, String(campId)] } });
     await MailEvent.deleteMany({ campaignId: campId }).setOptions({ bypassTenant: true });
 

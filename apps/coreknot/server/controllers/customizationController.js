@@ -1,12 +1,18 @@
-const DashboardPreset = require('../models/DashboardPreset');
-const NavbarPreference = require('../models/NavbarPreference');
-const ShortcutPreference = require('../models/ShortcutPreference');
+const {
+  DEPARTMENT_PRESETS,
+  DEFAULT_NAVBAR_GROUPS,
+} = require('../constants/customizationDefaults');
+const {
+  dashboardPresetRepository,
+  navbarPreferenceRepository,
+  shortcutPreferenceRepository,
+} = require('../repositories/customizationRepositories');
+const { isDuplicateKeyError } = require('../repositories/createCustomizationRepository');
 const {
   SHORTCUT_ACTIONS,
   normalizeKeyTokens,
   mergeShortcutBindings,
 } = require('../../shared/shortcutDefaults.cjs');
-const { DEPARTMENT_PRESETS } = require('../models/DashboardPreset');
 const logger = require('../utils/logger');
 const {
   filterDashboardElements,
@@ -123,7 +129,7 @@ const dedupeNavPages = (pages) => {
 
 /** Add default pages missing from saved navbar groups (e.g. new features after user saved prefs). */
 const mergeNavbarWithDefaults = (userGroups) => {
-  const defaults = NavbarPreference.DEFAULT_NAVBAR_GROUPS;
+  const defaults = DEFAULT_NAVBAR_GROUPS;
 
   if (!Array.isArray(userGroups) || userGroups.length === 0) {
     return defaults;
@@ -201,16 +207,23 @@ const assertAuthorizedDashboardElements = (elements, user) => {
 };
 
 /** Upsert races on userId unique index — recover like navbar preferences. */
-const upsertDashboardPreset = async (userId, update) => {
-  const options = { new: true, upsert: true, runValidators: true };
+const toPlain = (doc) => (doc?.toObject ? doc.toObject() : doc);
 
+const upsertDashboardPreset = async (userId, update) => {
+  const existing = await dashboardPresetRepository.findOne({ userId }).lean();
+  if (existing) {
+    return dashboardPresetRepository.findOneAndUpdate({ userId }, update, { new: true });
+  }
   try {
-    return await DashboardPreset.findOneAndUpdate({ userId }, update, options);
+    return await dashboardPresetRepository.create({
+      userId,
+      ...(update.$set || update),
+    });
   } catch (error) {
-    if (error.code !== 11000) throw error;
-    const existing = await DashboardPreset.findOne({ userId });
-    if (!existing) throw error;
-    return DashboardPreset.findOneAndUpdate({ userId }, update, { new: true, runValidators: true });
+    if (!isDuplicateKeyError(error)) throw error;
+    const retry = await dashboardPresetRepository.findOne({ userId }).lean();
+    if (!retry) throw error;
+    return dashboardPresetRepository.findOneAndUpdate({ userId }, update, { new: true });
   }
 };
 
@@ -219,19 +232,19 @@ exports.getDashboardPreset = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    let preset = await DashboardPreset.findOne({ userId });
+    let preset = await dashboardPresetRepository.findOne({ userId });
 
     if (!preset) {
       try {
-        preset = await DashboardPreset.create({
+        preset = await dashboardPresetRepository.create({
           userId,
           name: 'My Dashboard',
           department: 'custom',
           elements: DEFAULT_DASHBOARD_ELEMENTS,
         });
       } catch (error) {
-        if (error.code !== 11000) throw error;
-        preset = await DashboardPreset.findOne({ userId });
+        if (!isDuplicateKeyError(error)) throw error;
+        preset = await dashboardPresetRepository.findOne({ userId });
         if (!preset) throw error;
       }
     }
@@ -275,7 +288,7 @@ exports.saveDashboardPreset = async (req, res, next) => {
       elements: sortedElements,
     };
 
-    let existing = await DashboardPreset.findOne({ userId });
+    let existing = await dashboardPresetRepository.findOne({ userId });
     const presets = [...(existing?.presets || [])];
     const idx = presets.findIndex(
       (p) => p.name && p.name.toLowerCase() === savedLayoutName.toLowerCase()
@@ -315,7 +328,7 @@ exports.loadSavedLayout = async (req, res, next) => {
       return res.status(400).json({ error: 'Layout name is required' });
     }
 
-    const existing = await DashboardPreset.findOne({ userId });
+    const existing = await dashboardPresetRepository.findOne({ userId });
     if (!existing) {
       return res.status(404).json({ error: `Layout not found: ${layoutName}` });
     }
@@ -333,7 +346,7 @@ exports.loadSavedLayout = async (req, res, next) => {
       return res.status(authError.status).json({ error: authError.error });
     }
 
-    const preset = await DashboardPreset.findOneAndUpdate(
+    const preset = await dashboardPresetRepository.findOneAndUpdate(
       { userId },
       {
         name: saved.name,
@@ -365,7 +378,7 @@ exports.loadDepartmentPreset = async (req, res, next) => {
       return res.status(404).json({ error: `Department preset not found: ${department}` });
     }
 
-    const preset = await DashboardPreset.findOneAndUpdate(
+    const preset = await dashboardPresetRepository.findOneAndUpdate(
       { userId },
       {
         ...DEPARTMENT_PRESETS[department],
@@ -402,20 +415,29 @@ exports.updateElementVisibility = async (req, res, next) => {
     const userId = req.user._id;
     const { componentId, visible } = req.body;
 
-    const preset = await DashboardPreset.findOneAndUpdate(
-      { userId, 'elements.componentId': componentId },
-      {
-        $set: {
-          'elements.$.visible': visible,
-          updatedAt: new Date()
-        }
-      },
-      { new: true }
-    );
-
-    if (!preset) {
+    const existing = await dashboardPresetRepository.findOne({ userId }).lean();
+    if (!existing?.elements?.length) {
       return res.status(404).json({ error: 'Preset or element not found' });
     }
+
+    let found = false;
+    const elements = existing.elements.map((el) => {
+      if (el.componentId === componentId) {
+        found = true;
+        return { ...el, visible };
+      }
+      return el;
+    });
+
+    if (!found) {
+      return res.status(404).json({ error: 'Preset or element not found' });
+    }
+
+    const preset = await dashboardPresetRepository.findOneAndUpdate(
+      { userId },
+      { elements, updatedAt: new Date() },
+      { new: true },
+    );
 
     res.json(preset);
   } catch (error) {
@@ -444,7 +466,7 @@ exports.reorderDashboardElements = async (req, res, next) => {
 
     const sortedElements = [...normalizedElements].sort((a, b) => a.order - b.order);
 
-    const preset = await DashboardPreset.findOneAndUpdate(
+    const preset = await dashboardPresetRepository.findOneAndUpdate(
       { userId },
       {
         elements: sortedElements,
@@ -462,26 +484,27 @@ exports.reorderDashboardElements = async (req, res, next) => {
 
 // ============ NAVBAR ENDPOINTS ============
 
-/** Upsert can race with tenant-scoped queries when legacy rows lack tenantId — recover on E11000. */
+/** Upsert can race on userId unique index — recover on E11000. */
 const findOrCreateNavbarPreference = async (userId, upsertUpdate = null) => {
-  const upsertPayload = upsertUpdate || {
-    $setOnInsert: {
-      userId,
-      groups: NavbarPreference.DEFAULT_NAVBAR_GROUPS,
-    },
+  const existing = await navbarPreferenceRepository.findOne({ userId }).lean();
+  if (existing) {
+    if (!upsertUpdate) return existing;
+    return navbarPreferenceRepository.findOneAndUpdate({ userId }, upsertUpdate, { new: true });
+  }
+
+  const insertPayload = {
+    userId,
+    groups: DEFAULT_NAVBAR_GROUPS,
+    ...(upsertUpdate?.$set || {}),
   };
 
   try {
-    return await NavbarPreference.findOneAndUpdate(
-      { userId },
-      upsertPayload,
-      { new: true, upsert: true }
-    );
+    return await navbarPreferenceRepository.create(insertPayload);
   } catch (error) {
-    if (error.code !== 11000) throw error;
-    const existing = await NavbarPreference.findOne({ userId }).setOptions({ bypassTenant: true });
-    if (existing) return existing;
-    throw error;
+    if (!isDuplicateKeyError(error)) throw error;
+    const retry = await navbarPreferenceRepository.findOne({ userId }).lean();
+    if (!retry) throw error;
+    return retry;
   }
 };
 
@@ -493,19 +516,19 @@ exports.getNavbarPreferences = async (req, res, next) => {
     let preferences = await findOrCreateNavbarPreference(userId);
 
     if (preferences.pageOrder && !preferences.groups?.length) {
-      preferences = await NavbarPreference.findOneAndUpdate(
+      preferences = await navbarPreferenceRepository.findOneAndUpdate(
         { userId },
         {
-          $set: { groups: NavbarPreference.DEFAULT_NAVBAR_GROUPS },
+          $set: { groups: DEFAULT_NAVBAR_GROUPS },
           $unset: { pageOrder: 1 }
         },
         { new: true }
       );
     } else if (!preferences.groups?.length) {
-      preferences = await NavbarPreference.findOneAndUpdate(
+      preferences = await navbarPreferenceRepository.findOneAndUpdate(
         { userId },
         {
-          $set: { groups: NavbarPreference.DEFAULT_NAVBAR_GROUPS, updatedAt: new Date() }
+          $set: { groups: DEFAULT_NAVBAR_GROUPS, updatedAt: new Date() },
         },
         { new: true }
       );
@@ -576,7 +599,7 @@ exports.resetNavbarToDefaults = async (req, res, next) => {
 
     const preferences = await findOrCreateNavbarPreference(userId, {
       $set: {
-        groups: NavbarPreference.DEFAULT_NAVBAR_GROUPS,
+        groups: DEFAULT_NAVBAR_GROUPS,
         updatedAt: new Date(),
       },
     });
@@ -598,7 +621,7 @@ exports.togglePageVisibility = async (req, res, next) => {
 
     // This requires updating a nested array in MongoDB which can be complex.
     // Simpler to fetch, mutate, and save.
-    const preferences = await NavbarPreference.findOne({ userId });
+    const preferences = await navbarPreferenceRepository.findOne({ userId });
     if (!preferences) {
       return res.status(404).json({ error: 'Preferences not found' });
     }
@@ -652,27 +675,30 @@ function sanitizeShortcutBindings(raw = {}) {
 exports.getShortcutPreferences = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    let doc;
+    let doc = await shortcutPreferenceRepository.findOne({ userId }).lean();
 
-    try {
-      doc = await ShortcutPreference.findOneAndUpdate(
-        { userId },
-        { $setOnInsert: { bindings: {}, updatedAt: new Date() } },
-        { new: true, upsert: true, setDefaultsOnInsert: true }
-      );
-    } catch (error) {
-      if (error.code !== 11000) throw error;
-      doc = await ShortcutPreference.findOne({ userId }).setOptions({ bypassTenant: true });
-      if (!doc) throw error;
+    if (!doc) {
+      try {
+        doc = await shortcutPreferenceRepository.create({
+          userId,
+          bindings: {},
+          updatedAt: new Date(),
+        });
+      } catch (error) {
+        if (!isDuplicateKeyError(error)) throw error;
+        doc = await shortcutPreferenceRepository.findOne({ userId }).lean();
+        if (!doc) throw error;
+      }
     }
 
-    const overrides = doc.bindings || {};
+    const plain = toPlain(doc);
+    const overrides = plain.bindings || {};
     const effective = mergeShortcutBindings(overrides);
 
     res.json({
       bindings: overrides,
       effectiveBindings: effective,
-      updatedAt: doc.updatedAt,
+      updatedAt: plain.updatedAt,
     });
   } catch (error) {
     logger.error('Shortcuts', 'Error fetching shortcut preferences', { error: error.message });
@@ -692,7 +718,7 @@ exports.saveShortcutPreferences = async (req, res, next) => {
 
     const sanitized = sanitizeShortcutBindings(bindings);
 
-    const doc = await ShortcutPreference.findOneAndUpdate(
+    const doc = await shortcutPreferenceRepository.findOneAndUpdate(
       { userId },
       { bindings: sanitized, updatedAt: new Date() },
       { new: true, upsert: true }
@@ -715,7 +741,7 @@ exports.resetShortcutPreferences = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    const doc = await ShortcutPreference.findOneAndUpdate(
+    const doc = await shortcutPreferenceRepository.findOneAndUpdate(
       { userId },
       { bindings: {}, updatedAt: new Date() },
       { new: true, upsert: true }

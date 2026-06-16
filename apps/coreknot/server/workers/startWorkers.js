@@ -8,12 +8,16 @@
  */
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 
+const { initSentry, captureException } = require('../utils/sentry');
+initSentry();
+
 const { loadConfig } = require('../config');
 loadConfig();
 
 process.env.RUN_WORKERS = 'true';
 
 const logger = require('../utils/logger');
+const { pingBetterstackHeartbeat, pingBetterstackHeartbeatFireAndForget } = require('../utils/betterstackHeartbeat');
 const { connectMongo, bootstrapMongoSideEffects, applyMongooseDefaults } = require('../services/mongoConnectionService');
 const { isMongoRequired, pingPostgres, isPostgresConfigured } = require('../infrastructure/postgres/prismaClient');
 const {
@@ -23,6 +27,28 @@ const {
 } = require('./workerHealthServer');
 
 applyMongooseDefaults();
+
+async function reportFatalWorkerCrash(label, err) {
+  logger.error('workers', label, { error: err?.message, stack: err?.stack });
+  captureException(err instanceof Error ? err : new Error(String(err)), {
+    label,
+    process: 'coreknot-worker',
+  });
+  await pingBetterstackHeartbeat({ source: 'worker-fatal', label });
+}
+
+function registerWorkerProcessHandlers() {
+  process.on('uncaughtException', (err) => {
+    reportFatalWorkerCrash('uncaughtException', err).catch(() => {});
+  });
+
+  process.on('unhandledRejection', (reason) => {
+    const err = reason instanceof Error ? reason : new Error(String(reason));
+    reportFatalWorkerCrash('unhandledRejection', err).catch(() => {});
+  });
+}
+
+registerWorkerProcessHandlers();
 
 let shuttingDown = false;
 const closers = [];
@@ -53,6 +79,9 @@ async function start() {
   const { initMailCampaignWorker } = require('./mailCampaignWorker');
   const mailWorker = initMailCampaignWorker();
   if (mailWorker) {
+    mailWorker.on('completed', () => {
+      pingBetterstackHeartbeatFireAndForget({ source: 'worker-cycle', worker: 'mailCampaign' });
+    });
     closers.push(async () => {
       const { closeMailCampaignWorker } = require('./mailCampaignWorker');
       await closeMailCampaignWorker();
@@ -63,11 +92,13 @@ async function start() {
   setTimeout(() => {
     resumeStuckCampaigns().catch((err) => {
       logger.warn('workers', 'Campaign resume skipped', { error: err.message });
+      captureException(err, { label: 'campaignResumeFailed', process: 'coreknot-worker' });
     });
   }, 5000);
 
   setWorkerReady(true);
   logger.info('workers', 'Worker process ready');
+  await pingBetterstackHeartbeat({ source: 'worker-start' });
 }
 
 async function shutdown(signal) {
@@ -100,7 +131,7 @@ async function shutdown(signal) {
 process.once('SIGTERM', () => { shutdown('SIGTERM'); });
 process.once('SIGINT', () => { shutdown('SIGINT'); });
 
-start().catch((err) => {
-  logger.error('workers', 'Worker bootstrap failed', { error: err.message });
+start().catch(async (err) => {
+  await reportFatalWorkerCrash('workerBootstrapFailed', err);
   process.exit(1);
 });

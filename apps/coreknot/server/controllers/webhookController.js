@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const Lead = require('../models/Lead');
+const leadRepository = require('../repositories/leadRepository');
 const { createNotification } = require('../services/notificationDispatcher');
 const { buildLeadActionUrl } = require('../utils/notificationActionUrl');
 const { assignLeadToRep, leadService: LeadService } = require('../domains/crm/crmFacade');
@@ -61,7 +61,7 @@ exports.processBookedCallLogic = async (data) => {
     if (normalizedEmail) leadLookup.$or.push({ email: normalizedEmail });
     if (normalizedPhone) leadLookup.$or.push({ phone: normalizedPhone });
     let lead = leadLookup.$or.length
-      ? await Lead.findOne(leadLookup)
+      ? await leadRepository.findOne(leadLookup)
       : null;
     let rep = null;
 
@@ -155,7 +155,7 @@ exports.processBookedCallLogic = async (data) => {
           },
         }
       );
-      lead = await Lead.findById(lead._id);
+      lead = await leadRepository.findById(lead._id);
     } else {
       lead = await LeadService.createLead({
         email: normalizedEmail,

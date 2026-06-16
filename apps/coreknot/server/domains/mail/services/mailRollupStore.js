@@ -1,5 +1,4 @@
-const Campaign = require('../models/Campaign');
-const MailCampaign = require('../models/MailCampaign');
+const { campaignRepository, mailCampaignRepository } = require('../../../repositories/mailRepositories');
 const { isSupabaseEnabled } = require('../../../config/supabase');
 const { queryPg, preferRestPostgres } = require('../../../services/supabase/client');
 const { upsertRows, selectRows } = require('../../../services/supabase/restQuery');
@@ -53,8 +52,8 @@ const engagedRecipientPipeline = [
 async function collectEngagedEmails() {
   const MailEvent = require('../models/MailEvent');
   const [coreRecipientEmails, mailRecipientEmails, eventEmails] = await Promise.all([
-    Campaign.aggregate(engagedRecipientPipeline),
-    MailCampaign.aggregate(engagedRecipientPipeline),
+    campaignRepository.aggregate(engagedRecipientPipeline),
+    mailCampaignRepository.aggregate(engagedRecipientPipeline),
     MailEvent.aggregate([
       { $match: { eventType: { $in: ['Open', 'Click', 'Send'] }, email: { $type: 'string', $ne: '' } } },
       { $group: { _id: { $toLower: { $trim: { input: '$email' } } } } },
@@ -70,7 +69,7 @@ async function collectEngagedEmails() {
 
 async function computeCumulativeMetricsForUser(userId) {
   const [coreAgg, mailAgg, engagedEmails] = await Promise.all([
-    Campaign.aggregate([
+    campaignRepository.aggregate([
       { $match: { createdBy: userId } },
       {
         $group: {
@@ -81,7 +80,7 @@ async function computeCumulativeMetricsForUser(userId) {
         },
       },
     ]),
-    MailCampaign.aggregate([
+    mailCampaignRepository.aggregate([
       { $match: { createdBy: userId } },
       {
         $group: {

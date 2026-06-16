@@ -2,13 +2,7 @@ import axios from 'axios';
 
 const BATCH_SIZE = 8;
 
-/**
- * Upload finance files in small batches (avoids multer/UT timeouts on huge drops).
- * @param {File[]} files
- * @param {{ onProgress?: (pct: number) => void }} options
- * @returns {Promise<Array<{ url, key, name, size, type }>>}
- */
-export async function uploadFinanceFiles(files, { onProgress } = {}) {
+async function uploadFilesToEndpoint(files, endpoint, { onProgress, fieldName = 'files' } = {}) {
   if (!files?.length) return [];
 
   const headers = {
@@ -23,9 +17,9 @@ export async function uploadFinanceFiles(files, { onProgress } = {}) {
   for (let i = 0; i < files.length; i += BATCH_SIZE) {
     const batch = files.slice(i, i + BATCH_SIZE);
     const formData = new FormData();
-    batch.forEach((file) => formData.append('files', file));
+    batch.forEach((file) => formData.append(fieldName, file));
 
-    const res = await axios.post('/api/finance/upload-many', formData, {
+    const res = await axios.post(endpoint, formData, {
       headers,
       withCredentials: true,
       timeout: 0,
@@ -56,7 +50,7 @@ export async function uploadFinanceFiles(files, { onProgress } = {}) {
 
   if (failed.length > 0) {
     const err = new Error(
-      `${uploaded.length} of ${total} uploaded. ${failed.length} failed (e.g. ${failed[0].fileName}).`
+      `${uploaded.length} of ${total} uploaded. ${failed.length} failed (e.g. ${failed[0].fileName}).`,
     );
     err.partial = true;
     err.uploaded = uploaded;
@@ -65,4 +59,21 @@ export async function uploadFinanceFiles(files, { onProgress } = {}) {
   }
 
   return uploaded;
+}
+
+/**
+ * Upload finance files in small batches (avoids multer/UT timeouts on huge drops).
+ * @param {File[]} files
+ * @param {{ onProgress?: (pct: number) => void }} options
+ * @returns {Promise<Array<{ url, key, name, size, type }>>}
+ */
+export async function uploadFinanceFiles(files, { onProgress } = {}) {
+  return uploadFilesToEndpoint(files, '/api/finance/upload-many', { onProgress });
+}
+
+/**
+ * Upload reimbursement receipts (any authenticated user — server-side R2 when configured).
+ */
+export async function uploadReceiptFiles(files, { onProgress } = {}) {
+  return uploadFilesToEndpoint(files, '/api/finance/upload-receipts', { onProgress });
 }

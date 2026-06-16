@@ -35,6 +35,7 @@ const P1_STORE_FLAGS = [
   'COREKNOT_GAMIFICATION_STORE',
   'COREKNOT_CALENDAR_STORE',
   'COREKNOT_NOTIFICATIONS_STORE',
+  'COREKNOT_CUSTOMIZATION_STORE',
 ];
 
 const P0_FLAG_CHECKERS = [
@@ -46,8 +47,14 @@ const P0_FLAG_CHECKERS = [
   isPostgresArtistsEnabled,
 ];
 
+/** Matches prismaClient default-store semantics for cutover validation. */
+const POSTGRES_DEFAULT_STORE_FLAGS = new Set(['COREKNOT_CUSTOMIZATION_STORE']);
+
 function isStoreFlagPostgres(flagName) {
-  return process.env[flagName] === 'postgres';
+  const value = process.env[flagName];
+  if (value === 'postgres') return true;
+  if (value === 'mongo') return false;
+  return POSTGRES_DEFAULT_STORE_FLAGS.has(flagName);
 }
 
 function isPostgresMasterEnabled() {
@@ -209,6 +216,7 @@ function getProductionEnvTemplate() {
     COREKNOT_GAMIFICATION_STORE: 'postgres',
     COREKNOT_CALENDAR_STORE: 'postgres',
     COREKNOT_NOTIFICATIONS_STORE: 'postgres',
+    COREKNOT_CUSTOMIZATION_STORE: 'postgres',
     COREKNOT_DISABLE_GRIDFS_BACKUP: 'true',
     BACKUP_DESTINATION: 'neon',
     SUPABASE_SECONDARY_ENABLED: 'false',

@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
 const { apiError } = require('../utils/apiResponse');
+const { isMongoRequired } = require('../infrastructure/postgres/prismaClient');
 const {
   MONGO_UNAVAILABLE_CODE,
   PUBLIC_UNAVAILABLE_MESSAGE,
@@ -10,8 +10,10 @@ const {
 
 /**
  * Reject DB-dependent routes when Mongo is not connected (avoids 10s buffer timeouts).
+ * Skipped when COREKNOT_MONGO_REQUIRED=false (postgres-only mode).
  */
 async function requireMongo(req, res, next) {
+  if (!isMongoRequired()) return next();
   if (isMongoReady()) return next();
 
   if (isMongoConnecting()) {
@@ -23,6 +25,7 @@ async function requireMongo(req, res, next) {
     }
   }
 
+  const mongoose = require('mongoose');
   if (mongoose.connection.readyState === 0) {
     connectMongo({ reason: 'auth-route', maxAttempts: 1 }).catch(() => {});
   }

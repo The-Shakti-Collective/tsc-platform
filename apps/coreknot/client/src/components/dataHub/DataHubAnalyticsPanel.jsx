@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, Badge, ProgressBar } from '../ui';
+import TscBookCallLink from '../crm/TscBookCallLink';
 import {
   BarChart3, PieChart, TrendingUp, Target, Layers,
   ShoppingBag, Phone, Activity,
@@ -181,6 +182,9 @@ export default function DataHubAnalyticsPanel({ analytics, folder, showPanel, on
 
       {folder === 'booked_calls' && (
         <>
+          <div className="mb-4">
+            <TscBookCallLink variant="compact" />
+          </div>
           <Section title="Lead Status" icon={Target}>
             <BarList items={analytics.funnel} labelKey="_id" countKey="count" />
           </Section>

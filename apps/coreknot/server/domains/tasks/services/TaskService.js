@@ -1,10 +1,7 @@
-const mongoose = require('mongoose');
-const Task = require('../models/Task');
 const taskRepository = require('../repositories/taskRepository');
 const { isPostgresTasksEnabled } = require('../../../infrastructure/postgres/prismaClient');
-const TaskAssignment = require('../models/TaskAssignment');
-const Project = require('../../../models/Project');
-const Log = require('../../../models/Log');
+const { isValidEntityId } = require('../../../utils/taskMongo');
+const { canUseMongoModels } = require('../../../services/mongoConnectionService');
 const logActivity = require('../../../utils/activityLogger');
 const { applyPriorityDueDate } = require('../../../../shared/taskPriorityDates');
 const { getProjectRoleForUser, userIsProjectViewer } = require('../../../../shared/projectRoles');
@@ -57,6 +54,27 @@ const {
   getTaskListCountsCache,
   setTaskListCountsCache,
 } = require('../../../services/hybridCache');
+
+const lazyModel = (relPath) => {
+  let mod;
+  return () => {
+    if (!mod) {
+      // eslint-disable-next-line import/no-dynamic-require, global-require
+      mod = require(relPath);
+    }
+    return mod;
+  };
+};
+
+const getTaskModel = lazyModel('../models/Task');
+const getProjectModel = lazyModel('../../../models/Project');
+const getTaskAssignmentModel = lazyModel('../models/TaskAssignment');
+const getLogModel = lazyModel('../../../models/Log');
+
+const Task = new Proxy({}, { get: (_target, prop) => getTaskModel()[prop] });
+const Project = new Proxy({}, { get: (_target, prop) => getProjectModel()[prop] });
+const TaskAssignment = new Proxy({}, { get: (_target, prop) => getTaskAssignmentModel()[prop] });
+const Log = new Proxy({}, { get: (_target, prop) => getLogModel()[prop] });
 
 const assignmentUserId = (value) => (value?._id || value)?.toString?.() || null;
 
@@ -830,7 +848,7 @@ exports.updateTask = async (taskId, updates, user, session) => {
   if (coreUpdates.projectId !== undefined) {
     const nextProjectId = normalizeProjectId(coreUpdates.projectId);
     if (nextProjectId !== previousProjectId) {
-      if (nextProjectId && !mongoose.Types.ObjectId.isValid(nextProjectId)) {
+      if (nextProjectId && !isValidEntityId(nextProjectId)) {
         throw new Error('Invalid project');
       }
       let targetProject = null;
@@ -1372,24 +1390,33 @@ const populateTaskQuery = () => Task.find()
 exports.getReviewQueue = async (user) => {
   const platformOwnerId = await getPlatformOwnerUserId();
   const isPlatformOwner = platformOwnerId && user._id.toString() === platformOwnerId;
+  const taskRead = isPostgresTasksEnabled() ? taskRepository : Task;
 
   let taskIds = [];
   if (isPlatformOwner) {
-    const inReview = await Task.find({ status: 'in-review' }).select('_id').lean();
+    const inReview = await taskRead.find({ status: 'in-review' }).select('_id').lean();
     taskIds = inReview.map((t) => t._id);
-  } else {
+  } else if (canUseMongoModels()) {
     const filter = getReviewQueueAssignmentFilter(user._id);
     const delegated = await TaskAssignment.find(filter)
       .select('taskId userId assignedBy')
       .lean();
     taskIds = [...new Set(delegated.map((a) => a.taskId))];
+  } else {
+    return [];
   }
 
   if (!taskIds.length) return [];
 
-  const tasks = await populateTaskQuery()
-    .find({ status: 'in-review', _id: { $in: taskIds } })
-    .lean({ virtuals: true });
+  const reviewQuery = isPostgresTasksEnabled()
+    ? taskRead.find({ status: 'in-review', _id: { $in: taskIds } })
+      .select('title description status priority type scheduleSlot scheduleDate projectId workspace progress dueDate startDate duration plannedHours actualHours createdBy color')
+      .populate('projectId', 'name workspace')
+      .populate({ path: 'createdBy', select: 'name avatar', populate: { path: 'departmentId', select: 'name' } })
+      .populate(TASK_ASSIGNEE_POPULATE)
+    : populateTaskQuery().find({ status: 'in-review', _id: { $in: taskIds } });
+
+  const tasks = await reviewQuery.lean({ virtuals: true });
 
   const mapped = tasks.map(mapTaskDTO);
   return filterReviewQueueTasks(mapped, user, (task) => task.assignments || [], { platformOwnerId });

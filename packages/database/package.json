@@ -17,13 +17,14 @@
     }
   },
   "scripts": {
-    "build": "node ./node_modules/prisma/build/index.js generate && tsc",
-    "prisma:generate": "node ./node_modules/prisma/build/index.js generate",
+    "build": "node ./scripts/prisma-generate-safe.mjs && tsc",
+    "prisma:generate": "node ./scripts/prisma-generate-safe.mjs",
     "prisma:validate": "prisma validate",
     "lint": "eslint src --max-warnings 0",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
-    "seed:dev-user": "tsx scripts/seed-dev-user.ts"
+    "seed:dev-user": "tsx scripts/seed-dev-user.ts",
+    "seed:community-demo": "tsx scripts/seed-community-demo.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.0.0"

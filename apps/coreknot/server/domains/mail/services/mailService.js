@@ -3,7 +3,7 @@ const imaps = require('imap-simple');
 const { simpleParser } = require('mailparser');
 const { Resend } = require('resend');
 const { normalizeOutboundEmailHtml, wrapEmailShell } = require('../../../utils/normalizeOutboundEmailHtml');
-const MailCampaign = require('../models/MailCampaign');
+const { campaignRepository, mailCampaignRepository } = require('../../../repositories/mailRepositories');
 const EmailProfile = require('../models/EmailProfile');
 const MailEvent = require('../models/MailEvent');
 const Lead = require('../../../models/Lead');
@@ -65,8 +65,10 @@ const updateEmailTags = async (email, tag, status) => {
 };
 
 const sendCampaign = async (campaignId) => {
-  const campaign = await MailCampaign.findById(campaignId).populate('senderProfileId');
+  const campaign = await mailCampaignRepository.findById(campaignId).populate('senderProfileId').lean();
   if (!campaign || campaign.status === 'Sending') return;
+
+  const persistCampaign = async () => mailCampaignRepository.saveDocument(campaign);
 
   const profile = campaign.senderProfileId;
   const useResend = globalResend || (profile && profile.resendApiKey && profile.resendApiKey !== 'mock_resend_api_key');
@@ -87,7 +89,7 @@ const sendCampaign = async (campaignId) => {
   }
 
   campaign.status = 'Sending';
-  await campaign.save();
+  await persistCampaign();
 
   let baseUrl = process.env.APP_BASE_URL || 'https://tsccoreknot.com';
   if (baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1')) {
@@ -122,7 +124,7 @@ const sendCampaign = async (campaignId) => {
         recipient.status = 'Unsubscribed';
         recipient.error = 'User Unsubscribed';
         campaign.stats.unsubscribed = (campaign.stats.unsubscribed || 0) + 1;
-        await campaign.save();
+        await persistCampaign();
         continue;
       }
 
@@ -250,11 +252,11 @@ const sendCampaign = async (campaignId) => {
         await updateEmailTags(recipient.email, 'Invalid', 'Invalid');
       }
     }
-    await campaign.save();
+    await persistCampaign();
   }
 
   campaign.status = 'Completed';
-  await campaign.save();
+  await persistCampaign();
   if (transporter) {
     transporter.close();
   }
@@ -365,8 +367,8 @@ const scanBounces = async (profileId) => {
     const campaignBounced = [];
 
     for (const email of uniqueBouncedRaw) {
-      const existsInMailCamp = await MailCampaign.exists({ 'recipients.email': email });
-      const existsInCoreCamp = await MailCampaign.db.model('Campaign').exists({ 'recipients.email': email });
+      const existsInMailCamp = await mailCampaignRepository.exists({ 'recipients.email': email });
+      const existsInCoreCamp = await campaignRepository.exists({ 'recipients.email': email });
       
       if (existsInMailCamp || existsInCoreCamp) {
         campaignBounced.push(email);
@@ -382,35 +384,35 @@ const scanBounces = async (profileId) => {
       
       await updateEmailTags(email, 'Invalid', 'Invalid');
 
-      const allCampaigns = await MailCampaign.find({ 'recipients.email': email });
+      const allCampaigns = await mailCampaignRepository.find({ 'recipients.email': email }, { bypass: true }).lean();
       for (const camp of allCampaigns) {
         let modified = false;
-        camp.recipients.forEach(r => {
+        const recipients = (camp.recipients || []).map((r) => {
           if (r.email === email && r.status !== 'Bounced' && r.status !== 'Invalid') {
-            r.status = 'Bounced';
             modified = true;
+            return { ...r, status: 'Bounced' };
           }
+          return r;
         });
         if (modified) {
-          camp.stats.invalid = (camp.stats.invalid || 0) + 1;
-          camp.stats.bounced = (camp.stats.bounced || 0) + 1;
-          await camp.save();
+          const stats = { ...(camp.stats || {}), invalid: (camp.stats?.invalid || 0) + 1, bounced: (camp.stats?.bounced || 0) + 1 };
+          await mailCampaignRepository.saveDocument({ ...camp, recipients, stats });
         }
       }
 
-      const allCoreCampaigns = await MailCampaign.db.model('Campaign').find({ 'recipients.email': email });
+      const allCoreCampaigns = await campaignRepository.find({ 'recipients.email': email }, { bypass: true }).lean();
       for (const camp of allCoreCampaigns) {
         let modified = false;
-        camp.recipients.forEach(r => {
+        const recipients = (camp.recipients || []).map((r) => {
           if (r.email === email && r.status !== 'Bounced' && r.status !== 'Invalid') {
-            r.status = 'Bounced';
             modified = true;
+            return { ...r, status: 'Bounced' };
           }
+          return r;
         });
         if (modified) {
-          if (!camp.metrics) camp.metrics = { totalSent: 0, opened: 0, clicked: 0, bounced: 0 };
-          camp.metrics.bounced = (camp.metrics.bounced || 0) + 1;
-          await camp.save();
+          const metrics = { ...(camp.metrics || { totalSent: 0, opened: 0, clicked: 0, bounced: 0 }), bounced: (camp.metrics?.bounced || 0) + 1 };
+          await campaignRepository.saveDocument({ ...camp, recipients, metrics });
         }
       }
     }

@@ -1,5 +1,4 @@
 const http = require('http');
-const mongoose = require('mongoose');
 const { config } = require('../config');
 const { corsAllowlist } = require('./cors');
 const { captureException } = require('../utils/sentry');

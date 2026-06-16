@@ -1,10 +1,8 @@
 const Task = require('../../tasks/models/Task');
 const TaskAssignment = require('../../tasks/models/TaskAssignment');
 const Lead = require('../../../models/Lead');
-const Log = require('../../../models/Log');
 const Project = require('../../../models/Project');
 const { getUserCampaignRecipients } = require('../../mail/services/mailMetricsService');
-const mongoose = require('mongoose');
 const logger = require('../../../utils/logger');
 const { isAdminUser, isOpsUser } = require('../../../utils/departmentPermissions');
 const Attendance = require('../../../models/Attendance');
@@ -18,13 +16,14 @@ const leadRepository = require('../../../repositories/leadRepository');
 const projectRepository = require('../../../repositories/projectRepository');
 const attendanceRepository = require('../../../repositories/attendanceRepository');
 const calendarRepository = require('../../../repositories/calendarRepository');
+const logRepository = require('../../../repositories/logRepository');
 const { isMongoReady } = require('../../../services/mongoConnectionService');
 const {
   isPostgresTasksEnabled,
   isPostgresCrmEnabled,
   isPostgresProjectsEnabled,
-  isPostgresCalendarEnabled,
   isPostgresAttendanceEnabled,
+  isPostgresGamificationEnabled,
   isMongoRequired,
   getPrismaClient,
 } = require('../../../infrastructure/postgres/prismaClient');
@@ -94,10 +93,12 @@ const formatChartDayLabel = (dateKey) => {
 };
 
 const sumFocusHours = async (match) => {
-  if (!isMongoReady() && !isMongoRequired()) {
+  if (!preferRepository(isPostgresGamificationEnabled) && !isMongoReady() && !isMongoRequired()) {
     return [{ focusHours: 0, logCount: 0, focusAvgHours: 0 }];
   }
-  const logs = await Log.find(match).select('details.timeSpent').lean();
+
+  const logs = await logRepository.find(match).lean();
+
   const focusHours = logs.reduce(
     (sum, log) => sum + parseTimeSpentToHours(log.details?.timeSpent),
     0
@@ -192,21 +193,12 @@ async function aggregateProjectCount(userId) {
 }
 
 async function fetchTodayCalendarEvents(userId, today, todayEndTime) {
-  if (preferRepository(isPostgresCalendarEnabled)) {
-    const events = await calendarRepository.find({
-      date: { $gte: today, $lte: todayEndTime },
-    }).lean();
-    return events.filter(
-      (ev) => ev.visibility === 'public' || String(ev.createdBy) === String(userId),
-    );
-  }
-  return mongoose.model('CalendarEvent').find({
-    $or: [
-      { visibility: 'public' },
-      { createdBy: userId },
-    ],
+  const events = await calendarRepository.find({
     date: { $gte: today, $lte: todayEndTime },
-  }).setOptions({ bypassTenant: true }).lean();
+  }).lean();
+  return events.filter(
+    (ev) => ev.visibility === 'public' || String(ev.createdBy) === String(userId),
+  );
 }
 
 async function fetchAttendanceRows(start, end) {
@@ -222,7 +214,27 @@ async function fetchAttendanceRows(start, end) {
     .lean();
 }
 
-const aggregateTaskStats = (periodMatch) => aggregateWithTenant(Task, [
+const aggregateTaskStats = async (periodMatch) => {
+  if (preferRepository(isPostgresTasksEnabled)) {
+    const tasks = await taskRepository.find({}).lean();
+    const start = periodMatch.$gte;
+    const end = periodMatch.$lte;
+    const inPeriod = (value) => {
+      if (!value) return false;
+      const date = new Date(value);
+      return date >= start && date <= end;
+    };
+    const completed = tasks.filter((task) => (
+      task.status === 'done'
+      && (inPeriod(task.completedAt) || inPeriod(task.updatedAt))
+    )).length;
+    const active = tasks.filter((task) => (
+      inPeriod(task.updatedAt) || inPeriod(task.dueDate) || inPeriod(task.scheduleDate)
+    )).length;
+    return [{ completed: [{ count: completed }], active: [{ count: active }] }];
+  }
+
+  return aggregateWithTenant(Task, [
   {
     $facet: {
       completed: [
@@ -251,9 +263,34 @@ const aggregateTaskStats = (periodMatch) => aggregateWithTenant(Task, [
       ],
     },
   },
-]);
+  ]);
+};
 
-const aggregateLeadStats = (periodMatch) => aggregateWithTenant(Lead, [
+const aggregateLeadStats = async (periodMatch) => {
+  if (preferRepository(isPostgresCrmEnabled)) {
+    const leads = await leadRepository.find({}).lean();
+    const start = periodMatch.$gte;
+    const end = periodMatch.$lte;
+    const inPeriod = (value) => {
+      if (!value) return false;
+      const date = new Date(value);
+      return date >= start && date <= end;
+    };
+    const newLeads = leads.filter((lead) => inPeriod(lead.createdAt));
+    const convertedInPeriod = leads.filter((lead) => (
+      lead.leadStatus === 'Converted' && inPeriod(lead.updatedAt)
+    ));
+    return [{
+      newLeads: [{
+        total: newLeads.length,
+        converted: newLeads.filter((lead) => lead.leadStatus === 'Converted').length,
+      }],
+      conversions: [{ count: convertedInPeriod.length }],
+      touched: [{ count: leads.filter((lead) => inPeriod(lead.updatedAt)).length }],
+    }];
+  }
+
+  return aggregateWithTenant(Lead, [
   {
     $facet: {
       newLeads: [
@@ -276,7 +313,8 @@ const aggregateLeadStats = (periodMatch) => aggregateWithTenant(Lead, [
       ],
     },
   },
-]);
+  ]);
+};
 
 exports.getDepartmentStats = async (req, res) => {
   try {

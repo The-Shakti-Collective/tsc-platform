@@ -43,7 +43,7 @@ const corsOptions = {
     if (isLocalDevOrigin(origin)) return callback(null, true);
     if (isCoreKnotVercelOrigin(origin)) return callback(null, true);
     if (allowVercelPreviews && origin.endsWith('.vercel.app')) return callback(null, true);
-    return callback(new Error('Not allowed by CORS'));
+    return callback(null, false);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

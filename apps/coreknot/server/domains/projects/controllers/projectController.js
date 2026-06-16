@@ -2,7 +2,7 @@ const Project = require('../models/Project');
 const projectRepository = require('../repositories/projectRepository');
 const Phase = require('../models/Phase');
 const Workspace = require('../../../models/Workspace');
-const WorkspacePreference = require('../../../models/WorkspacePreference');
+const workspacePostgresService = require('../services/workspacePostgresService');
 const User = require('../../../models/User');
 const Asset = require('../../../models/Asset');
 const Log = require('../../../models/Log');
@@ -110,57 +110,20 @@ const sortWorkspacesForUser = (workspaces, userOrder) => {
 };
 
 async function findWorkspacePreferenceForUser(userId) {
-  const pref = await WorkspacePreference.findOne({ userId }).lean();
-  if (pref) return pref;
-
-  const tenantId = getTenantId();
-  if (!tenantId) return null;
-
-  return WorkspacePreference.findOne({
-    userId,
-    $or: [{ tenantId: { $exists: false } }, { tenantId: null }],
-  })
-    .setOptions({ bypassTenant: true })
-    .lean();
+  return workspacePostgresService.findWorkspacePreferenceForUser(userId);
 }
 
 async function upsertWorkspacePreferenceOrder(userId, order) {
-  const tenantId = getTenantId();
-  const update = { order, updatedAt: new Date() };
-
-  const existing = await WorkspacePreference.findOneAndUpdate(
-    { userId },
-    { $set: update },
-    { new: true }
-  );
-  if (existing) return existing;
-
-  if (tenantId) {
-    const legacy = await WorkspacePreference.findOneAndUpdate(
-      { userId, $or: [{ tenantId: { $exists: false } }, { tenantId: null }] },
-      { $set: { ...update, tenantId } },
-      { new: true }
-    ).setOptions({ bypassTenant: true });
-    if (legacy) return legacy;
-
-    return WorkspacePreference.findOneAndUpdate(
-      { userId },
-      {
-        $set: update,
-        $setOnInsert: { userId, tenantId },
-      },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
-  }
-
-  return WorkspacePreference.findOneAndUpdate(
-    { userId },
-    { $set: update, $setOnInsert: { userId } },
-    { upsert: true, new: true, setDefaultsOnInsert: true }
-  );
+  return workspacePostgresService.upsertWorkspacePreferenceOrder(userId, order);
 }
 
 async function getSortedWorkspacesForUser(userId) {
+  if (workspacePostgresService.isPostgresProjectsEnabled()) {
+    let workspaces = await workspacePostgresService.listWorkspaces(userId);
+    const pref = await findWorkspacePreferenceForUser(userId);
+    return sortWorkspacesForUser(workspaces, pref?.order);
+  }
+
   let workspaces = await Workspace.find().lean();
   if (workspaces.length === 0) {
     await Workspace.insertMany(

@@ -1,6 +1,4 @@
-const Lead = require('../models/Lead');
-const CRMAudit = require('../models/CRMAudit');
-const CRMImport = require('../models/CRMImport');
+const { leadRepository, crmAuditRepository, crmImportRepository } = require('../repositories');
 const { isAdminUser, getDepartmentSlug } = require('../../../utils/departmentPermissions');
 const { resolveCrmScope } = require('../../../utils/crmScope');
 
@@ -10,7 +8,7 @@ async function listImports(user, queryParams) {
   if (crmType) importQuery.crmType = crmType;
   else if (queryParams.crmType) importQuery.crmType = queryParams.crmType;
 
-  return CRMImport.find(importQuery)
+  return crmImportRepository.find(importQuery)
     .populate('createdBy', 'name')
     .sort('-createdAt')
     .lean();
@@ -20,13 +18,13 @@ async function deleteImportBatch(user, importId, reason) {
   if (!isAdminUser(user)) {
     return { error: 'ADMIN CLEARANCE REQUIRED', status: 403 };
   }
-  const batch = await CRMImport.findById(importId);
+  const batch = await crmImportRepository.findById(importId);
   if (!batch) return { error: 'Import batch not found', status: 404 };
 
-  const result = await Lead.deleteMany({ importId });
-  await CRMImport.findByIdAndDelete(importId);
+  const result = await leadRepository.deleteMany({ importId });
+  await crmImportRepository.findByIdAndDelete(importId);
 
-  await CRMAudit.create({
+  await crmAuditRepository.create({
     userId: user._id,
     userRole: getDepartmentSlug(user),
     action: 'BATCH_DELETE',

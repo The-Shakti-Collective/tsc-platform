@@ -12,6 +12,7 @@ const {
   isPostgresGamificationEnabled,
   isPostgresCalendarEnabled,
   isPostgresNotificationsEnabled,
+  isPostgresCustomizationEnabled,
 } = require('./prismaClient');
 
 const SOURCE_SYSTEM = 'coreknot';
@@ -31,4 +32,5 @@ module.exports = {
   isPostgresGamificationEnabled,
   isPostgresCalendarEnabled,
   isPostgresNotificationsEnabled,
+  isPostgresCustomizationEnabled,
 };

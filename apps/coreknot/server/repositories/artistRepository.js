@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
 const Artist = require('../models/Artist');
+const { isObjectIdString } = require('../utils/mongoId');
 const { getTenantId } = require('../utils/tenantContext');
 const { idFilter } = require('../utils/mongoId');
 const { getPrismaClient, isPostgresArtistsEnabled } = require('../infrastructure/postgres/prismaClient');
@@ -258,7 +258,7 @@ async function saveArtist(mongoDoc, options = {}) {
 }
 
 function isValidArtistId(artistId) {
-  return mongoose.Types.ObjectId.isValid(artistId);
+  return isObjectIdString(artistId);
 }
 
 module.exports = {

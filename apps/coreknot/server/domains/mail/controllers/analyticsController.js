@@ -1,14 +1,13 @@
-const MailCampaign = require('../models/MailCampaign');
+const { campaignRepository, mailCampaignRepository } = require('../../../repositories/mailRepositories');
 const MailEvent = require('../models/MailEvent');
-const Campaign = require('../models/Campaign');
 const { isAdminUser } = require('../../../utils/departmentPermissions');
 const { scanBounces, updateEmailTags } = require('../services/mailService');
 
 exports.getStats = async (req, res) => {
   try {
     const filter = isAdminUser(req.user) ? {} : { createdBy: req.user._id };
-    const mailCampaigns = await MailCampaign.find(filter).select('-recipients -content').lean();
-    const coreCampaigns = await Campaign.find(filter).select('-recipients -content').lean();
+    const mailCampaigns = await mailCampaignRepository.find(filter).select('-recipients -content').lean();
+    const coreCampaigns = await campaignRepository.find(filter).select('-recipients -content').lean();
     const allCampaigns = [...mailCampaigns, ...coreCampaigns];
 
     let totalCampaigns = allCampaigns.length;
@@ -93,7 +92,7 @@ exports.trackOpen = async (req, res) => {
       incPayload[locKey] = 1;
 
 
-      const updatedCampaign = await Campaign.findOneAndUpdate(
+      const updatedCampaign = await campaignRepository.findOneAndUpdate(
         { $or: [updateQuery, { campaignId }] },
         {
           $set: setPayload,
@@ -106,7 +105,7 @@ exports.trackOpen = async (req, res) => {
       );
 
       if (!updatedCampaign) {
-        await MailCampaign.findOneAndUpdate(
+        await mailCampaignRepository.findOneAndUpdate(
           updateQuery,
           {
             $set: setPayload,
@@ -189,7 +188,7 @@ exports.trackClick = async (req, res) => {
       incPayload[locKey] = 1;
 
 
-      const updatedCampaign = await Campaign.findOneAndUpdate(
+      const updatedCampaign = await campaignRepository.findOneAndUpdate(
         { $or: [updateQuery, { campaignId }] },
         {
           $set: setPayload,
@@ -202,7 +201,7 @@ exports.trackClick = async (req, res) => {
       );
 
       if (!updatedCampaign) {
-        await MailCampaign.findOneAndUpdate(
+        await mailCampaignRepository.findOneAndUpdate(
           updateQuery,
           {
             $set: setPayload,

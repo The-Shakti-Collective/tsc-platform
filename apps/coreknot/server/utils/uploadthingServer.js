@@ -1,4 +1,6 @@
+const crypto = require('crypto');
 const { UTApi, UTFile } = require('uploadthing/server');
+const r2 = require('../infrastructure/r2/r2StorageProvider');
 
 let utApiKey;
 try {
@@ -8,11 +10,35 @@ try {
   utApiKey = process.env.UPLOADTHING_SECRET;
 }
 
-const utapi = new UTApi({ apiKey: utApiKey });
+const utapi = utApiKey ? new UTApi({ apiKey: utApiKey }) : null;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const SAFE_FILENAME = /[^a-zA-Z0-9._-]+/g;
+
+function buildR2Key(prefix, originalname) {
+  const safeName = String(originalname || 'file').replace(SAFE_FILENAME, '_').slice(0, 120);
+  return `coreknot/${prefix}/${crypto.randomBytes(16).toString('hex')}-${safeName}`;
+}
+
+const uploadOneFileToR2 = async (file, prefix = 'finance') => {
+  const key = buildR2Key(prefix, file.originalname);
+  const result = await r2.uploadObject({
+    key,
+    body: file.buffer,
+    contentType: file.mimetype,
+  });
+  return {
+    url: result.url,
+    key: result.key,
+    name: file.originalname,
+    size: file.size,
+    type: file.mimetype,
+  };
+};
+
 const uploadOneFileToUT = async (file, maxAttempts = 3) => {
+  if (!utapi) throw new Error('UploadThing is not configured');
   let lastError = 'Upload failed';
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
@@ -38,18 +64,25 @@ const uploadOneFileToUT = async (file, maxAttempts = 3) => {
   throw new Error(lastError);
 };
 
-const uploadSingleMulterFile = async (file) => {
-  if (!file) throw new Error('No file provided');
+const uploadOneFile = async (file, prefix = 'finance') => {
+  if (r2.isR2Configured()) {
+    return uploadOneFileToR2(file, prefix);
+  }
   return uploadOneFileToUT(file);
 };
 
-const uploadManyMulterFiles = async (files = []) => {
+const uploadSingleMulterFile = async (file, prefix = 'finance') => {
+  if (!file) throw new Error('No file provided');
+  return uploadOneFile(file, prefix);
+};
+
+const uploadManyMulterFiles = async (files = [], prefix = 'finance') => {
   const data = [];
   const failed = [];
 
   for (const file of files) {
     try {
-      const result = await uploadOneFileToUT(file);
+      const result = await uploadOneFile(file, prefix);
       data.push(result);
     } catch (err) {
       failed.push({ fileName: file.originalname, error: err.message });
@@ -60,14 +93,26 @@ const uploadManyMulterFiles = async (files = []) => {
   return { data, failed };
 };
 
+const deleteStoredFile = async (fileKey) => {
+  if (!fileKey) return;
+  if (r2.isR2ObjectKey(fileKey)) {
+    await r2.deleteObject(fileKey);
+    return;
+  }
+  if (utapi) {
+    await utapi.deleteFiles(fileKey);
+  }
+};
+
 const handleUploadFilesManyRequest = async (req, res) => {
+  const prefix = typeof req.uploadPrefix === 'string' ? req.uploadPrefix : 'finance';
   try {
     const files = req.files || [];
     if (files.length === 0) {
       return res.status(400).json({ success: false, message: 'No files provided' });
     }
 
-    const { data, failed } = await uploadManyMulterFiles(files);
+    const { data, failed } = await uploadManyMulterFiles(files, prefix);
     const message = failed.length
       ? `${data.length} uploaded, ${failed.length} failed`
       : `${data.length} file(s) uploaded`;
@@ -85,11 +130,12 @@ const handleUploadFilesManyRequest = async (req, res) => {
 };
 
 const handleUploadSingleRequest = async (req, res) => {
+  const prefix = typeof req.uploadPrefix === 'string' ? req.uploadPrefix : 'finance';
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'No file provided' });
     }
-    const result = await uploadSingleMulterFile(req.file);
+    const result = await uploadSingleMulterFile(req.file, prefix);
     res.json({ success: true, data: result });
   } catch (error) {
     console.error('File upload error:', error);
@@ -99,9 +145,12 @@ const handleUploadSingleRequest = async (req, res) => {
 
 module.exports = {
   utapi,
+  uploadOneFile,
   uploadOneFileToUT,
+  uploadOneFileToR2,
   uploadSingleMulterFile,
   uploadManyMulterFiles,
+  deleteStoredFile,
   handleUploadFilesManyRequest,
   handleUploadSingleRequest,
 };

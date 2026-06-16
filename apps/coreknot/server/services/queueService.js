@@ -1,5 +1,4 @@
-const Campaign = require('../models/Campaign');
-const MailCampaign = require('../models/MailCampaign');
+const { campaignRepository, mailCampaignRepository } = require('../repositories/mailRepositories');
 const logger = require('../utils/logger');
 const { resolveCampaignByParam } = require('../utils/resolveCampaign');
 const { bypassOptions } = require('../infrastructure/database/bypassTenantPolicy');
@@ -137,7 +136,7 @@ const dispatchCampaignJobs = async (campaignId) => {
   }
 
   if (!campaign.tenantId) {
-    await Model.updateOne({ _id: campaign._id }, { $set: { tenantId } }).setOptions(BYPASS);
+    await Model.updateOne({ _id: campaign._id }, { $set: { tenantId } }, { ...BYPASS, bypass: true });
   }
 
   clearCampaignStopped(campaign._id.toString());
@@ -154,7 +153,8 @@ const dispatchCampaignJobs = async (campaignId) => {
   await Model.updateOne(
     { _id: campaign._id },
     { $set: { status: 'Queued', queuedAt: new Date() } },
-  ).setOptions(BYPASS);
+    { ...BYPASS, bypass: true },
+  );
 
   if (useBullMq) {
     const enqueued = await enqueueCampaignBatch({
@@ -235,8 +235,8 @@ const resumeStuckCampaigns = async () => {
     }
   };
 
-  await resumeForModel(Campaign);
-  await resumeForModel(MailCampaign);
+  await resumeForModel(campaignRepository);
+  await resumeForModel(mailCampaignRepository);
 
   return { resumed };
 };

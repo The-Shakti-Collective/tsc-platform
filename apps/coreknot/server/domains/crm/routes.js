@@ -7,7 +7,7 @@ const { getPlatformOwnerUserId } = require('../../../shared/platformUserIds');
 const { validateBody } = require('../../validation/validateBody');
 const { createLeadBody, updateLeadBody, leadNoteBody } = require('../../validation/schemas/crm');
 const { checkLock } = require('../../middleware/concurrencyMiddleware');
-const Lead = require('./models/Lead');
+const { leadRepository } = require('./repositories/leadRepository');
 
 const multer = require('multer');
 const path = require('path');
@@ -76,7 +76,7 @@ router.route('/leads')
 
 router.route('/leads/:id')
   .get(crmController.getLead)
-  .put(validateBody(updateLeadBody), checkLock(Lead), crmController.updateLead)
+  .put(validateBody(updateLeadBody), checkLock(leadRepository), crmController.updateLead)
   .delete(crmController.deleteLead);
 
 router.post('/leads/:id/notes', validateBody(leadNoteBody), crmController.addNote);

@@ -1,10 +1,10 @@
-const mongoose = require('mongoose');
-const CRMAudit = require('../models/CRMAudit');
+const { crmAuditRepository } = require('../repositories');
 const User = require('../../../models/User');
+const { isObjectIdString } = require('../../../utils/mongoId');
 const { getDepartmentSlug } = require('../../../utils/departmentPermissions');
 
 async function populateAuditUsers(logs) {
-  const userIds = [...new Set(logs.map((log) => log.userId).filter((id) => id && mongoose.isValidObjectId(id)))];
+  const userIds = [...new Set(logs.map((log) => log.userId).filter((id) => id && isObjectIdString(String(id))))];
   const users = await User.find({ _id: { $in: userIds } }, 'name email avatar').lean();
   const userMap = new Map(users.map((u) => [u._id.toString(), u]));
 
@@ -20,7 +20,7 @@ async function populateAuditUsers(logs) {
 }
 
 async function getAuditLogsForLead(leadId) {
-  const logs = await CRMAudit.find({ leadId })
+  const logs = await crmAuditRepository.find({ leadId })
     .sort('-timestamp')
     .lean();
   return populateAuditUsers(logs);
@@ -35,7 +35,7 @@ async function getAllAuditLogs(queryParams = {}) {
   const page = parseInt(queryParams.page, 10) || 1;
   const skip = (page - 1) * limit;
 
-  const logs = await CRMAudit.find(query)
+  const logs = await crmAuditRepository.find(query)
     .populate('leadId', 'name email phone')
     .sort('-timestamp')
     .skip(skip)
@@ -43,7 +43,7 @@ async function getAllAuditLogs(queryParams = {}) {
     .lean();
 
   const populated = await populateAuditUsers(logs);
-  const total = await CRMAudit.countDocuments(query);
+  const total = await crmAuditRepository.countDocuments(query);
 
   return {
     logs: populated,
@@ -54,18 +54,18 @@ async function getAllAuditLogs(queryParams = {}) {
 }
 
 async function getPurgeLogs() {
-  return CRMAudit.find({ action: { $in: ['BATCH_DELETE', 'SYSTEM_RESET'] } })
+  return crmAuditRepository.find({ action: { $in: ['BATCH_DELETE', 'SYSTEM_RESET'] } })
     .populate('userId', 'name')
     .sort('-createdAt');
 }
 
 async function purgeAuditLogs() {
-  await CRMAudit.deleteMany({});
+  await crmAuditRepository.deleteMany({});
   return { message: 'All lead change audit logs have been purged.' };
 }
 
 async function logLeadDeletion(lead, userId) {
-  await CRMAudit.create({
+  await crmAuditRepository.create({
     leadId: lead._id,
     userId,
     fieldChanged: '__deleted__',
@@ -76,7 +76,7 @@ async function logLeadDeletion(lead, userId) {
 }
 
 async function logNoteAdded(leadId, user, text) {
-  await CRMAudit.create({
+  await crmAuditRepository.create({
     leadId,
     userId: user._id,
     userRole: getDepartmentSlug(user),
@@ -88,7 +88,7 @@ async function logNoteAdded(leadId, user, text) {
 }
 
 async function logSystemReset(user, reason) {
-  await CRMAudit.create({
+  await crmAuditRepository.create({
     userId: user._id,
     userRole: getDepartmentSlug(user),
     action: 'SYSTEM_RESET',
@@ -100,7 +100,7 @@ async function logSystemReset(user, reason) {
 }
 
 async function logProjectDeletion(user, project) {
-  await CRMAudit.create({
+  await crmAuditRepository.create({
     userId: user._id,
     userRole: getDepartmentSlug(user),
     action: 'PROJECT_DELETE',

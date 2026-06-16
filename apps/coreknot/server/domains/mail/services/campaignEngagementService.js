@@ -1,5 +1,5 @@
 const MailEvent = require('../models/MailEvent');
-const Campaign = require('../models/Campaign');
+const { campaignRepository } = require('../../../repositories/mailRepositories');
 const { bypassOptions } = require('../../../infrastructure/database/bypassTenantPolicy');
 const { normalizeEmail, isValidEmail } = require('../../../utils/emailValidation');
 
@@ -33,6 +33,25 @@ function uniqueNormalizedEmails(rawEmails) {
   return out;
 }
 
+async function aggregateRecipientEngagementForEmails(emails) {
+  const lowerBatch = new Set(emails.map((e) => e.toLowerCase()));
+  const docs = await campaignRepository.find({}, { bypass: true }).lean();
+  const rows = [];
+  const seen = new Set();
+  for (const doc of docs) {
+    for (const recipient of doc.recipients || []) {
+      const key = normalizeEmail(recipient.email);
+      if (!key || !lowerBatch.has(key) || seen.has(key)) continue;
+      seen.add(key);
+      rows.push({
+        _id: key,
+        hasEngaged: ENGAGED_RECIPIENT_STATUSES.includes(recipient.status) ? 1 : 0,
+      });
+    }
+  }
+  return rows;
+}
+
 async function resolveCampaignEngagementByEmails(rawEmails) {
   const emails = uniqueNormalizedEmails(rawEmails);
   if (!emails.length) return {};
@@ -50,30 +69,32 @@ async function resolveCampaignEngagementByEmails(rawEmails) {
         eventType: { $in: ENGAGED_EVENT_TYPES },
       }).setOptions(ENGAGEMENT_BYPASS),
       MailEvent.distinct('email', { email: { $in: batch } }).setOptions(ENGAGEMENT_BYPASS),
-      Campaign.aggregate([
-        { $unwind: '$recipients' },
-        {
-          $match: {
-            $expr: {
-              $in: [{ $toLower: { $ifNull: ['$recipients.email', ''] } }, lowerBatch],
-            },
-          },
-        },
-        {
-          $group: {
-            _id: { $toLower: { $ifNull: ['$recipients.email', ''] } },
-            hasEngaged: {
-              $max: {
-                $cond: [
-                  { $in: ['$recipients.status', ENGAGED_RECIPIENT_STATUSES] },
-                  1,
-                  0,
-                ],
+      campaignRepository.isPostgresEnabled()
+        ? aggregateRecipientEngagementForEmails(batch)
+        : campaignRepository.aggregate([
+          { $unwind: '$recipients' },
+          {
+            $match: {
+              $expr: {
+                $in: [{ $toLower: { $ifNull: ['$recipients.email', ''] } }, lowerBatch],
               },
             },
           },
-        },
-      ]).option(ENGAGEMENT_BYPASS),
+          {
+            $group: {
+              _id: { $toLower: { $ifNull: ['$recipients.email', ''] } },
+              hasEngaged: {
+                $max: {
+                  $cond: [
+                    { $in: ['$recipients.status', ENGAGED_RECIPIENT_STATUSES] },
+                    1,
+                    0,
+                  ],
+                },
+              },
+            },
+          },
+        ]),
     ]);
 
     for (const email of engagedEvents) {
