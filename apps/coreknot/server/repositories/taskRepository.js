@@ -34,6 +34,96 @@ const PRISMA_STATUS_FROM_LEGACY = {
   blocked: 'blocked',
 };
 
+function legacyStatusesToPrisma(statuses = []) {
+  return [...new Set(statuses.map((s) => PRISMA_STATUS_FROM_LEGACY[s] || s))];
+}
+
+function needsPostgresTaskFilter(filter = {}) {
+  return Boolean(
+    filter.$expr
+    || filter.$or
+    || filter.$and
+    || filter.createdBy
+    || filter.mentionAccessIds
+    || filter._id?.$in,
+  );
+}
+
+function matchDashboardTaskExpr(task, expr) {
+  if (!expr?.$let) return true;
+  const { vars, in: inExpr } = expr.$let;
+  const ifNullFields = vars?.taskDay?.$ifNull;
+  if (!Array.isArray(ifNullFields)) return true;
+
+  const fieldNames = ifNullFields.map((f) => String(f).replace(/^\$/, ''));
+  const taskDay = fieldNames.reduce(
+    (val, field) => val ?? task[field],
+    null,
+  );
+
+  const clauses = inExpr?.$and || [inExpr];
+  for (const clause of clauses) {
+    if (clause?.$ne) {
+      const [, right] = clause.$ne;
+      if (right == null && (taskDay == null || taskDay === '')) return false;
+    }
+    if (clause?.$lt) {
+      const [, right] = clause.$lt;
+      const limit = right instanceof Date ? right : new Date(right);
+      if (taskDay == null || new Date(taskDay) >= limit) return false;
+    }
+  }
+  return true;
+}
+
+function taskMatchesSubFilter(task, subFilter = {}) {
+  if (subFilter.createdBy != null) {
+    const createdBy = task.createdBy?._id || task.createdBy;
+    if (String(createdBy) !== String(subFilter.createdBy)) return false;
+  }
+  if (subFilter._id?.$in) {
+    const set = new Set(subFilter._id.$in.map((id) => String(id)));
+    if (!set.has(String(task._id))) return false;
+  }
+  if (subFilter.mentionAccessIds != null) {
+    const mid = String(subFilter.mentionAccessIds);
+    const mentions = task.mentionAccessIds || [];
+    if (!mentions.some((id) => String(id) === mid)) return false;
+  }
+  if (subFilter.status?.$ne) {
+    if (task.status === subFilter.status.$ne) return false;
+  }
+  if (subFilter.status?.$nin) {
+    if (subFilter.status.$nin.includes(task.status)) return false;
+  }
+  if (subFilter.$expr && !matchDashboardTaskExpr(task, subFilter.$expr)) return false;
+  return true;
+}
+
+function applyPostgresTaskFilters(tasks, filter = {}) {
+  let list = tasks;
+  if (filter._id?.$in) {
+    const set = new Set(filter._id.$in.map((id) => String(id)));
+    list = list.filter((task) => set.has(String(task._id)));
+  }
+  if (filter.createdBy != null) {
+    list = list.filter((task) => taskMatchesSubFilter(task, { createdBy: filter.createdBy }));
+  }
+  if (filter.mentionAccessIds != null) {
+    list = list.filter((task) => taskMatchesSubFilter(task, { mentionAccessIds: filter.mentionAccessIds }));
+  }
+  if (filter.$expr) {
+    list = list.filter((task) => matchDashboardTaskExpr(task, filter.$expr));
+  }
+  if (filter.$or) {
+    list = list.filter((task) => filter.$or.some((clause) => taskMatchesSubFilter(task, clause)));
+  }
+  if (filter.$and) {
+    list = list.filter((task) => filter.$and.every((clause) => taskMatchesSubFilter(task, clause)));
+  }
+  return list;
+}
+
 async function resolveTaskMongoId(id) {
   if (!id) return null;
   const str = String(id);
@@ -100,9 +190,11 @@ function buildPrismaTaskWhere(filter = {}) {
       const legacy = String(filter.status.$ne);
       const prismaStatus = PRISMA_STATUS_FROM_LEGACY[legacy] || legacy;
       where.NOT = { status: prismaStatus };
+    } else if (filter.status.$nin) {
+      where.status = { notIn: legacyStatusesToPrisma(filter.status.$nin) };
     } else if (filter.status.$in) {
       where.status = {
-        in: filter.status.$in.map((s) => PRISMA_STATUS_FROM_LEGACY[s] || s),
+        in: legacyStatusesToPrisma(filter.status.$in),
       };
     } else {
       where.status = PRISMA_STATUS_FROM_LEGACY[filter.status] || filter.status;
@@ -161,14 +253,20 @@ async function findPostgresTasks(filter = {}, options = {}) {
     where.projectId = { in: tscIds };
   }
 
+  const postFilter = needsPostgresTaskFilter(resolvedFilter);
   const rows = await prisma.task.findMany({
     where,
     orderBy: { updatedAt: 'desc' },
-    take: options.limit,
-    skip: options.skip,
+    ...(postFilter ? {} : { take: options.limit, skip: options.skip }),
   });
 
-  return Promise.all(rows.map((row) => hydrateTask(row, tenantId)));
+  let tasks = await Promise.all(rows.map((row) => hydrateTask(row, tenantId)));
+  if (postFilter) {
+    tasks = applyPostgresTaskFilters(tasks, resolvedFilter);
+    if (options.skip) tasks = tasks.slice(options.skip);
+    if (options.limit) tasks = tasks.slice(0, options.limit);
+  }
+  return tasks;
 }
 
 async function countPostgresTasks(filter = {}, options = {}) {
@@ -192,6 +290,11 @@ async function countPostgresTasks(filter = {}, options = {}) {
     }
     if (!tscIds.length) return 0;
     where.projectId = { in: tscIds };
+  }
+
+  if (needsPostgresTaskFilter(resolvedFilter)) {
+    const tasks = await findPostgresTasks(resolvedFilter, { ...options, limit: undefined, skip: undefined });
+    return tasks.length;
   }
 
   return prisma.task.count({ where });
@@ -353,6 +456,10 @@ const taskRepository = {
   resolveTaskMongoId,
   resolveTaskTscId,
   resolvePersonId,
+  buildPrismaTaskWhere,
+  matchDashboardTaskExpr,
+  applyPostgresTaskFilters,
+  legacyStatusesToPrisma,
 };
 
 module.exports = taskRepository;

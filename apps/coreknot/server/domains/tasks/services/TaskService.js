@@ -673,7 +673,7 @@ exports.getTasks = async (filter, { userId = null, listMode = false, completedLi
     const cacheUserId = userId || 'anon';
     let total = await getTaskListCountsCache(tenantId, cacheUserId, scopeKey);
     if (total == null) {
-      total = await Task.countDocuments(filter);
+      total = await taskRead.countDocuments(filter);
       await setTaskListCountsCache(tenantId, cacheUserId, scopeKey, total);
     }
     const tasks = await baseQuery.sort(sortSpec).skip(skip).limit(limit).lean({ virtuals: true });

@@ -33,11 +33,16 @@ const touchLastOnline = (userId) => {
   const lastWrite = lastOnlineWrites.get(key) || 0;
   if (now - lastWrite < LAST_ONLINE_INTERVAL_MS) return;
   lastOnlineWrites.set(key, now);
-  User.updateOne(idFilter(userId), {
-    $set: { lastOnline: new Date(), online: true },
-  }).setOptions({ bypassTenant: true }).catch(() => {});
+
+  const { isMongoReady } = require('../services/mongoConnectionService');
+  const { isMongoRequired, isPostgresAuthEnabled } = require('../infrastructure/postgres/prismaClient');
+  if (isMongoReady() || isMongoRequired()) {
+    User.updateOne(idFilter(userId), {
+      $set: { lastOnline: new Date(), online: true },
+    }).setOptions({ bypassTenant: true }).catch(() => {});
+  }
   try {
-    const { touchStaffUserLastOnline, isPostgresAuthEnabled } = require('../repositories/staffUserRepository');
+    const { touchStaffUserLastOnline } = require('../repositories/staffUserRepository');
     if (isPostgresAuthEnabled()) {
       touchStaffUserLastOnline(key).catch(() => {});
     }

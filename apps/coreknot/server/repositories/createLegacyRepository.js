@@ -76,6 +76,16 @@ function createLegacyRepository({ MongoModel, entityType, flagName }) {
         return true;
       });
     }
+    if (filter.date && typeof filter.date === 'object') {
+      const { $gte, $lte } = filter.date;
+      shaped = shaped.filter((row) => {
+        const rd = row.date ? new Date(row.date) : null;
+        if (!rd) return false;
+        if ($gte && rd < new Date($gte)) return false;
+        if ($lte && rd > new Date($lte)) return false;
+        return true;
+      });
+    }
     if (filter.issueId) {
       const issueId = String(filter.issueId);
       shaped = shaped.filter((row) => String(row.issueId) === issueId);
@@ -135,9 +145,16 @@ function createLegacyRepository({ MongoModel, entityType, flagName }) {
   }
 
   function hasComplexMongoFilter(filter = {}) {
-    if (filter.$or || filter.$and || filter.date || filter.$gte || filter.$lte) return true;
+    if (filter.$or || filter.$and) return true;
+    if (filter.date && typeof filter.date === 'object' && (filter.date.$gte || filter.date.$lte)) {
+      return false;
+    }
+    if (filter.createdAt && typeof filter.createdAt === 'object' && (filter.createdAt.$gte || filter.createdAt.$lte)) {
+      return false;
+    }
+    if (filter.date || filter.createdAt) return true;
+    if (filter.$gte || filter.$lte) return true;
     if (filter.userId && typeof filter.userId === 'object' && !filter.userId.$in) return true;
-    if (filter.createdAt && typeof filter.createdAt === 'object') return false;
     return false;
   }
 

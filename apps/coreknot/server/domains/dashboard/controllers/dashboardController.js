@@ -13,6 +13,22 @@ const { getCache, setCache } = require('../../../services/cacheService');
 const { parseTimeSpentToHours } = require('../../../../shared/timeSpent');
 const { aggregateWithTenant } = require('../../../repositories/aggregateWithTenant');
 const { getTenantId } = require('../../../utils/tenantContext');
+const taskRepository = require('../../../repositories/taskRepository');
+const leadRepository = require('../../../repositories/leadRepository');
+const projectRepository = require('../../../repositories/projectRepository');
+const attendanceRepository = require('../../../repositories/attendanceRepository');
+const calendarRepository = require('../../../repositories/calendarRepository');
+const { isMongoReady } = require('../../../services/mongoConnectionService');
+const {
+  isPostgresTasksEnabled,
+  isPostgresCrmEnabled,
+  isPostgresProjectsEnabled,
+  isPostgresCalendarEnabled,
+  isPostgresAttendanceEnabled,
+  isMongoRequired,
+  getPrismaClient,
+} = require('../../../infrastructure/postgres/prismaClient');
+const { resolvePersonId, resolveMongoId } = require('../../../infrastructure/postgres/syncMappingHelper');
 
 const PRIVATE_CACHE_60 = 'private, max-age=60';
 const DASHBOARD_STATS_TTL_SECONDS = 300;
@@ -78,6 +94,9 @@ const formatChartDayLabel = (dateKey) => {
 };
 
 const sumFocusHours = async (match) => {
+  if (!isMongoReady() && !isMongoRequired()) {
+    return [{ focusHours: 0, logCount: 0, focusAvgHours: 0 }];
+  }
   const logs = await Log.find(match).select('details.timeSpent').lean();
   const focusHours = logs.reduce(
     (sum, log) => sum + parseTimeSpentToHours(log.details?.timeSpent),
@@ -89,6 +108,119 @@ const sumFocusHours = async (match) => {
     logCount > 0 ? Math.round((rounded / logCount) * 10) / 10 : 0;
   return [{ focusHours: rounded, logCount, focusAvgHours }];
 };
+
+const preferRepository = (storeEnabled) => storeEnabled() || !isMongoReady();
+
+async function getAssignedTaskIds(userId) {
+  if (preferRepository(isPostgresTasksEnabled)) {
+    const prisma = await getPrismaClient();
+    const personId = await resolvePersonId(String(userId));
+    if (!personId) return [];
+    const rows = await prisma.taskAssignee.findMany({
+      where: { personId },
+      select: { taskId: true },
+    });
+    const taskIds = await Promise.all(rows.map((row) => resolveMongoId('Task', row.taskId)));
+    return taskIds.filter(Boolean);
+  }
+  const assignments = await TaskAssignment.find({ userId }).select('taskId').lean();
+  return assignments.map((a) => a.taskId);
+}
+
+async function aggregateAssignedTaskStats(assignedTaskIds) {
+  if (!assignedTaskIds.length) {
+    return { total: 0, completed: 0, critical: 0, overdue: 0 };
+  }
+  if (preferRepository(isPostgresTasksEnabled)) {
+    const tasks = await taskRepository.find({ _id: { $in: assignedTaskIds } }).lean();
+    const now = new Date();
+    return {
+      total: tasks.length,
+      completed: tasks.filter((t) => t.status === 'done').length,
+      critical: tasks.filter((t) => ['critical', 'high'].includes(t.priority)).length,
+      overdue: tasks.filter((t) => t.dueDate && new Date(t.dueDate) < now && t.status !== 'done').length,
+    };
+  }
+  const taskStats = await aggregateWithTenant(Task, [
+    { $match: { _id: { $in: assignedTaskIds } } },
+    { $group: {
+      _id: null,
+      total: { $sum: 1 },
+      completed: { $sum: { $cond: [{ $eq: ['$status', 'done'] }, 1, 0] } },
+      critical: { $sum: { $cond: [{ $in: ['$priority', ['critical', 'high']] }, 1, 0] } },
+      overdue: { $sum: { $cond: [{ $and: [{ $lt: ['$dueDate', new Date()] }, { $ne: ['$status', 'done'] }] }, 1, 0] } },
+    }},
+  ]);
+  return taskStats[0] || { total: 0, completed: 0, critical: 0, overdue: 0 };
+}
+
+async function aggregateLeadSummary(user) {
+  const userId = user._id;
+  if (preferRepository(isPostgresCrmEnabled)) {
+    const filter = isAdminUser(user) ? {} : { assignedRepId: userId };
+    const leads = await leadRepository.find(filter).lean();
+    return {
+      total: leads.length,
+      converted: leads.filter((l) => l.leadStatus === 'Converted').length,
+      highQuality: leads.filter((l) => (l.leadQuality || 0) >= 4).length,
+    };
+  }
+  const leadStats = await aggregateWithTenant(Lead, [
+    { $match: isAdminUser(user) ? {} : { assignedRepId: userId } },
+    { $group: {
+      _id: null,
+      total: { $sum: 1 },
+      converted: { $sum: { $cond: [{ $eq: ['$leadStatus', 'Converted'] }, 1, 0] } },
+      highQuality: { $sum: { $cond: [{ $gte: ['$leadQuality', 4] }, 1, 0] } },
+    }},
+  ]);
+  return leadStats[0] || { total: 0, converted: 0, highQuality: 0 };
+}
+
+async function aggregateProjectCount(userId) {
+  if (preferRepository(isPostgresProjectsEnabled)) {
+    const projects = await projectRepository.find({
+      $or: [{ owner: userId }, { members: userId }],
+    }).lean();
+    return { count: projects.length };
+  }
+  const projectStats = await aggregateWithTenant(Project, [
+    { $match: { $or: [{ owner: userId }, { members: userId }] } },
+    { $group: { _id: null, count: { $sum: 1 } } },
+  ]);
+  return projectStats[0] || { count: 0 };
+}
+
+async function fetchTodayCalendarEvents(userId, today, todayEndTime) {
+  if (preferRepository(isPostgresCalendarEnabled)) {
+    const events = await calendarRepository.find({
+      date: { $gte: today, $lte: todayEndTime },
+    }).lean();
+    return events.filter(
+      (ev) => ev.visibility === 'public' || String(ev.createdBy) === String(userId),
+    );
+  }
+  return mongoose.model('CalendarEvent').find({
+    $or: [
+      { visibility: 'public' },
+      { createdBy: userId },
+    ],
+    date: { $gte: today, $lte: todayEndTime },
+  }).setOptions({ bypassTenant: true }).lean();
+}
+
+async function fetchAttendanceRows(start, end) {
+  if (preferRepository(isPostgresAttendanceEnabled)) {
+    return attendanceRepository.find({
+      date: { $gte: start, $lte: end },
+    }).select('userId date onLeave isHalfDay inTimeRecord outTimeRecord username').lean();
+  }
+  return Attendance.find({
+    date: { $gte: start, $lte: end },
+  })
+    .select('userId date onLeave isHalfDay inTimeRecord outTimeRecord username')
+    .lean();
+}
 
 const aggregateTaskStats = (periodMatch) => aggregateWithTenant(Task, [
   {
@@ -223,55 +355,14 @@ exports.getDashboardSummary = async (req, res) => {
     const today = todayStart();
     const todayEndTime = todayEnd();
 
-    const assignments = await TaskAssignment.find({ userId }).select('taskId').lean();
-    const assignedTaskIds = assignments.map(a => a.taskId);
+    const assignedTaskIds = await getAssignedTaskIds(userId);
 
-    const [taskStats, leadStats, logStats, projectStats, calendarRes, campaignRecipients] = await Promise.all([
-      // 1. Task Statistics (assigned tasks only)
-      aggregateWithTenant(Task, [
-        { $match: { _id: { $in: assignedTaskIds } } },
-        { $group: {
-          _id: null,
-          total: { $sum: 1 },
-          completed: { $sum: { $cond: [{ $eq: ['$status', 'done'] }, 1, 0] } },
-          critical: { $sum: { $cond: [{ $in: ['$priority', ['critical', 'high']] }, 1, 0] } },
-          overdue: { $sum: { $cond: [{ $and: [{ $lt: ['$dueDate', new Date()] }, { $ne: ['$status', 'done'] }] }, 1, 0] } }
-        }}
-      ]),
-
-      // 2. Lead Statistics
-      aggregateWithTenant(Lead, [
-        { $match: isAdminUser(req.user) ? {} : { assignedRepId: userId } },
-        { $group: {
-          _id: null,
-          total: { $sum: 1 },
-          converted: { $sum: { $cond: [{ $eq: ['$leadStatus', 'Converted'] }, 1, 0] } },
-          highQuality: { $sum: { $cond: [{ $gte: ['$leadQuality', 4] }, 1, 0] } }
-        }}
-      ]),
-
-      // 3. Log Statistics (Focus Hours)
+    const [tasks, leads, logStats, projects, calendarRes, campaignRecipients] = await Promise.all([
+      aggregateAssignedTaskStats(assignedTaskIds),
+      aggregateLeadSummary(req.user),
       sumFocusHours({ userId, action: 'DAILY_LOG', createdAt: { $gte: today } }),
-
-      // 4. Project Portfolio
-      aggregateWithTenant(Project, [
-        { $match: { $or: [{ owner: userId }, { members: userId }] } },
-        { $group: {
-          _id: null,
-          count: { $sum: 1 }
-        }}
-      ]),
-
-      // 5. Calendar Events (Today)
-      mongoose.model('CalendarEvent').find({ 
-        $or: [
-          { visibility: 'public' },
-          { createdBy: userId }
-        ],
-        date: { $gte: today, $lte: todayEndTime }
-      }).setOptions({ bypassTenant: true }).lean(),
-
-      // 6. Campaign Data for Bounces
+      aggregateProjectCount(userId),
+      fetchTodayCalendarEvents(userId, today, todayEndTime),
       getUserCampaignRecipients(userId),
     ]);
 
@@ -284,27 +375,27 @@ exports.getDashboardSummary = async (req, res) => {
       });
     }
 
-    const tasks = taskStats[0] || { total: 0, completed: 0, critical: 0, overdue: 0 };
-    const leads = leadStats[0] || { total: 0, converted: 0, highQuality: 0 };
+    const taskMetrics = tasks || { total: 0, completed: 0, critical: 0, overdue: 0 };
+    const leadMetrics = leads || { total: 0, converted: 0, highQuality: 0 };
     const logs = logStats[0] || { focusHours: 0 };
-    const projects = projectStats[0] || { count: 0 };
+    const projectMetrics = projects || { count: 0 };
     const calendar = calendarRes || [];
 
-    const completionRate = tasks.total > 0 ? Math.round((tasks.completed / tasks.total) * 100) : 0;
-    const conversionRate = leads.total > 0 ? Math.round((leads.converted / leads.total) * 100) : 0;
+    const completionRate = taskMetrics.total > 0 ? Math.round((taskMetrics.completed / taskMetrics.total) * 100) : 0;
+    const conversionRate = leadMetrics.total > 0 ? Math.round((leadMetrics.converted / leadMetrics.total) * 100) : 0;
 
     const payload = {
       metrics: {
         completionRate,
-        criticalTasks: tasks.critical,
-        overdueTasks: tasks.overdue,
+        criticalTasks: taskMetrics.critical,
+        overdueTasks: taskMetrics.overdue,
         focusHours: logs.focusHours,
         focusAvgHours: logs.focusAvgHours,
-        totalLeads: leads.total,
-        convertedLeads: leads.converted,
+        totalLeads: leadMetrics.total,
+        convertedLeads: leadMetrics.converted,
         conversionRate,
-        highQualityLeads: leads.highQuality,
-        projectCount: projects.count,
+        highQualityLeads: leadMetrics.highQuality,
+        projectCount: projectMetrics.count,
         bouncedEmails
       },
       calendar,
@@ -355,11 +446,7 @@ exports.getAttendanceOverview = async (req, res) => {
       dateKeys.map((key) => [key, { marked: new Set(), present: new Set(), halfDay: new Set(), leave: new Set() }])
     );
 
-    const rows = await Attendance.find({
-      date: { $gte: start, $lte: end },
-    })
-      .select('userId date onLeave isHalfDay inTimeRecord outTimeRecord username')
-      .lean();
+    const rows = await fetchAttendanceRows(start, end);
 
     for (const row of rows) {
       if (isAttendanceExcluded({ _id: row.userId, name: row.username, email: '' })) continue;
