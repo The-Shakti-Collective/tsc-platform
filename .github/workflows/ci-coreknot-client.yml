@@ -32,3 +32,34 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-pnpm
       - run: pnpm turbo run lint typecheck test build --filter=@tsc/coreknot-client
+
+  deploy:
+    name: Deploy CoreKnot (prebuilt)
+    needs: ci
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Build Vercel output
+        working-directory: apps/coreknot/client
+        env:
+          RENDER_API_PROXY_URL: https://api.coreknot.in
+          VITE_API_URL: https://api.coreknot.in
+          COREKNOT_DEPLOY: "true"
+          VERCEL: "1"
+        run: node scripts/vercelBuildOutput.cjs
+      - name: Deploy prebuilt to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: team_6ew6oULCB5ybymCVS2BgJyKv
+          VERCEL_PROJECT_ID: prj_eASJORRbLiL9HPDNvkaA7ZNhwhgu
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "VERCEL_TOKEN not set — skipping prebuilt deploy (configure in repo secrets)."
+            exit 0
+          fi
+          npx vercel@54 deploy --prebuilt --yes --token "$VERCEL_TOKEN" \
+            ${{ github.ref == 'refs/heads/main' && '--prod' || '' }}
