@@ -1,7 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getAppUrl } from '@/lib/app-urls';
+import { getAppUrl, withBasePath } from '@/lib/app-urls';
 import { normalizePathname } from '@/lib/request-pathname';
 
 const isPublicRoute = createRouteMatcher([
@@ -32,6 +32,8 @@ const isPublicRoute = createRouteMatcher([
   '/reputation',
   '/ai-agents',
   '/creator-crm',
+  '/bookings',
+  '/channels',
   '/community/(.*)',
   '/event/(.*)',
   '/api/health',
@@ -49,7 +51,7 @@ export default clerkMiddleware(async (auth, request) => {
   if (pathname === '/') {
     const { userId } = await auth();
     if (userId) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      return NextResponse.redirect(new URL(withBasePath('/dashboard'), request.url));
     }
     return nextWithPathname(request);
   }

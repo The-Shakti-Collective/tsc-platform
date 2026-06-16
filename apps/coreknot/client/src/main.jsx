@@ -37,6 +37,15 @@ warnIfDevPointsAtProduction();
 
 const CHUNK_RETRY_KEY = 'chunk-retry';
 
+const isSameOriginAppScript = (src) => {
+  try {
+    const url = new URL(src, window.location.origin);
+    return url.origin === window.location.origin && /\.(js|mjs)(\?|$)/i.test(url.pathname);
+  } catch {
+    return false;
+  }
+};
+
 const reloadOnceForStaleAssets = () => {
   if (import.meta.env.DEV) return;
   if (window.sessionStorage.getItem(CHUNK_RETRY_KEY)) return;
@@ -48,7 +57,8 @@ if (typeof window !== 'undefined') {
   window.addEventListener('error', (event) => {
     const target = event.target;
     if (target?.tagName !== 'SCRIPT' || !target.src) return;
-    if (!/\.(js|mjs)(\?|$)/i.test(target.src)) return;
+    // PostHog/Sentry/third-party script failures must not trigger deploy chunk reload loops.
+    if (!isSameOriginAppScript(target.src)) return;
     reloadOnceForStaleAssets();
   }, true);
 }
