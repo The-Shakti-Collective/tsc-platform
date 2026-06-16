@@ -1,5 +1,6 @@
 const cors = require('cors');
 const { config } = require('../config');
+const { isCoreKnotVercelOrigin } = require('./coreknotOrigins');
 
 const DEFAULT_ALLOWED_ORIGINS = [
   'http://localhost:3001',
@@ -40,6 +41,7 @@ const corsOptions = {
     if (!origin) return callback(null, true);
     if (corsAllowlist.has(origin)) return callback(null, true);
     if (isLocalDevOrigin(origin)) return callback(null, true);
+    if (isCoreKnotVercelOrigin(origin)) return callback(null, true);
     if (allowVercelPreviews && origin.endsWith('.vercel.app')) return callback(null, true);
     return callback(new Error('Not allowed by CORS'));
   },

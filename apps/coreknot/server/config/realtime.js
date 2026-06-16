@@ -4,6 +4,7 @@ const cookie = require('cookie');
 const User = require('../models/User');
 const { isAdminUser, isOpsUser } = require('../utils/departmentPermissions');
 const { COOKIE_NAME } = require('../utils/authCookie');
+const { isCoreKnotVercelOrigin } = require('../app/coreknotOrigins');
 
 let io = null;
 const log = () => require('../utils/logger');
@@ -19,6 +20,7 @@ const initRealtime = (httpServer, corsAllowlist = new Set()) => {
     cors: {
       origin: (origin, callback) => {
         if (!origin || origins.includes(origin)) return callback(null, true);
+        if (isCoreKnotVercelOrigin(origin)) return callback(null, true);
         if (allowVercelPreviews && origin.endsWith('.vercel.app')) return callback(null, true);
         return callback(new Error('Not allowed by CORS'));
       },

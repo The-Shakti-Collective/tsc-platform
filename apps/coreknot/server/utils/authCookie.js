@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { isCoreKnotVercelHost } = require('../app/coreknotOrigins');
 
 /** Current session cookie — sliding inactivity sessions (Jun 2026+). */
 const COOKIE_NAME = 'coreknot_token_v3';
@@ -96,6 +97,9 @@ const isFirstPartyProxiedRequest = (req) => {
   if (forwardedHost && hostsMatchFrontend(forwardedHost, allowed)) {
     return true;
   }
+  if (forwardedHost && isCoreKnotVercelHost(forwardedHost)) {
+    return true;
+  }
 
   const apiHost = normalizeHost(readHeader(req, 'host'));
   const proxiedViaRender = apiHost.endsWith('.onrender.com');
@@ -103,6 +107,17 @@ const isFirstPartyProxiedRequest = (req) => {
     for (const headerName of ['origin', 'referer']) {
       const headerHost = hostFromHeaderUrl(readHeader(req, headerName));
       if (headerHost && hostsMatchFrontend(headerHost, allowed)) {
+        return true;
+      }
+    }
+  }
+
+  const proxiedViaCoreKnotVercel =
+    isCoreKnotVercelHost(forwardedHost) || apiHost === 'api.coreknot.in';
+  if (proxiedViaCoreKnotVercel) {
+    for (const headerName of ['origin', 'referer']) {
+      const headerHost = hostFromHeaderUrl(readHeader(req, headerName));
+      if (headerHost && isCoreKnotVercelHost(headerHost)) {
         return true;
       }
     }
