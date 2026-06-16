@@ -6,7 +6,7 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 const CLIENT_ROOT = path.join(__dirname, '..');
-const REPO_ROOT = path.join(CLIENT_ROOT, '..', '..');
+const REPO_ROOT = path.join(CLIENT_ROOT, '..', '..', '..');
 const DIST = path.join(CLIENT_ROOT, 'dist');
 
 const run = (cmd) => {
