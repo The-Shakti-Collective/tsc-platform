@@ -1,13 +1,66 @@
 const mongoose = require('mongoose');
 const { config } = require('../config');
 const { connectMongo, isMongoReady } = require('./mongoConnectionService');
-const { isMongoRequired, pingPostgres, isPostgresConfigured } = require('../infrastructure/postgres/prismaClient');
+const {
+  isMongoRequired,
+  pingPostgres,
+  disconnectPostgres,
+  isPostgresConfigured,
+} = require('../infrastructure/postgres/prismaClient');
 const { areAllP0StoresOnPostgres } = require('../infrastructure/postgres/migrationProfile');
+
+/** Consecutive failed dependency checks before production maintenance gate (45s at 15s interval). */
+const PRODUCTION_FAIL_THRESHOLD = 3;
+const PING_RETRY_ATTEMPTS = 3;
+const PING_RETRY_BASE_MS = 400;
 
 let systemStatus = 'STARTING';
 let failReason = null;
+let consecutiveFailures = 0;
 let lastPostgresPing = { ok: false, reason: 'not checked' };
 let lastRedisHealth = { ok: false, state: 'unknown' };
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function pingPostgresWithRetry() {
+  let last = { ok: false, reason: 'not checked' };
+  for (let attempt = 0; attempt < PING_RETRY_ATTEMPTS; attempt += 1) {
+    last = await pingPostgres();
+    if (last.ok) return last;
+    if (attempt < PING_RETRY_ATTEMPTS - 1) {
+      await disconnectPostgres().catch(() => {});
+      await sleep(PING_RETRY_BASE_MS * (attempt + 1));
+    }
+  }
+  return last;
+}
+
+function markDependencyFailure(err) {
+  consecutiveFailures += 1;
+  failReason = err.message;
+
+  if (!config.isProduction) {
+    systemStatus = 'DEGRADED';
+    return;
+  }
+
+  if (consecutiveFailures >= PRODUCTION_FAIL_THRESHOLD) {
+    systemStatus = 'FAIL';
+    return;
+  }
+
+  // Transient outage / cold start — keep serving traffic until threshold is hit.
+  if (systemStatus === 'FAIL') {
+    systemStatus = 'DEGRADED';
+    return;
+  }
+
+  if (systemStatus === 'HEALTHY' || systemStatus === 'STARTING') {
+    systemStatus = 'DEGRADED';
+  }
+}
 
 async function refreshRedisHealth() {
   const { isRedisConfigured } = require('../utils/wslRedis');
@@ -42,7 +95,7 @@ class SystemHealthService {
       );
 
       if (postgresRequired) {
-        lastPostgresPing = await pingPostgres();
+        lastPostgresPing = await pingPostgresWithRetry();
         if (!lastPostgresPing.ok) {
           throw new Error(`Postgres unavailable: ${lastPostgresPing.reason}`);
         }
@@ -57,12 +110,12 @@ class SystemHealthService {
 
       await refreshRedisHealth();
 
+      consecutiveFailures = 0;
       systemStatus = 'HEALTHY';
       failReason = null;
       return true;
     } catch (err) {
-      systemStatus = config.isProduction ? 'FAIL' : 'DEGRADED';
-      failReason = err.message;
+      markDependencyFailure(err);
       if (isMongoRequired() && !isMongoReady() && mongoose.connection.readyState === 0) {
         connectMongo({ reason: 'health-check', maxAttempts: 1 }).catch(() => {});
       }
@@ -104,6 +157,7 @@ class SystemHealthService {
     return {
       status: systemStatus,
       reason: failReason,
+      consecutiveFailures,
       dependencies: {
         postgres: {
           ok: postgresOk,
@@ -130,18 +184,29 @@ class SystemHealthService {
   }
 
   static getStatus() {
-    return { status: systemStatus, reason: failReason };
+    return { status: systemStatus, reason: failReason, consecutiveFailures };
   }
 
   static middleware(req, res, next) {
     if (systemStatus === 'FAIL' && config.isProduction) {
       return res.status(503).json({
         success: false,
+        error: '503 Service Unavailable: Maintenance Mode',
         message: '503 Service Unavailable: Maintenance Mode',
-        reason: failReason
+        code: 'SERVICE_UNAVAILABLE',
+        reason: failReason,
       });
     }
     next();
+  }
+
+  /** @internal test helper */
+  static resetStateForTests() {
+    systemStatus = 'STARTING';
+    failReason = null;
+    consecutiveFailures = 0;
+    lastPostgresPing = { ok: false, reason: 'not checked' };
+    lastRedisHealth = { ok: false, state: 'unknown' };
   }
 }
 
