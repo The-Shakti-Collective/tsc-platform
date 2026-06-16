@@ -3,8 +3,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  // Package-local output avoids Windows EPERM on hoisted pnpm @prisma/client store.
-  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
