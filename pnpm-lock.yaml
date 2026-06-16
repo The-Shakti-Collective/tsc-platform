@@ -89,9 +89,6 @@ importers:
       '@tsc/projects':
         specifier: workspace:*
         version: link:../../packages/projects
-      '@tsc/search':
-        specifier: workspace:*
-        version: link:../../packages/search
       '@tsc/tasks':
         specifier: workspace:*
         version: link:../../packages/tasks
