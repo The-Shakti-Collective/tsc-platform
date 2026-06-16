@@ -33,7 +33,9 @@ const monorepoInstall = () => {
   run('pnpm install --no-frozen-lockfile', REPO_ROOT);
 };
 
-if (fs.existsSync(path.join(REPO_ROOT, 'pnpm-lock.yaml'))) {
+if (process.env.VERCEL === '1') {
+  standaloneInstall();
+} else if (fs.existsSync(path.join(REPO_ROOT, 'pnpm-lock.yaml'))) {
   try {
     monorepoInstall();
   } catch (err) {

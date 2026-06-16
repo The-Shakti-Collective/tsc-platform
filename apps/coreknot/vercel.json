@@ -1,6 +1,4 @@
 {
-  "framework": null,
-  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -22,6 +20,6 @@
       "COREKNOT_DEPLOY": "true"
     }
   },
-  "buildCommand": "node scripts/vercelInstall.cjs && node scripts/vercelBuild.cjs",
-  "installCommand": "echo coreknot-install-via-build"
+  "buildCommand": "node scripts/vercelBuild.cjs",
+  "installCommand": "node scripts/vercelInstall.cjs"
 }
