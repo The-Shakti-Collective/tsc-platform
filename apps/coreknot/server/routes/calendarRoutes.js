@@ -5,20 +5,17 @@ const { isAdminUser } = require('../utils/departmentPermissions');
 const calendarRepository = require('../repositories/calendarRepository');
 const projectRepository = require('../repositories/projectRepository');
 const taskRepository = require('../repositories/taskRepository');
+const taskAssignmentRepository = require('../repositories/taskAssignmentRepository');
 const { seedMusicContentCalendar } = require('../services/musicCalendarSeedService');
 const Task = require('../models/Task');
-const TaskAssignment = require('../models/TaskAssignment');
 const Project = require('../models/Project');
 const User = require('../models/User');
-const { isMongoReady } = require('../services/mongoConnectionService');
+const { isMongoReady, canUseMongoModels } = require('../services/mongoConnectionService');
 const {
   isPostgresProjectsEnabled,
   isPostgresTasksEnabled,
   isPostgresCalendarEnabled,
-  getPrismaClient,
 } = require('../infrastructure/postgres/prismaClient');
-const { resolvePersonId, resolveMongoId } = require('../infrastructure/postgres/syncMappingHelper');
-
 const preferRepository = (storeEnabled) => storeEnabled() || !isMongoReady();
 const { dispatchEmailPayload } = require('../services/mailDriver');
 const GamificationService = require('../services/gamificationService');
@@ -52,17 +49,9 @@ async function getUserProjectIds(userId) {
 
 async function getAssignedTaskIds(userId) {
   if (preferRepository(isPostgresTasksEnabled)) {
-    const prisma = await getPrismaClient();
-    const personId = await resolvePersonId(String(userId));
-    if (!personId) return [];
-    const rows = await prisma.taskAssignee.findMany({
-      where: { personId },
-      select: { taskId: true },
-    });
-    const taskIds = await Promise.all(rows.map((row) => resolveMongoId('Task', row.taskId)));
-    return taskIds.filter(Boolean);
+    return taskAssignmentRepository.distinctTaskIdsForUser(userId);
   }
-  const rows = await TaskAssignment.find({ userId }).select('taskId').lean();
+  const rows = await taskAssignmentRepository.find({ userId }).select('taskId').lean();
   return rows.map((r) => r.taskId);
 }
 
@@ -281,7 +270,7 @@ router.post('/', validateBody(calendarEventBody), async (req, res) => {
     const populatedObj = populated.toObject();
     populatedObj.type = 'event';
 
-    if (visibility === 'public') {
+    if (visibility === 'public' && canUseMongoModels()) {
       try {
         const allUsers = await User.find({ email: { $exists: true, $ne: '' } }, 'email name');
         const eventDate = eventDateTime.toLocaleDateString('en-US', {

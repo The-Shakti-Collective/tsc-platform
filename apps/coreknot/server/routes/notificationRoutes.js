@@ -1,12 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const Task = require('../models/Task');
-const TaskAssignment = require('../models/TaskAssignment');
-const Lead = require('../models/Lead');
 const calendarRepository = require('../repositories/calendarRepository');
-const User = require('../models/User');
+const taskRepository = require('../repositories/taskRepository');
+const taskAssignmentRepository = require('../repositories/taskAssignmentRepository');
+const leadRepository = require('../repositories/leadRepository');
 const { protect } = require('../middleware/authMiddleware');
-const { startOfDay, endOfDay, isBefore } = require('date-fns');
+const { startOfDay, endOfDay } = require('date-fns');
 const { getAllowedCategoriesForUser } = require('../utils/notificationCategories');
 const { getVapidPublicKey } = require('../services/pushNotificationService');
 const { prunePushSubscriptions } = require('../utils/pushSubscriptions');
@@ -14,7 +13,34 @@ const TaskService = require('../services/TaskService');
 const logger = require('../utils/logger');
 const { validateBody } = require('../validation/validateBody');
 const { pushSubscribeBody, pushUnsubscribeBody } = require('../validation/schemas/notifications');
-const { aggregateWithTenant } = require('../repositories/aggregateWithTenant');
+const { preferRepository } = require('../utils/preferPostgresStore');
+const {
+  isPostgresTasksEnabled,
+  isPostgresCrmEnabled,
+  isPostgresAuthEnabled,
+} = require('../infrastructure/postgres/prismaClient');
+const {
+  findStaffUserById,
+  findStaffUserPopulated,
+  updateStaffUserMongo,
+} = require('../repositories/staffUserRepository');
+const { canUseMongoModels } = require('../services/mongoConnectionService');
+const User = require('../models/User');
+
+async function getAssignedTaskIds(userId) {
+  if (preferRepository(isPostgresTasksEnabled)) {
+    return taskAssignmentRepository.distinctTaskIdsForUser(userId);
+  }
+  return taskAssignmentRepository.distinct('taskId', { userId });
+}
+
+async function countTasks(filter) {
+  if (preferRepository(isPostgresTasksEnabled)) {
+    return taskRepository.countDocuments(filter);
+  }
+  const Task = require('../models/Task');
+  return Task.countDocuments(filter);
+}
 
 router.get('/status-counts', protect, async (req, res) => {
   try {
@@ -22,71 +48,89 @@ router.get('/status-counts', protect, async (req, res) => {
     const todayStart = startOfDay(now);
     const todayEnd = endOfDay(now);
 
-    const assignedTaskIds = await TaskAssignment.distinct('taskId', { userId: req.user._id });
+    const assignedTaskIds = await getAssignedTaskIds(req.user._id);
     const taskScope = assignedTaskIds.length ? { _id: { $in: assignedTaskIds } } : { _id: null };
 
-    const overdueTasksCount = await Task.countDocuments({
+    const overdueTasksCount = await countTasks({
       ...taskScope,
       status: { $ne: 'done' },
       dueDate: { $lt: now },
     });
 
-    const todayTasksCount = await Task.countDocuments({
+    const todayTasksCount = await countTasks({
       ...taskScope,
       status: { $ne: 'done' },
       dueDate: { $gte: todayStart, $lte: todayEnd },
     });
 
-    const [followupAgg] = await aggregateWithTenant(Lead, [
-      {
-        $match: {
-          assignedRepId: req.user._id,
-          leadStatus: { $ne: 'Converted' },
-          nextFollowupDate: { $exists: true, $ne: '' },
-        },
-      },
-      {
-        $addFields: {
-          followupDate: {
-            $dateFromString: {
-              dateString: '$nextFollowupDate',
-              onError: null,
-              onNull: null,
-            },
-          },
-        },
-      },
-      { $match: { followupDate: { $ne: null } } },
-      {
-        $group: {
-          _id: null,
-          today: {
-            $sum: {
-              $cond: [
-                { $and: [{ $gte: ['$followupDate', todayStart] }, { $lte: ['$followupDate', todayEnd] }] },
-                1,
-                0,
-              ],
-            },
-          },
-          overdue: {
-            $sum: {
-              $cond: [{ $lt: ['$followupDate', todayStart] }, 1, 0],
-            },
-          },
-        },
-      },
-    ]);
+    let overdueFollowupsCount = 0;
+    let todayFollowupsCount = 0;
 
-    const overdueFollowupsCount = followupAgg?.overdue || 0;
-    const todayFollowupsCount = followupAgg?.today || 0;
+    if (preferRepository(isPostgresCrmEnabled)) {
+      const leads = await leadRepository.find({
+        assignedRepId: req.user._id,
+        leadStatus: { $ne: 'Converted' },
+      }).lean();
+      for (const lead of leads) {
+        if (!lead.nextFollowupDate) continue;
+        const followupDate = new Date(lead.nextFollowupDate);
+        if (Number.isNaN(followupDate.getTime())) continue;
+        if (followupDate < todayStart) overdueFollowupsCount += 1;
+        else if (followupDate >= todayStart && followupDate <= todayEnd) todayFollowupsCount += 1;
+      }
+    } else if (canUseMongoModels()) {
+      const Lead = require('../models/Lead');
+      const { aggregateWithTenant } = require('../repositories/aggregateWithTenant');
+      const [followupAgg] = await aggregateWithTenant(Lead, [
+        {
+          $match: {
+            assignedRepId: req.user._id,
+            leadStatus: { $ne: 'Converted' },
+            nextFollowupDate: { $exists: true, $ne: '' },
+          },
+        },
+        {
+          $addFields: {
+            followupDate: {
+              $dateFromString: {
+                dateString: '$nextFollowupDate',
+                onError: null,
+                onNull: null,
+              },
+            },
+          },
+        },
+        { $match: { followupDate: { $ne: null } } },
+        {
+          $group: {
+            _id: null,
+            today: {
+              $sum: {
+                $cond: [
+                  { $and: [{ $gte: ['$followupDate', todayStart] }, { $lte: ['$followupDate', todayEnd] }] },
+                  1,
+                  0,
+                ],
+              },
+            },
+            overdue: {
+              $sum: {
+                $cond: [{ $lt: ['$followupDate', todayStart] }, 1, 0],
+              },
+            },
+          },
+        },
+      ]);
+      overdueFollowupsCount = followupAgg?.overdue || 0;
+      todayFollowupsCount = followupAgg?.today || 0;
+    }
 
     const todayCalendarCount = await calendarRepository.countDocuments({
       $or: [{ createdBy: req.user._id }, { visibility: 'public' }],
       date: { $gte: todayStart, $lte: todayEnd },
     });
 
-    const inReviewTasksCount = await Task.countDocuments({
+    const inReviewTasksCount = await countTasks({
       ...taskScope,
       status: 'in-review',
     });
@@ -127,15 +171,26 @@ router.post('/push/subscribe', protect, validateBody(pushSubscribeBody), async (
       return res.status(400).json({ error: 'Invalid subscription' });
     }
 
-    const user = await User.findById(req.user._id).select('pushSubscriptions');
     const newSub = {
       endpoint,
       keys: { p256dh, auth },
       userAgent: req.headers['user-agent'] || '',
       createdAt: new Date(),
     };
-    const pruned = prunePushSubscriptions(user?.pushSubscriptions || [], newSub);
 
+    if (isPostgresAuthEnabled() || !canUseMongoModels()) {
+      const user = await findStaffUserById(req.user._id);
+      const pruned = prunePushSubscriptions(user?.pushSubscriptions || [], newSub);
+      const prismaUser = user;
+      if (prismaUser) {
+        prismaUser.pushSubscriptions = pruned;
+        await updateStaffUserMongo(prismaUser);
+      }
+      return res.json({ success: true, subscriptionCount: pruned.length });
+    }
+
+    const user = await User.findById(req.user._id).select('pushSubscriptions');
+    const pruned = prunePushSubscriptions(user?.pushSubscriptions || [], newSub);
     await User.findByIdAndUpdate(req.user._id, {
       $set: { pushSubscriptions: pruned },
     });
@@ -150,8 +205,18 @@ router.post('/push/subscribe', protect, validateBody(pushSubscribeBody), async (
 router.delete('/push/unsubscribe', protect, validateBody(pushUnsubscribeBody), async (req, res) => {
   try {
     const { endpoint } = req.body;
+
+    if (isPostgresAuthEnabled() || !canUseMongoModels()) {
+      const user = await findStaffUserById(req.user._id);
+      if (user?.pushSubscriptions?.length) {
+        user.pushSubscriptions = user.pushSubscriptions.filter((sub) => sub.endpoint !== endpoint);
+        await updateStaffUserMongo(user);
+      }
+      return res.json({ success: true });
+    }
+
     await User.findByIdAndUpdate(req.user._id, {
-      $pull: { pushSubscriptions: { endpoint } }
+      $pull: { pushSubscriptions: { endpoint } },
     });
     res.json({ success: true });
   } catch (error) {
@@ -162,7 +227,7 @@ router.delete('/push/unsubscribe', protect, validateBody(pushUnsubscribeBody), a
 router.get('/', protect, async (req, res) => {
   try {
     const allowed = await getAllowedCategoriesForUser(req.user);
-    const user = await User.findById(req.user._id).populate('departmentId', 'slug name');
+    const user = await findStaffUserPopulated(req.user._id);
     res.json({
       notifications: [],
       localOnly: true,

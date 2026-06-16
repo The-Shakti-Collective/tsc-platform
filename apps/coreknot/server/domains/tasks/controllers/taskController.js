@@ -16,12 +16,13 @@ const {
   withTaskSession,
 } = require('../../../utils/taskMongo');
 const {
-  getPrismaClient,
   isPostgresProjectsEnabled,
   isPostgresTasksEnabled,
 } = require('../../../infrastructure/postgres/prismaClient');
 const projectRepository = require('../../../repositories/projectRepository');
 const taskRepository = require('../../../repositories/taskRepository');
+const taskAssignmentRepository = require('../../../repositories/taskAssignmentRepository');
+const { preferRepository } = require('../../../utils/preferPostgresStore');
 
 const lazyModel = (relPath) => {
   let mod;
@@ -36,19 +37,13 @@ const lazyModel = (relPath) => {
 
 const getTaskModel = lazyModel('../models/Task');
 const getProjectModel = lazyModel('../../../models/Project');
-const getTaskAssignmentModel = lazyModel('../models/TaskAssignment');
 const getUserModel = lazyModel('../../../models/User');
 
 async function findTaskIdsForUser(userId) {
-  if (isPostgresTasksEnabled()) {
-    const prisma = await getPrismaClient();
-    const rows = await prisma.taskAssignee.findMany({
-      where: { personId: String(userId) },
-      select: { taskId: true },
-    });
-    return rows.map((row) => row.taskId);
+  if (preferRepository(isPostgresTasksEnabled)) {
+    return taskAssignmentRepository.distinctTaskIdsForUser(userId);
   }
-  const assignments = await getTaskAssignmentModel().find({ userId }).lean();
+  const assignments = await taskAssignmentRepository.find({ userId }).lean();
   return assignments.map((a) => a.taskId);
 }
 
@@ -672,9 +667,8 @@ exports.reportBug = async (req, res, next) => {
       pendingNotifications = result.pendingNotifications;
 
       if (usesMongoSessions()) {
-        const TaskAssignmentModel = getTaskAssignmentModel();
-        await TaskAssignmentModel.deleteMany({ taskId: taskDto._id }).session(session);
-        await TaskAssignmentModel.create([{
+        await taskAssignmentRepository.deleteMany({ taskId: taskDto._id }, { session });
+        await taskAssignmentRepository.create([{
           taskId: taskDto._id,
           userId: platformOwner._id,
           assignedBy: platformOwner._id,

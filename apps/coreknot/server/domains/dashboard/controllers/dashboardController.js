@@ -1,5 +1,5 @@
 const Task = require('../../tasks/models/Task');
-const TaskAssignment = require('../../tasks/models/TaskAssignment');
+const taskAssignmentRepository = require('../../../repositories/taskAssignmentRepository');
 const Lead = require('../../../models/Lead');
 const Project = require('../../../models/Project');
 const { getUserCampaignRecipients } = require('../../mail/services/mailMetricsService');
@@ -25,9 +25,7 @@ const {
   isPostgresAttendanceEnabled,
   isPostgresGamificationEnabled,
   isMongoRequired,
-  getPrismaClient,
 } = require('../../../infrastructure/postgres/prismaClient');
-const { resolvePersonId, resolveMongoId } = require('../../../infrastructure/postgres/syncMappingHelper');
 
 const PRIVATE_CACHE_60 = 'private, max-age=60';
 const DASHBOARD_STATS_TTL_SECONDS = 300;
@@ -114,17 +112,9 @@ const preferRepository = (storeEnabled) => storeEnabled() || !isMongoReady();
 
 async function getAssignedTaskIds(userId) {
   if (preferRepository(isPostgresTasksEnabled)) {
-    const prisma = await getPrismaClient();
-    const personId = await resolvePersonId(String(userId));
-    if (!personId) return [];
-    const rows = await prisma.taskAssignee.findMany({
-      where: { personId },
-      select: { taskId: true },
-    });
-    const taskIds = await Promise.all(rows.map((row) => resolveMongoId('Task', row.taskId)));
-    return taskIds.filter(Boolean);
+    return taskAssignmentRepository.distinctTaskIdsForUser(userId);
   }
-  const assignments = await TaskAssignment.find({ userId }).select('taskId').lean();
+  const assignments = await taskAssignmentRepository.find({ userId }).select('taskId').lean();
   return assignments.map((a) => a.taskId);
 }
 

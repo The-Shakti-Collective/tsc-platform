@@ -20,6 +20,7 @@ const {
   hasAnyPageAccess,
 } = require('../utils/departmentPermissions');
 const { verifySessionToken, isAbsoluteSessionExpired } = require('../utils/authSession');
+const { canUseMongoModels } = require('../services/mongoConnectionService');
 
 const populateDepartment = (query) =>
   query.populate('departmentId', 'name slug signupAllowed permissionPreset pagePermissions');
@@ -72,7 +73,7 @@ const protect = async (req, res, next) => {
     if (isBypassEnabled && isLocalhost && token === bypassToken) {
       const bypassEmail = resolveDevBypassEmail();
       let bypassUser = await findStaffUserByEmail(bypassEmail);
-      if (!bypassUser) {
+      if (!bypassUser && canUseMongoModels()) {
         bypassUser = await populateDepartment(
           User.findOne({ email: bypassEmail }).select('-password'),
         );

@@ -1,5 +1,11 @@
 const bcrypt = require('bcryptjs');
-const { isPostgresAuthEnabled, getPrismaClient } = require('../infrastructure/postgres/prismaClient');
+const { canUseMongoModels } = require('../services/mongoConnectionService');
+const {
+  isPostgresAuthEnabled,
+  getPrismaClient,
+  isPostgresConfigured,
+  isMongoRequired,
+} = require('../infrastructure/postgres/prismaClient');
 const {
   createStaffUserFromMongo,
   updateStaffUserFromMongo,
@@ -18,6 +24,14 @@ const {
 
 const DEPARTMENT_POPULATE = 'name slug signupAllowed permissionPreset pagePermissions';
 const BYPASS = { bypassTenant: true };
+
+function preferPostgresAuth(options = {}) {
+  if (options.bypass) return false;
+  if (isPostgresAuthEnabled()) return true;
+  if (!canUseMongoModels() && isPostgresConfigured()) return true;
+  if (!isMongoRequired() && isPostgresConfigured()) return true;
+  return false;
+}
 
 const departmentSelect = {
   id: true,
@@ -203,7 +217,7 @@ function buildMongoLoginQuery(filter) {
 }
 
 async function findStaffUserForLogin(filter) {
-  if (isPostgresAuthEnabled()) {
+  if (preferPostgresAuth()) {
     if (filter.email) {
       return findPostgresStaffUser({ email: filter.email }, { withPassword: true });
     }
@@ -232,7 +246,7 @@ async function findStaffUserForLogin(filter) {
 async function findStaffUserById(userId, options = {}) {
   const { withPassword = false, select } = options;
 
-  if (isPostgresAuthEnabled()) {
+  if (preferPostgresAuth()) {
     const row = await findPostgresStaffUser(
       { mongoId: String(userId) },
       { withPassword },
@@ -248,7 +262,7 @@ async function findStaffUserById(userId, options = {}) {
 }
 
 async function loadAuthStaffUser(userId) {
-  if (isPostgresAuthEnabled()) {
+  if (preferPostgresAuth()) {
     return findPostgresStaffUser({ mongoId: String(userId) });
   }
   return User.findOne(idFilter(userId))
@@ -258,7 +272,7 @@ async function loadAuthStaffUser(userId) {
 
 async function findStaffUserByEmail(email, { withPassword = false } = {}) {
   const emailLower = String(email).toLowerCase().trim();
-  if (isPostgresAuthEnabled()) {
+  if (preferPostgresAuth()) {
     return findPostgresStaffUser({ email: emailLower }, { withPassword });
   }
   let query = User.findOne({ email: emailLower }).setOptions(BYPASS);
@@ -267,7 +281,7 @@ async function findStaffUserByEmail(email, { withPassword = false } = {}) {
 }
 
 async function findStaffUserPopulated(userId) {
-  if (isPostgresAuthEnabled()) {
+  if (preferPostgresAuth()) {
     return findPostgresStaffUser({ mongoId: String(userId) });
   }
   return User.findById(userId)
@@ -277,14 +291,14 @@ async function findStaffUserPopulated(userId) {
 }
 
 async function findStaffUserWithPassword(userId) {
-  if (isPostgresAuthEnabled()) {
+  if (preferPostgresAuth()) {
     return findPostgresStaffUser({ mongoId: String(userId) }, { withPassword: true });
   }
   return User.findOne(idFilter(userId)).select('+password').setOptions(BYPASS);
 }
 
 async function findStaffUserByResetToken(hashedToken) {
-  if (isPostgresAuthEnabled()) {
+  if (preferPostgresAuth()) {
     const prisma = await getPrismaClient();
     const rows = await prisma.ckLegacyStaffUser.findMany({
       include: { department: { select: departmentSelect } },
@@ -312,7 +326,7 @@ async function findStaffUserByResetToken(hashedToken) {
 
 async function findStaffUserByEmailForReset(email) {
   const emailLower = String(email).toLowerCase().trim();
-  if (isPostgresAuthEnabled()) {
+  if (preferPostgresAuth()) {
     return findPostgresStaffUser({ email: emailLower }, { withPassword: true });
   }
   return User.findOne({ email: emailLower })

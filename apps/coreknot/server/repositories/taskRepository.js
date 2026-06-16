@@ -1,7 +1,7 @@
 const Task = require('../domains/tasks/models/Task');
 const { createTenantRepository } = require('./createTenantRepository');
 const { getPrismaClient } = require('../infrastructure/postgres/prismaClient');
-const { isPostgresTasksEnabled } = require('../infrastructure/postgres/prismaClient');
+const { isPostgresTasksEnabled, isMongoRequired, isPostgresConfigured } = require('../infrastructure/postgres/prismaClient');
 const {
   mirrorTaskFromMongo,
   deleteTaskMirror,
@@ -336,7 +336,10 @@ async function aggregatePostgresTaskCounts(pipeline) {
 }
 
 function usePostgres(options = {}) {
-  return isPostgresTasksEnabled() && !options.bypass;
+  if (options.bypass) return false;
+  if (isPostgresTasksEnabled()) return true;
+  if (!isMongoRequired() && isPostgresConfigured()) return true;
+  return false;
 }
 
 function chainableQuery(rowsOrPromise) {

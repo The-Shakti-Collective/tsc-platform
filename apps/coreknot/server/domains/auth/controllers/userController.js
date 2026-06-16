@@ -327,9 +327,7 @@ exports.createUserAdmin = async (req, res) => {
       return res.status(400).json({ error: 'Invalid email format' });
     }
 
-    const existing = isPostgresAuthEnabled()
-      ? await findStaffUserByEmail(emailLower)
-      : await User.findOne({ email: emailLower });
+    const existing = await findStaffUserByEmail(emailLower);
     if (existing) {
       return res.status(409).json({ error: 'A user with this email already exists' });
     }

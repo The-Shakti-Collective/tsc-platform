@@ -1,12 +1,14 @@
 const Task = require('../models/Task');
-const TaskAssignment = require('../models/TaskAssignment');
+const taskAssignmentRepository = require('../../../repositories/taskAssignmentRepository');
+const taskMentionReceiptRepository = require('../../../repositories/taskMentionReceiptRepository');
 const TaskActivity = require('../models/TaskActivity');
-const TaskMentionReceipt = require('../models/TaskMentionReceipt');
 const { canUseMongoModels } = require('../../../services/mongoConnectionService');
+const projectRepository = require('../../../repositories/projectRepository');
+const { findStaffUsersPostgres } = require('../../../repositories/staffUserRepository');
+const { preferRepository } = require('../../../utils/preferPostgresStore');
+const { isPostgresProjectsEnabled } = require('../../../infrastructure/postgres/prismaClient');
 
-const canUseMentionReceiptStore = () => canUseMongoModels();
-const Project = require('../../../models/Project');
-const User = require('../../../models/User');
+const canUseMentionReceiptStore = () => taskMentionReceiptRepository.usePostgres() || canUseMongoModels();
 const { sanitizeName } = require('../../../utils/sanitizer');
 const { buildMentionNotifications, resolveNewlyMentionedUserIds } = require('../../../utils/mentionNotifications');
 const { buildTaskActionUrl } = require('../../../utils/notificationActionUrl');
@@ -55,7 +57,7 @@ const resolveMentionedUserIdsFromActivity = async (taskId) => {
   const labels = rows.flatMap((r) => extractUserMentionLabels(r.body || ''));
   if (!labels.length) return new Set();
 
-  const users = await User.find({}).select('name email').lean();
+  const users = await loadUsersForMentionResolution();
   const ids = new Set();
   for (const label of labels) {
     const mentioned = resolveUserByLabel(label, users);
@@ -63,6 +65,15 @@ const resolveMentionedUserIdsFromActivity = async (taskId) => {
   }
   return ids;
 };
+
+async function loadUsersForMentionResolution() {
+  if (taskAssignmentRepository.usePostgres() || !canUseMongoModels()) {
+    const page = await findStaffUsersPostgres({ limit: 5000 });
+    return (page?.rows || []).map((u) => ({ _id: u._id, name: u.name, email: u.email }));
+  }
+  const User = require('../../../models/User');
+  return User.find({}).select('name email').lean();
+}
 
 const resolveAllMentionedUserIdsForTask = async (task) => {
   const fromFields = await resolveMentionedUserIds(task.title, task.description);
@@ -74,7 +85,7 @@ const resolveMentionedUserIdsFromText = async (text) => {
   const labels = extractUserMentionLabels(text || '');
   if (!labels.length) return [];
 
-  const users = await User.find({}).select('name email').lean();
+  const users = await loadUsersForMentionResolution();
   const ids = [];
   const seen = new Set();
   for (const label of labels) {
@@ -95,11 +106,17 @@ const canAccessTaskActivity = async (task, user) => {
   const uid = user._id.toString();
   if (task.createdBy?.toString() === uid) return true;
 
-  const assignment = await TaskAssignment.findOne({ taskId: task._id, userId: user._id }).lean();
+  const assignment = await taskAssignmentRepository.findOne({ taskId: task._id, userId: user._id }).lean();
   if (assignment) return true;
 
   if (task.projectId) {
-    const project = await Project.findById(task.projectId).lean();
+    let project;
+    if (preferRepository(isPostgresProjectsEnabled)) {
+      project = await projectRepository.findById(task.projectId).lean();
+    } else if (canUseMongoModels()) {
+      const Project = require('../../../models/Project');
+      project = await Project.findById(task.projectId).lean();
+    }
     if (project && userHasProjectAccess(project, user._id)) return true;
   }
 
@@ -383,7 +400,7 @@ const bumpMentionReceipts = async (taskId, recipientIds, actorId, session) => {
     if (!rid || rid === actorStr) continue;
     if (qaActive && (await isQaExcludedUserId(rid))) continue;
 
-    await TaskMentionReceipt.findOneAndUpdate(
+    await taskMentionReceiptRepository.findOneAndUpdate(
       { userId: rid, taskId },
       {
         $inc: { unreadCount: 1 },
@@ -430,7 +447,7 @@ const appendTaskMessage = async ({
     { session }
   );
 
-  const assigneeRows = await TaskAssignment.find({ taskId: task._id }).select('userId').session(session).lean();
+  const assigneeRows = await taskAssignmentRepository.find({ taskId: task._id }).select('userId').session(session).lean();
   const assigneeIds = assigneeRows.map((a) => a.userId?.toString()).filter(Boolean);
 
   await bumpMentionReceipts(task._id, mentionedUserIds, user._id, session);
@@ -483,7 +500,7 @@ const postMessage = async (taskId, user, body, session) => {
 
 const markMentionsRead = async (taskId, userId) => {
   if (!canUseMentionReceiptStore()) return;
-  await TaskMentionReceipt.findOneAndUpdate(
+  await taskMentionReceiptRepository.findOneAndUpdate(
     { userId, taskId },
     { $set: { unreadCount: 0 } }
   );
@@ -493,7 +510,7 @@ const getUnreadMentionCountsByTask = async (userId, taskIds) => {
   if (!userId || !taskIds?.length) return {};
   if (!canUseMentionReceiptStore()) return {};
 
-  const receipts = await TaskMentionReceipt.find({
+  const receipts = await taskMentionReceiptRepository.find({
     userId,
     taskId: { $in: taskIds },
     unreadCount: { $gt: 0 },
@@ -515,7 +532,7 @@ const purgeActivityForTasks = async (taskIds) => {
     ? await TaskActivity.deleteMany({ taskId: { $in: ids } })
     : { deletedCount: 0 };
   const receiptResult = canUseMentionReceiptStore()
-    ? await TaskMentionReceipt.deleteMany({ taskId: { $in: ids } })
+    ? await taskMentionReceiptRepository.deleteMany({ taskId: { $in: ids } })
     : { deletedCount: 0 };
 
   return {
