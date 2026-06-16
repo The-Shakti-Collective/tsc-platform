@@ -1,4 +1,4 @@
-import { buildArtistPathPayload } from '@/lib/taskmasterWebhook';
+import { buildArtistPathPayload } from './taskmasterWebhook';
 
 function resolvePlatformApiUrl(): string | null {
   const raw = (process.env.TSC_API_URL || process.env.PLATFORM_API_URL || '').trim();

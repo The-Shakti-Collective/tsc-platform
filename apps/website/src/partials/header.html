@@ -1,0 +1,45 @@
+<header id="site-header" class="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 pointer-events-none" data-nav="marketing">
+  <div class="max-w-container mx-auto pt-4">
+    <nav
+      class="pointer-events-auto flex items-center justify-between gap-4 px-4 sm:px-6 py-3 rounded-2xl border border-teal-dark/10 bg-cream/90 backdrop-blur-xl shadow-[0_4px_24px_-8px_rgba(8,61,58,0.12)]"
+      aria-label="Main navigation"
+    >
+      <a href="/" class="flex-shrink-0 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">
+        <img src="/assets/only-logo.svg" alt="The Shakti Collective" class="h-8 sm:h-9 w-auto" width="120" height="36" />
+      </a>
+
+      <div id="desktop-nav" class="hidden lg:flex items-center gap-6 xl:gap-8"></div>
+
+      <button
+        id="mobile-nav-toggle"
+        type="button"
+        class="lg:hidden p-2 rounded-lg text-teal-dark hover:bg-teal-dark/5 cursor-pointer"
+        aria-expanded="false"
+        aria-controls="mobile-nav-panel"
+        aria-label="Open menu"
+      >
+        <svg class="w-6 h-6 icon-menu" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        <svg class="w-6 h-6 icon-close hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </nav>
+
+    <div id="mobile-nav-backdrop" class="hidden fixed inset-0 bg-black/60 z-40 pointer-events-auto lg:hidden" aria-hidden="true"></div>
+
+    <div id="mobile-nav-panel" class="hidden lg:hidden fixed top-20 left-4 right-4 z-50 rounded-2xl border border-teal-dark/10 bg-cream/98 backdrop-blur-xl shadow-xl overflow-hidden pointer-events-auto max-h-[calc(100svh-6rem)] overflow-y-auto">
+      <div id="mobile-nav-links" class="p-4 flex flex-col"></div>
+    </div>
+  </div>
+</header>
+
+<header id="academy-header" class="hidden fixed top-0 left-0 right-0 z-50 bg-academy-blue text-white border-b border-white/10" data-nav="academy">
+  <div class="max-w-container mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
+    <a href="/academy" class="font-signika font-bold text-lg">TSC Academy</a>
+    <nav class="hidden md:flex items-center gap-6 text-sm font-alan-sans">
+      <a href="/academy#courses" class="hover:text-orange-light transition-colors">Courses</a>
+      <a href="/academy#testimonials" class="hover:text-orange-light transition-colors">Testimonials</a>
+      <a href="/book-a-call" class="px-4 py-2 rounded-full bg-orange text-white font-semibold hover:bg-orange/90">Book a Call</a>
+      <a href="/" class="text-white/70 hover:text-white">Main Site</a>
+    </nav>
+    <a href="/book-a-call" class="md:hidden px-4 py-2 rounded-full bg-orange text-sm font-semibold">Book a Call</a>
+  </div>
+</header>

@@ -1,9 +1,17 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "nextjs",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
   "buildCommand": "pnpm build",
+  "outputDirectory": "dist",
   "regions": ["bom1"],
+  "redirects": [
+    { "source": "/tscacademy", "destination": "/academy", "permanent": true },
+    { "source": "/tscacademy/ambassador", "destination": "/academy/ambassador", "permanent": true },
+    { "source": "/resources", "destination": "/insights", "permanent": true },
+    { "source": "/ip", "destination": "/stories", "permanent": true },
+    { "source": "/artist", "destination": "/query", "permanent": false },
+    { "source": "/contact", "destination": "/about", "permanent": false }
+  ],
   "rewrites": [
     {
       "source": "/community",

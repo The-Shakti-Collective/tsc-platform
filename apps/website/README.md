@@ -1,25 +1,33 @@
 # @tsc/website
 
-Marketing site for The Shakti Collective (`theshakticollective.in`).
+Static marketing site for **theshakticollective.in** — Vite multi-page app (HTML + vanilla JS).
 
 ## Dev
 
 ```powershell
-pnpm dev:website          # :3002
-pnpm start:website        # infra + API + website
+pnpm --filter @tsc/website dev
+# http://localhost:3002
 ```
 
-## Environment
+## Build
 
-| Variable | Purpose |
-|----------|---------|
-| `NEXT_PUBLIC_WEBSITE_URL` | Canonical site URL (SEO, sitemap) |
-| `NEXT_PUBLIC_COMMUNITY_URL` | Community app link |
-| `NEXT_PUBLIC_API_URL` | TSC API base (`http://localhost:4000/api`) |
-| `TSC_PUBLIC_API_KEY` | Server-only public API key for `/discover` |
-| `NEXT_PUBLIC_POSTHOG_KEY` | Client + contact form analytics |
-| `NEXT_PUBLIC_POSTHOG_HOST` | PostHog ingest host |
+```powershell
+pnpm --filter @tsc/website build
+# Output: apps/website/dist/
+```
+
+Build steps:
+
+1. `tsx scripts/export-site-data.mjs` — JSON from `lib/*.ts`
+2. `node scripts/generate-pages.mjs` — HTML shells from templates
+3. `vite build` — MPA bundle
+
+## Forms
+
+Browser → same-origin `/api/*` (Vercel serverless) → Platform API `public/website/*` → CoreKnot webhooks.
+
+Copy [`apps/website/.env.example`](.env.example) to `.env.local` for local API proxy secrets.
 
 ## Deploy
 
-Vercel — see `vercel.json`. Health check: `GET /api/health`.
+Vercel project root: `apps/website`. `vercel.json` sets `outputDirectory: dist` and keeps `/community` proxy rewrites.

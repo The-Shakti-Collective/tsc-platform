@@ -1,0 +1,628 @@
+{
+  "HERO_HEADLINE_PREFIX": "Unfolding",
+  "HERO_HEADLINE_SUFFIXES": [
+    "Possibilities.",
+    "Artist Force.",
+    "Yourself.",
+    "Potential.",
+    "Your Journey."
+  ],
+  "HERO_SUBHEADLINE": "Learn. Create. Collaborate. Grow — with mentorship and systems built to last.",
+  "HERO_CTAS": [
+    {
+      "label": "Learn Music",
+      "href": "/academy"
+    },
+    {
+      "label": "Build Stories",
+      "href": "/stories"
+    },
+    {
+      "label": "Collab with TSC",
+      "href": "/collab"
+    },
+    {
+      "label": "Book an Artist",
+      "href": "/query"
+    }
+  ],
+  "HOME_ABOUT": {
+    "headline": "An ecosystem for artistic growth.",
+    "tagline": "Talent-first. Culture-led. Built for artists who want to last.",
+    "pillars": [
+      {
+        "label": "Mentorship",
+        "href": "/academy"
+      },
+      {
+        "label": "Stories & IP",
+        "href": "/stories"
+      },
+      {
+        "label": "Brand Collab",
+        "href": "/collab"
+      },
+      {
+        "label": "Artist Network",
+        "href": "/artists"
+      }
+    ]
+  },
+  "METEOR_EFFECT": {
+    "headline": "The Meteor Effect",
+    "subheadline": "Talent fades without foundations.",
+    "stats": [
+      {
+        "value": "30%",
+        "label": "chasing virality"
+      },
+      {
+        "value": "70%",
+        "label": "revenue to incumbents"
+      },
+      {
+        "value": "Few",
+        "label": "viral careers that last"
+      }
+    ],
+    "closing": "Foundations compound. Flashes don’t."
+  },
+  "ROUNDWAY_STAGES": [
+    {
+      "num": "01",
+      "label": "CONNECTION",
+      "title": "Connect",
+      "desc": "Community, mentorship, identity."
+    },
+    {
+      "num": "02",
+      "label": "SPARK",
+      "title": "Discover",
+      "desc": "Experiment until it feels alive."
+    },
+    {
+      "num": "03",
+      "label": "BELIEVE",
+      "title": "Believe",
+      "desc": "Confidence through guided progress."
+    },
+    {
+      "num": "04",
+      "label": "LEARNING",
+      "title": "Refine",
+      "desc": "Voice, craft, release readiness."
+    },
+    {
+      "num": "05",
+      "label": "MARKET",
+      "title": "Release",
+      "desc": "Audience, collab, monetise with soul."
+    }
+  ],
+  "WHAT_WE_BUILD": [
+    {
+      "title": "TSC Academy",
+      "tag": "Learn",
+      "href": "/academy",
+      "image": "/assets/academy/sandesh.jpg"
+    },
+    {
+      "title": "Artist Path",
+      "tag": "Grow",
+      "href": "/artist-path",
+      "image": "/assets/academy/deepank.jpg"
+    },
+    {
+      "title": "Build Stories",
+      "tag": "IP",
+      "href": "/stories",
+      "image": "/assets/mba banner.png"
+    },
+    {
+      "title": "Collab",
+      "tag": "Partner",
+      "href": "/collab",
+      "image": "/assets/havells logo 2 (2).png"
+    },
+    {
+      "title": "TSC Films",
+      "tag": "Film",
+      "href": "/films",
+      "image": "/assets/Movie_images_117.jpg"
+    },
+    {
+      "title": "Artists",
+      "tag": "Book",
+      "href": "/artists",
+      "image": "/assets/academy/prasadji.jpg"
+    }
+  ],
+  "WHO_THIS_IS_FOR": [
+    {
+      "label": "Singers finding voice",
+      "emoji": "🎤"
+    },
+    {
+      "label": "Producers shaping ideas",
+      "emoji": "🎧"
+    },
+    {
+      "label": "Storytellers beyond trends",
+      "emoji": "✨"
+    },
+    {
+      "label": "Artists growing with intent",
+      "emoji": "🌱"
+    }
+  ],
+  "STORIES_IPS": [
+    {
+      "title": "Main Bhi Artist",
+      "desc": "Community for emerging creators.",
+      "image": "/assets/mba banner.png",
+      "tag": "Community IP"
+    },
+    {
+      "title": "Insta Music League",
+      "desc": "Social-native music discovery.",
+      "image": "/assets/IML Logo (1)@3x.png",
+      "href": "https://iml.tscacademy.in",
+      "tag": "Discovery IP"
+    },
+    {
+      "title": "Havells mYOUsic",
+      "desc": "Brand IP × grassroots talent.",
+      "image": "/assets/havells logo 2 (2).png",
+      "href": "https://havellsmyousic.com",
+      "tag": "Brand IP"
+    },
+    {
+      "title": "Young Gunns",
+      "desc": "Incubator for breakthrough artists.",
+      "image": "/assets/tsc academy.png",
+      "tag": "Incubator IP"
+    }
+  ],
+  "STORIES_INITIATIVES": [
+    {
+      "title": "Kalki",
+      "desc": "Mythic storytelling × modern culture.",
+      "image": "/assets/image.png",
+      "vertical": "Film & Culture"
+    },
+    {
+      "title": "Mahaavatar Narsimha",
+      "desc": "Animated feature audience strategy.",
+      "image": "/assets/Movie_images_117.jpg",
+      "vertical": "Animated Feature"
+    },
+    {
+      "title": "Hanuman Ansh",
+      "desc": "Cinematic universe building.",
+      "image": "/assets/Movie_images_117.jpg",
+      "vertical": "Cinematic Universe"
+    },
+    {
+      "title": "Jai Jagannath",
+      "desc": "Regional heritage & devotion.",
+      "image": "/assets/Movie_images_117.jpg",
+      "vertical": "Cultural Resonance"
+    }
+  ],
+  "FILM_CATALOGUE": [
+    {
+      "title": "Kalki",
+      "desc": "Cultural branding and storytelling initiative exploring ancient narratives in modern formats."
+    },
+    {
+      "title": "Mahaavatar Narsimha",
+      "desc": "Modern animated feature strategy and global monetization."
+    },
+    {
+      "title": "Hanuman Ansh",
+      "desc": "Original IP development centered on heroic cultural archetypes."
+    },
+    {
+      "title": "Jai Jagannath",
+      "desc": "Cultural resonance project celebrating regional heritage."
+    }
+  ],
+  "FILMS_SERVICES": [
+    {
+      "title": "Film Mounting",
+      "items": [
+        "Audience Discovery",
+        "Positioning Strategy",
+        "Audience Segmentation",
+        "Cultural Relevance Mapping",
+        "Franchise Potential Assessment"
+      ]
+    },
+    {
+      "title": "Audience Building",
+      "items": [
+        "Community Development",
+        "Fan Ecosystem Creation",
+        "Influencer & Creator Strategy",
+        "Grassroots Activation",
+        "Digital Growth Frameworks"
+      ]
+    },
+    {
+      "title": "Partnerships & Collaborations",
+      "items": [
+        "Brand Partnerships",
+        "Strategic Alliances",
+        "Educational & Institutional Collaborations",
+        "Community Partnerships",
+        "Cultural Outreach"
+      ]
+    },
+    {
+      "title": "Monetisation & Business Strategy",
+      "items": [
+        "Revenue Strategy",
+        "Licensing Opportunities",
+        "Music & Content Monetisation",
+        "Merchandise Opportunities",
+        "Ancillary Revenue Development"
+      ]
+    },
+    {
+      "title": "Franchise & Universe Building",
+      "items": [
+        "Character Ecosystems",
+        "Sequel Planning",
+        "Community Retention",
+        "Long-Term Audience Strategy",
+        "IP Expansion Roadmaps"
+      ]
+    }
+  ],
+  "FILMS_APPROACH": [
+    {
+      "step": "1",
+      "title": "Discover",
+      "desc": "Understand the story, audience and opportunity."
+    },
+    {
+      "step": "2",
+      "title": "Design",
+      "desc": "Build a strategic roadmap for audience, partnerships and growth."
+    },
+    {
+      "step": "3",
+      "title": "Activate",
+      "desc": "Execute campaigns, collaborations and community initiatives."
+    },
+    {
+      "step": "4",
+      "title": "Amplify",
+      "desc": "Scale awareness, engagement and monetisation opportunities."
+    },
+    {
+      "step": "5",
+      "title": "Sustain",
+      "desc": "Transform a film into a long-term cultural asset."
+    }
+  ],
+  "FILMS_WORK": [
+    {
+      "title": "Mahavatar Narsimha",
+      "desc": "Supporting the audience-building, partnership and growth journey of one of India’s most anticipated animated films."
+    },
+    {
+      "title": "Mahaprabhu Jagannath",
+      "desc": "Designing audience-first strategies rooted in community, culture and devotional engagement."
+    },
+    {
+      "title": "Hanuman Ansh",
+      "desc": "Strategic growth, audience development and monetisation frameworks for a new cinematic universe."
+    }
+  ],
+  "FILMS_STATS": [
+    "50+ Films Released Globally",
+    "360° Monetization — Theatrical, Non-Theatrical & Music",
+    "Strategic Marketing & Partnership Strategy",
+    "Franchise and Universe Development"
+  ],
+  "COLLAB_SERVICES": [
+    "IP Development",
+    "Artist Collaborations",
+    "Music-led Campaigns",
+    "Cultural Storytelling",
+    "Creative Strategy",
+    "Community Engagement",
+    "Branded Experiences"
+  ],
+  "COLLAB_CASE_STUDIES": [
+    {
+      "title": "Kalki",
+      "desc": "Brand integration with cultural storytelling."
+    },
+    {
+      "title": "Mahaavatar Narsimha",
+      "desc": "Monetization and strategy case study."
+    },
+    {
+      "title": "Hanuman Ansh",
+      "desc": "IP co-creation roadmap."
+    },
+    {
+      "title": "Jai Jagannath",
+      "desc": "Cultural resonance and reach metrics."
+    }
+  ],
+  "COLLAB_VALUE_PROPS": [
+    {
+      "title": "Culture over interruption",
+      "emoji": "🎯"
+    },
+    {
+      "title": "Story-led ecosystems",
+      "emoji": "📖"
+    },
+    {
+      "title": "Long-term relevance",
+      "emoji": "⏳"
+    },
+    {
+      "title": "Artist-first integrity",
+      "emoji": "🤝"
+    }
+  ],
+  "ABOUT_FAQ": [
+    {
+      "q": "What is The Shakti Collective?",
+      "a": "A global ecosystem focused on artist development, mentorship, storytelling, collaboration, and sustainable creative growth."
+    },
+    {
+      "q": "Who is TSC for?",
+      "a": "Artists, musicians, producers, creators, storytellers, and brands looking to build meaningful cultural impact."
+    },
+    {
+      "q": "Is TSC only for musicians?",
+      "a": "No. TSC also supports storytelling, IP development, multidisciplinary creativity, and culture-first collaborations."
+    },
+    {
+      "q": "What makes TSC different?",
+      "a": "We focus on long-term artistic development instead of short-term visibility. Foundations over hype. Identity over trends. Sustainability over noise."
+    },
+    {
+      "q": "Can brands collaborate with TSC?",
+      "a": "Yes. We partner with brands to build authentic, culture-first experiences through music, storytelling, artists, and original IPs."
+    }
+  ],
+  "FREE_TOOLS": [
+    {
+      "name": "Waveform Free",
+      "category": "DAW",
+      "description": "Cross-platform production software with unlimited tracks and full VST/AU plugin hosting.",
+      "link": "https://www.tracktion.com/products/waveform-free"
+    },
+    {
+      "name": "Cakewalk Sonar",
+      "category": "DAW",
+      "description": "Windows-optimized production workspace with built-in console modeling and mixing tools.",
+      "link": "https://www.cakewalk.com/"
+    },
+    {
+      "name": "BandLab",
+      "category": "DAW",
+      "description": "Cloud-native browser workspace for remote multi-user tracking and composition.",
+      "link": "https://www.bandlab.com/"
+    },
+    {
+      "name": "Audacity",
+      "category": "Audio Editor",
+      "description": "Open-source multi-track editor for recording, repairs, and spectrum editing.",
+      "link": "https://www.audacityteam.org/"
+    },
+    {
+      "name": "Soundtrap",
+      "category": "DAW",
+      "description": "Spotify-backed online workspace for multi-device tracking and introductory composition.",
+      "link": "https://www.soundtrap.com/"
+    },
+    {
+      "name": "Vital",
+      "category": "Synth",
+      "description": "Spectral-warping wavetable synthesizer with deep modulation mapping.",
+      "link": "https://vital.audio/"
+    },
+    {
+      "name": "Surge XT",
+      "category": "Synth",
+      "description": "Open-source hybrid synthesizer with wavetable, FM, and subtractive engines.",
+      "link": "https://surge-synthesizer.github.io/"
+    },
+    {
+      "name": "Valhalla Supermassive",
+      "category": "Effect",
+      "description": "Mass spatial echo processor for cavernous reverbs and modulations.",
+      "link": "https://valhalladsp.com/shop/reverb/valhalla-supermassive/"
+    },
+    {
+      "name": "Youlean Loudness Meter",
+      "category": "Utility",
+      "description": "Loudness monitoring for true peak levels and integrated LUFS trends.",
+      "link": "https://youlean.co/download-youlean-loudness-meter/"
+    },
+    {
+      "name": "Cymatics Deja Vu",
+      "category": "Effect",
+      "description": "Time-stretching, pitch-warping lo-fi effect for retro cassette-style character.",
+      "link": "https://cymatics.fm"
+    },
+    {
+      "name": "Soldier Sound S Pulser",
+      "category": "Effect",
+      "description": "Mid-side stereo tremolo router for spatial amplitude modulation.",
+      "link": "https://solidersound.com/plugins/s-pulser/"
+    },
+    {
+      "name": "Rough Rider 3",
+      "category": "Effect",
+      "description": "Character-forward compressor for punch, pumping artifacts, and thickness.",
+      "link": "https://www.audiodamage.com/pages/free-and-legacy"
+    },
+    {
+      "name": "RouteNote",
+      "category": "Distribution",
+      "description": "Independent digital music distribution to major stores.",
+      "link": "https://routenote.com/"
+    },
+    {
+      "name": "linksr.io",
+      "category": "Marketing",
+      "description": "Smart links with pre-save automation, storefronts, and geographic tracking.",
+      "link": "https://linksr.io"
+    },
+    {
+      "name": "Feature.fm",
+      "category": "Marketing",
+      "description": "Pre-save tracking, landing hubs, and ad retargeting pixels.",
+      "link": "https://feature.fm/"
+    },
+    {
+      "name": "SonoBus",
+      "category": "Collaboration",
+      "description": "Peer-to-peer real-time audio broadcasting for remote sessions.",
+      "link": "https://sonobus.net/"
+    },
+    {
+      "name": "StemSplit",
+      "category": "Utility",
+      "description": "AI audio processor separating mixed tracks into vocal and backing layers.",
+      "link": "https://stemsplit.io/"
+    },
+    {
+      "name": "Spitfire LABS",
+      "category": "Synth",
+      "description": "Free software instruments from musicians and sampling experts.",
+      "link": "https://labs.spitfireaudio.com/"
+    }
+  ],
+  "INSIGHT_RESOURCES": [
+    {
+      "title": "Artist Release Playbook",
+      "excerpt": "Strategic frameworks for releasing music intentionally.",
+      "href": "/insights/artist-release-playbook"
+    },
+    {
+      "title": "Vocal Texture",
+      "excerpt": "Practical systems for improving vocal tone and individuality.",
+      "href": "/insights/breathing-vocal-texture"
+    },
+    {
+      "title": "Riyaaz Routine",
+      "excerpt": "A sustainable daily practice framework for singers.",
+      "href": "/insights/daily-riyaaz-routine"
+    }
+  ],
+  "ACADEMY_COURSES": [
+    {
+      "title": "The heART of Composition",
+      "mentor": "Sandesh Shandilya",
+      "desc": "Understand the emotional architecture behind composition — melody, harmony, storytelling, and advanced compositional thinking through live mentorship.",
+      "link": "/courses/composition-comprehensive",
+      "image": "/assets/academy/sandesh.jpg"
+    },
+    {
+      "title": "Roots of Hindustani Classical",
+      "mentor": "Prasad Khaparde",
+      "desc": "Explore raag understanding, sur control, voice culture, and riyaaz systems to deepen musical awareness and artistic sensitivity.",
+      "link": "/courses/hindustani-classical",
+      "image": "/assets/academy/prasadji.jpg"
+    },
+    {
+      "title": "A–Z of Music Production",
+      "mentor": "Luca Petracca",
+      "desc": "Learn the complete process of modern music production — from recording and arrangement to mixing, workflow, and creative execution.",
+      "link": "/courses/music-production",
+      "image": "/assets/academy/luca.jpg"
+    }
+  ],
+  "MENTOR_BIOS": {
+    "prasad": {
+      "name": "Pandit Prasad Khaparde",
+      "role": "Legendary Classical Vocalist",
+      "bio": "A renowned Hindustani classical vocalist of international repute with over 30 years of illustrious career from the Rampur Sahaswan gharana. His musical journey began under Padma Bhushan Ustad Rashid Khan Sahab. Through live group sessions, experience rigorous technique and spiritual connection to music.",
+      "credentials": [
+        "Legendary Classical Vocalist",
+        "30+ Years Professional Career",
+        "Rampur Sahaswan Gharana"
+      ],
+      "videoUrl": "https://www.youtube.com/watch?v=jsikazbmhSk"
+    },
+    "sandesh": {
+      "name": "Sandesh Shandilya",
+      "role": "Award-Winning Composer",
+      "bio": "A celebrated music director, composer, and arranger who has created some of Bollywood's most iconic soundtracks. Through live interactive sessions, receive direct mentorship where knowledge meets experience — elevating compositional abilities to professional standards.",
+      "credentials": [
+        "Iconic Bollywood Soundtracks",
+        "Award-Winning Composer",
+        "Decades of Industry Experience"
+      ],
+      "spotifyUrl": "https://open.spotify.com/artist/6AwwLwgIsTIXZ8kHWaZUj5"
+    },
+    "luca": {
+      "name": "Luca Petracca",
+      "role": "Music Production Mentor",
+      "bio": "End-to-end music production for laptop-based artists — from idea to finished track. Melody, harmony, arrangement, recording, mixing, and mastering without expensive studio gear.",
+      "credentials": [
+        "Modern Production Workflow",
+        "Laptop-Friendly Recording",
+        "Genre-Agnostic Arrangement"
+      ]
+    }
+  },
+  "ACADEMY_TESTIMONIALS": [
+    {
+      "name": "SHRADHA MISHRA",
+      "role": "Winner of Saregama 2025",
+      "quote": "Sandesh Shandilya Sir has been more than a mentor to me. He has been my guiding angel, my godfather, my support, and the reason I walk this musical journey with confidence and gratitude. Through his teachings, I found my voice, my purpose, and the soul of my art.",
+      "image": "/assets/academy/shradha.jpg"
+    },
+    {
+      "name": "DEEPANK SONI",
+      "role": "Singer Songwriter",
+      "quote": "Having seen this course come to life, I can confidently say it's pure gold. No other course approaches music composition the way this one does. Sandesh Sir's method of explanation is truly unique. This course reveals the true philosophy and inner world of creation.",
+      "image": "/assets/academy/deepank.jpg"
+    },
+    {
+      "name": "VASAV VASHISHT",
+      "role": "The Samarpan Collective & Kalakul",
+      "quote": "Attending a session with Sandesh ji was a very calming and inspiring. Not only will you learn how to craft your imagination and translate into music, but I believe it also helps a musician bring out his/her emotions perfectly in their compositions.",
+      "image": "/assets/academy/vasav.jpg"
+    }
+  ],
+  "ARTIST_ECOSYSTEM": {
+    "roadmap": [
+      "Discovery",
+      "Grooming / Imaging",
+      "Curation (Human → Artist → Art)"
+    ],
+    "provides": [
+      "Legal support",
+      "Social media strategy",
+      "Community access to co-create with TSC",
+      "Release and catalogue infrastructure",
+      "Booking and collaboration workflows"
+    ],
+    "values": [
+      "Uncertainty → Certainty",
+      "Safety",
+      "Security",
+      "Trust",
+      "Honesty"
+    ],
+    "profileFeatures": [
+      "Artist biography and philosophy",
+      "Performance reels and studio sessions",
+      "Release catalogue with Spotify & YouTube",
+      "Collaboration inquiries",
+      "Booking system"
+    ]
+  }
+}

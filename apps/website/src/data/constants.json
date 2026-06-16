@@ -1,0 +1,11 @@
+{
+  "SITE_EMAIL": "hello@theshakticollective.in",
+  "FILMS_CONTACT_EMAIL": "harshika@theshakticollective.in",
+  "WHATSAPP_COMMUNITY_URL": "https://chat.whatsapp.com/invite",
+  "ROHIT_LINKEDIN_URL": "https://www.linkedin.com/in/rohitsobti/details/experience/",
+  "PRASAD_YOUTUBE_URL": "https://www.youtube.com/watch?v=jsikazbmhSk",
+  "SANDESH_SPOTIFY_URL": "https://open.spotify.com/artist/6AwwLwgIsTIXZ8kHWaZUj5",
+  "ARTIST_PATH_LANDING_URL": "https://theartistpath.in",
+  "ARTIST_PATH_FORM_PATH": "/artist-path",
+  "ARTIST_BOOKING_FORM_PATH": "/query"
+}

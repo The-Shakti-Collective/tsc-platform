@@ -1,10 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
+    './index.html',
+    './**/*.html',
+    './src/**/*.{js,ts,html}',
     './pages/**/*.{js,ts,jsx,tsx}',
     './components/**/*.{js,ts,jsx,tsx}',
-    './lib/**/*.{js,ts,jsx,tsx}',
-    './src/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
@@ -19,9 +20,14 @@ module.exports = {
         // Primary Canvas (Strictly Black & White)
         white: '#FFFFFF',
         black: '#000000',
-        cream: '#FFFFFF', // Mapping cream to white for B&W background
-        'cream-light': '#FFFFFF',
-        'cream-dark': '#F9F9F9', // Very light gray for subtle contrast
+        cream: '#FFECD1',
+        'cream-light': '#FFF5E8',
+        'cream-dark': '#F5DFC4',
+        'teal-dark': '#083D3A',
+        'teal-mid': '#126D5E',
+        'teal-ui': '#08525F',
+        'amber-text': '#AD6517',
+        'orange-wash': 'rgba(183, 75, 2, 0.12)',
 
         // Accent Colors
         'academy-blue': {

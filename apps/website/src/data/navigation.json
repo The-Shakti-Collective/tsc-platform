@@ -1,0 +1,183 @@
+{
+  "NAV_INTENT_LABEL": "I want to",
+  "MAIN_NAV": [
+    {
+      "label": "About",
+      "href": "/about"
+    },
+    {
+      "label": "Work",
+      "href": "/stories",
+      "matchPrefixes": [
+        "/stories",
+        "/films",
+        "/collab",
+        "/ip"
+      ],
+      "children": [
+        {
+          "label": "Build Stories",
+          "href": "/stories",
+          "description": "Original IPs and cultural initiatives"
+        },
+        {
+          "label": "TSC Films",
+          "href": "/films",
+          "description": "Film mounting and audience ecosystems"
+        },
+        {
+          "label": "Collab with TSC",
+          "href": "/collab",
+          "description": "Brand partnerships and co-created IP"
+        }
+      ]
+    },
+    {
+      "label": "Artists",
+      "href": "/artists",
+      "emphasis": true,
+      "matchPrefixes": [
+        "/artists",
+        "/artist",
+        "/artist-path",
+        "/harshadduhita",
+        "/yugm",
+        "/mohitshanker",
+        "/query"
+      ],
+      "children": [
+        {
+          "label": "All Artists",
+          "href": "/artists",
+          "description": "Browse TSC artist roster"
+        },
+        {
+          "label": "Book an Artist",
+          "href": "/query",
+          "description": "Bookings and collaborations"
+        },
+        {
+          "label": "Artist Path",
+          "href": "/artist-path",
+          "description": "Personalized growth roadmap"
+        }
+      ]
+    },
+    {
+      "label": "TSC Academy",
+      "href": "/academy",
+      "matchPrefixes": [
+        "/academy",
+        "/tscacademy",
+        "/courses",
+        "/masterclass"
+      ]
+    },
+    {
+      "label": "Resources",
+      "href": "/insights",
+      "matchPrefixes": [
+        "/insights",
+        "/resources"
+      ]
+    }
+  ],
+  "FOOTER_SECTIONS": [
+    {
+      "title": "Explore",
+      "links": [
+        {
+          "label": "About",
+          "href": "/about"
+        },
+        {
+          "label": "Build Stories",
+          "href": "/stories"
+        },
+        {
+          "label": "TSC Films",
+          "href": "/films"
+        },
+        {
+          "label": "Artists",
+          "href": "/artists"
+        },
+        {
+          "label": "TSC Academy",
+          "href": "/academy"
+        },
+        {
+          "label": "Resources",
+          "href": "/insights"
+        }
+      ]
+    },
+    {
+      "title": "Artists",
+      "links": [
+        {
+          "label": "Artist Path",
+          "href": "https://theartistpath.in",
+          "external": true
+        },
+        {
+          "label": "Start Artist Path",
+          "href": "/artist-path"
+        },
+        {
+          "label": "Book an Artist",
+          "href": "/query"
+        },
+        {
+          "label": "Ambassador Program",
+          "href": "/academy/ambassador"
+        }
+      ]
+    },
+    {
+      "title": "Connect",
+      "links": [
+        {
+          "label": "Collab with TSC",
+          "href": "/collab"
+        },
+        {
+          "label": "Book a Call",
+          "href": "/book-a-call"
+        },
+        {
+          "label": "Join WhatsApp Community",
+          "href": "https://chat.whatsapp.com/invite",
+          "external": true
+        },
+        {
+          "label": "Instagram",
+          "href": "https://www.instagram.com/the_shakti_collective",
+          "external": true
+        },
+        {
+          "label": "LinkedIn",
+          "href": "https://www.linkedin.com/in/rohitsobti/",
+          "external": true
+        },
+        {
+          "label": "YouTube",
+          "href": "https://www.youtube.com/@theshakticollective",
+          "external": true
+        },
+        {
+          "label": "Spotify",
+          "href": "https://open.spotify.com/",
+          "external": true
+        }
+      ]
+    }
+  ],
+  "SOCIAL_LINKS": {
+    "instagram": "https://www.instagram.com/the_shakti_collective",
+    "linkedin": "https://www.linkedin.com/in/rohitsobti/",
+    "youtube": "https://www.youtube.com/@theshakticollective",
+    "spotify": "https://open.spotify.com/",
+    "whatsapp": "https://chat.whatsapp.com/invite"
+  }
+}

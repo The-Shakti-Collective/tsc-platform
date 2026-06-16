@@ -1,0 +1,215 @@
+@import url('https://fonts.googleapis.com/css2?family=Signika:wght@300;400;500;600;700&family=Alata:wght@400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --tsc-cream: #FFECD1;
+  --tsc-teal-dark: #083D3A;
+  --tsc-teal-mid: #126D5E;
+  --tsc-amber: #AD6517;
+  --tsc-orange-wash: rgba(183, 75, 2, 0.12);
+  --primary-orange: #FF8C00;
+  --academy-blue: #1e3a8a;
+  --section-spacing: 6rem;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+body {
+  font-family: 'Alata', sans-serif;
+  color: var(--tsc-amber);
+  overflow-x: hidden;
+  line-height: 1.7;
+  background: var(--tsc-cream);
+}
+
+body[data-layout='academy'],
+body[data-layout='course'] {
+  background: #ffffff;
+  color: #000000;
+}
+
+.font-signika {
+  font-family: 'Signika', sans-serif;
+}
+
+.font-alan-sans {
+  font-family: 'Alata', sans-serif;
+}
+
+.heading-font {
+  font-family: 'Signika', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.texture-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background-image: url('/patterns/textures/paper.svg');
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  pointer-events: none;
+}
+
+.bg-orange-wash {
+  background-color: var(--tsc-orange-wash);
+}
+
+/* Scroll reveal motion */
+[data-reveal],
+[data-reveal-stagger] > * {
+  opacity: 0;
+  transform: translateY(1.5rem);
+  transition:
+    opacity 0.7s cubic-bezier(0.37, 0, 0.63, 1),
+    transform 0.7s cubic-bezier(0.37, 0, 0.63, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+[data-reveal].is-revealed,
+[data-reveal-stagger] > *.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+img.blur-up,
+img[data-blur-up] {
+  filter: blur(8px);
+  transition: filter 0.8s ease-in;
+}
+
+img.blur-up[data-load-done],
+img[data-blur-up][data-load-done] {
+  filter: none;
+}
+
+[data-parallax] {
+  will-change: transform;
+}
+
+[data-layout='form'] #site-footer {
+  display: none;
+}
+
+[data-layout='form'][data-form-success='true'] #site-footer {
+  display: block;
+}
+
+[data-layout='review'] #site-header,
+[data-layout='review'] #site-footer {
+  display: none;
+}
+
+.hero-suffix {
+  transition: opacity 0.45s ease, transform 0.45s ease, filter 0.45s ease;
+}
+
+.hero-suffix.is-exiting {
+  opacity: 0;
+  transform: translateY(-16px);
+  filter: blur(6px);
+}
+
+.hero-suffix.is-entering {
+  opacity: 0;
+  transform: translateY(20px);
+  filter: blur(6px);
+}
+
+.faq-panel {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.35s ease, opacity 0.25s ease;
+}
+
+.faq-item.is-open .faq-panel {
+  max-height: 400px;
+  opacity: 1;
+}
+
+.faq-item.is-open .faq-icon {
+  transform: rotate(45deg);
+}
+
+.form-step {
+  display: none;
+}
+
+.form-step.is-active {
+  display: block;
+}
+
+.nav-dropdown-panel {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+  pointer-events: none;
+}
+
+.nav-dropdown.is-open .nav-dropdown-panel {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.tool-card.hidden-by-filter {
+  display: none;
+}
+
+.roundway-step {
+  position: relative;
+}
+
+.roundway-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 1.5rem;
+  right: -0.5rem;
+  width: 1px;
+  height: calc(100% - 2rem);
+  border-left: 2px dotted rgba(8, 61, 58, 0.2);
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .roundway-step:not(:last-child)::after {
+    display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  [data-reveal],
+  [data-reveal-stagger] > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  [data-parallax] {
+    transform: none !important;
+  }
+
+  img[data-blur-up] {
+    filter: none;
+  }
+}
