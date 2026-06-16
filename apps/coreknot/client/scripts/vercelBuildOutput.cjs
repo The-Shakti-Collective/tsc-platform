@@ -41,9 +41,15 @@ fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(STATIC, { recursive: true });
 copyDir(DIST, STATIC);
 
+const proxyUrl = String(
+  process.env.RENDER_API_PROXY_URL || process.env.VITE_API_URL || 'https://api.coreknot.in',
+).replace(/\/$/, '');
+
 const config = {
   version: 3,
   routes: [
+    { src: '/api/(.*)', dest: `${proxyUrl}/api/$1` },
+    { src: '/socket.io/(.*)', dest: `${proxyUrl}/socket.io/$1` },
     { handle: 'filesystem' },
     { src: '/(.*)', dest: '/index.html' },
   ],

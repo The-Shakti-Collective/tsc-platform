@@ -170,6 +170,9 @@ const payload = {
     return rule;
   }),
   ...(template.build ? { build: template.build } : {}),
+  ...(Object.prototype.hasOwnProperty.call(template, 'framework')
+    ? { framework: template.framework }
+    : {}),
   ...(template.buildCommand ? { buildCommand: template.buildCommand } : {}),
   ...(template.installCommand ? { installCommand: template.installCommand } : {}),
 };
