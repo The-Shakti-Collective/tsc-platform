@@ -14,14 +14,21 @@
   },
   "scripts": {
     "build": "tsc",
+    "index": "tsx scripts/search-index.ts",
+    "reindex": "tsx scripts/search-reindex.ts",
+    "verify": "tsx scripts/search-verify.ts",
     "lint": "eslint src --max-warnings 0",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@tsc/types": "workspace:*"
+    "@prisma/client": "^6.0.0",
+    "@tsc/types": "workspace:*",
+    "typesense": "^2.0.0"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
     "typescript": "^5.7.0"
   }
 }

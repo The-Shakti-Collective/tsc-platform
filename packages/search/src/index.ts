@@ -1,15 +1,46 @@
-/** Search package stub — Elasticsearch/Typesense integration in Stage 2+. */
-
-export const SEARCH_NOT_CONFIGURED = true as const;
-
-export interface SearchPlaceholderResult {
-  readonly configured: false;
-  readonly message: string;
-}
-
-export function searchPlaceholder(_query: string): SearchPlaceholderResult {
-  return {
-    configured: false,
-    message: "Search index not configured. Wire in Stage 2+.",
-  };
-}
+export {
+  getTypesenseConfig,
+  isTypesenseConfigured,
+  type TypesenseConfig,
+} from './config.js';
+export {
+  createTypesenseClient,
+  getTypesenseClient,
+  type TypesenseClient,
+} from './client.js';
+export {
+  COLLECTION_QUERY_BY,
+  COLLECTION_SCHEMAS,
+  SEARCH_COLLECTIONS,
+  type SearchCollectionName,
+} from './collections.js';
+export {
+  mapArtist,
+  mapCommunityProfile,
+  mapOpportunity,
+  mapOrganization,
+  mapProject,
+  toUnixMs,
+} from './documents.js';
+export {
+  bootstrapCollections,
+  ensureCollection,
+  recreateAllCollections,
+  recreateCollection,
+} from './bootstrap.js';
+export {
+  readSyncState,
+  runFullReindex,
+  runIncrementalSync,
+  writeSyncState,
+  type SyncCounts,
+  type SyncResult,
+  type SyncState,
+} from './sync.js';
+export {
+  pingTypesense,
+  searchAll,
+  searchCollection,
+  type SearchHit,
+  type SearchResponse,
+} from './query.js';
