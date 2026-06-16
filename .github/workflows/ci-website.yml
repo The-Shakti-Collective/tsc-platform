@@ -38,3 +38,30 @@ jobs:
       - uses: ./.github/actions/setup-pnpm
       - run: pnpm db:generate
       - run: pnpm turbo run lint typecheck test build --filter=@tsc/website...
+
+  deploy:
+    name: Deploy Website (Vercel prebuilt)
+    needs: ci
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-pnpm
+      - run: pnpm db:generate
+      - name: Build website dist
+        working-directory: apps/website
+        run: pnpm build
+      - name: Deploy prebuilt to Vercel
+        working-directory: apps/website
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: team_6ew6oULCB5ybymCVS2BgJyKv
+          VERCEL_PROJECT_ID: prj_dijAXq8qk9I2ayuZfRUYF2cYTprz
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "VERCEL_TOKEN not set — skipping prebuilt deploy (configure in repo secrets)."
+            exit 0
+          fi
+          npx vercel@54 pull --yes --environment=production --token "$VERCEL_TOKEN"
+          npx vercel@54 build --prod --token "$VERCEL_TOKEN"
+          npx vercel@54 deploy --prebuilt --prod --yes --token "$VERCEL_TOKEN"
