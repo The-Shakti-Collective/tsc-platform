@@ -73,7 +73,8 @@ const isPostgresLegacyAuthDataEnabled = () => (
 async function getPrismaClient() {
   if (client) return client;
   if (!clientPromise) {
-    clientPromise = import('@tsc/database/client').then(({ PrismaClient }) => {
+    clientPromise = Promise.resolve().then(() => {
+      const { PrismaClient } = requirePrismaClient('@prisma/client');
       client = new PrismaClient();
       return client;
     });
