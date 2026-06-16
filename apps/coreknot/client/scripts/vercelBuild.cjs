@@ -23,6 +23,7 @@ const standaloneBuild = () => {
 };
 
 if (process.env.VERCEL === '1') {
+  // install already ran in vercelInstall.cjs (combined buildCommand on Vercel)
   standaloneBuild();
 } else if (fs.existsSync(path.join(REPO_ROOT, 'pnpm-lock.yaml'))) {
   try {

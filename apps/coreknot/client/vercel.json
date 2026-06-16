@@ -22,6 +22,6 @@
       "COREKNOT_DEPLOY": "true"
     }
   },
-  "buildCommand": "node scripts/vercelBuild.cjs",
-  "installCommand": "node scripts/vercelInstall.cjs"
+  "buildCommand": "node scripts/vercelInstall.cjs && node scripts/vercelBuild.cjs",
+  "installCommand": "echo coreknot-install-via-build"
 }
