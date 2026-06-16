@@ -10,7 +10,7 @@ export const ROUTES = {
   'insights-breathing-vocal-texture': 'insights/breathing-vocal-texture/index.html',
   'insights-daily-riyaaz-routine': 'insights/daily-riyaaz-routine/index.html',
   artists: 'artists/index.html',
-  harshadduhita: 'harshadduhita/index.html',
+  // harshadduhita: static Wix export in public/harshadduhita/
   yugm: 'yugm/index.html',
   mohitshanker: 'mohitshanker/index.html',
   'book-a-call': 'book-a-call/index.html',

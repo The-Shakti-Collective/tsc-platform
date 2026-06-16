@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --port 3002",
     "build": "tsx scripts/export-site-data.mjs && node scripts/generate-pages.mjs && vite build",
+    "restore:harshadduhita": "node scripts/restore-harshadduhita-wix.mjs",
     "preview": "vite preview --port 3002",
     "export-data": "tsx scripts/export-site-data.mjs",
     "generate-pages": "node scripts/generate-pages.mjs",
