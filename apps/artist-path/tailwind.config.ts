@@ -1,5 +1,8 @@
 import type { Config } from 'tailwindcss';
 
+/** Brand tokens with opacity support — values come from CSS variables in globals.css */
+const brand = (name: string) => `rgb(var(--brand-${name}-rgb) / <alpha-value>)`;
+
 const config: Config = {
   content: ['./src/**/*.{ts,tsx}'],
   theme: {
@@ -11,6 +14,10 @@ const config: Config = {
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
         },
         muted: {
           DEFAULT: 'hsl(var(--muted))',
@@ -24,20 +31,23 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-        /* Flat keys — match class names used in components (gradients, opacity, etc.) */
-        'brand-teal-deep': '#083d3a',
-        'brand-green': '#126d5e',
-        'brand-teal-mid': '#08525f',
-        'brand-cream': '#ffecd1',
-        'brand-cream-muted': '#f4eee3',
-        'brand-cream-wash': '#fcf8f2',
-        'brand-pumpkin': '#b74b02',
-        'brand-pumpkin-soft': '#fef7e0',
-        'brand-green-soft': '#e6f4f1',
-        'brand-espresso': '#592314',
-        'brand-burgundy': '#6d2034',
-        'brand-rust': '#88281c',
-        'brand-mustard': '#ad6517',
+        'brand-teal-deep': brand('teal-deep'),
+        'brand-green': brand('green'),
+        'brand-teal-mid': brand('teal-mid'),
+        'brand-peacock': brand('peacock'),
+        'brand-cream': brand('cream'),
+        'brand-cream-muted': brand('cream-muted'),
+        'brand-cream-wash': brand('cream-wash'),
+        'brand-pumpkin': brand('pumpkin'),
+        'brand-pumpkin-soft': brand('pumpkin-soft'),
+        'brand-green-soft': brand('green-soft'),
+        'brand-espresso': brand('espresso'),
+        'brand-burgundy': brand('burgundy'),
+        'brand-rust': brand('rust'),
+        'brand-red-oxide': brand('red-oxide'),
+        'brand-mustard': brand('mustard'),
+        'brand-peacock-soft': brand('peacock-soft'),
+        'brand-red-oxide-soft': brand('red-oxide-soft'),
       },
       borderRadius: {
         lg: 'var(--radius)',

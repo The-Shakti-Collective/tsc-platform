@@ -38,7 +38,7 @@ export function BrandPattern({ variant = 'section', className }: BrandPatternPro
           <rect width="100%" height="100%" fill="url(#hero-arcs)" />
         </svg>
         <div
-          className="absolute -right-24 top-1/4 h-72 w-72 rounded-full bg-brand-green/20 blur-3xl"
+          className="absolute -right-24 top-1/4 h-72 w-72 rounded-full bg-brand-peacock/20 blur-3xl"
         />
         <div
           className="absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-brand-pumpkin/15 blur-3xl"

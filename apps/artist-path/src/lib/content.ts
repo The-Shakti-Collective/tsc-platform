@@ -1,3 +1,5 @@
+import { siteConfig } from '@/lib/config';
+
 export const frameworkPillars = [
   { label: 'Human', description: 'Understand yourself.' },
   { label: 'Artist', description: 'Develop your identity.' },
@@ -107,6 +109,10 @@ export const selectionSteps = [
 ] as const;
 
 export const faqs = [
+  {
+    question: 'When is the last date to apply?',
+    answer: `Registrations are open until ${siteConfig.program.registrationDeadline}. The program begins on ${siteConfig.program.startDate}.`,
+  },
   {
     question: 'Is this a music course?',
     answer:

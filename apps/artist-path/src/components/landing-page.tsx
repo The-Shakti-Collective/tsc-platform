@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import {
+  Check,
   ChevronDown,
   Compass,
   Globe,
@@ -15,13 +15,18 @@ import {
   Target,
   TrendingUp,
   Users,
+  X,
 } from 'lucide-react';
-import { ApplyButton } from '@/components/apply-button';
-import { BrandPattern } from '@/components/brand/brand-pattern';
 import { FinalCtaSection } from '@/components/final-cta-section';
 import { HeroSection } from '@/components/hero-section';
 import { SectionDivider } from '@/components/section-divider';
+import { SiteHeader } from '@/components/site-header';
+import { ArtistPathLogo } from '@/components/brand/artist-path-logo';
+import { BrandPattern } from '@/components/brand/brand-pattern';
+import { SectionEyebrow } from '@/components/ui/section-eyebrow';
+import { SurfaceCard } from '@/components/ui/surface-card';
 import { siteConfig } from '@/lib/config';
+import { programHighlightRows } from '@/lib/program-highlights';
 import {
   artistBenefits,
   businessTopics,
@@ -46,14 +51,16 @@ function SectionHeading({
   subtitle,
   align = 'left',
   light,
+  className,
 }: {
   title: string;
   subtitle?: string;
   align?: 'left' | 'center';
   light?: boolean;
+  className?: string;
 }) {
   return (
-    <div className={cn('space-y-3', align === 'center' && 'text-center mx-auto max-w-2xl')}>
+    <div className={cn('space-y-3', align === 'center' && 'mx-auto max-w-2xl text-center', className)}>
       <h2
         className={cn(
           'font-display text-3xl font-bold tracking-tight text-balance md:text-4xl',
@@ -65,9 +72,8 @@ function SectionHeading({
       {subtitle ? (
         <p
           className={cn(
-            'text-lg text-balance',
-            light ? 'text-brand-cream/75' : 'text-brand-teal-deep/70',
-            align === 'center' && 'mx-auto',
+            'text-lg text-balance leading-relaxed',
+            light ? 'text-brand-cream/85' : 'text-brand-teal-deep/80',
           )}
         >
           {subtitle}
@@ -81,95 +87,78 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="rounded-xl border border-brand-teal-deep/10 bg-white shadow-sm">
+    <SurfaceCard className="overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+        className="flex w-full cursor-pointer items-center justify-between gap-4 px-5 py-4 text-left transition-colors duration-200 hover:bg-brand-cream-muted/40"
         aria-expanded={open}
       >
         <span className="font-medium text-brand-teal-deep">{question}</span>
         <ChevronDown
           className={cn(
-            'h-5 w-5 shrink-0 text-brand-teal-deep/50 transition-transform',
+            'h-5 w-5 shrink-0 text-brand-teal-deep/60 transition-transform duration-200',
             open && 'rotate-180',
           )}
         />
       </button>
       {open ? (
-        <div className="border-t border-brand-teal-deep/10 px-5 py-4 text-brand-teal-deep/75">
+        <div className="border-t border-brand-teal-deep/10 px-5 py-4 leading-relaxed text-brand-teal-deep/80">
           {answer}
         </div>
       ) : null}
-    </div>
+    </SurfaceCard>
   );
 }
 
 export function LandingPage() {
   return (
     <div className="relative bg-brand-cream-wash">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-brand-teal-deep/10 bg-brand-cream-wash/90 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-teal-deep text-brand-cream">
-              <Music2 className="h-5 w-5" aria-hidden />
-            </div>
-            <span className="font-display text-lg font-bold text-brand-teal-deep">{siteConfig.name}</span>
-          </Link>
-          <ApplyButton size="default" />
-        </div>
-      </header>
-
+      <SiteHeader />
       <HeroSection />
 
       {/* Opportunity */}
-      <section className="relative mx-auto max-w-6xl px-4 py-16 md:py-20">
+      <section className="relative mx-auto max-w-6xl px-4 py-16 md:py-24">
         <BrandPattern variant="section" className="pointer-events-none absolute inset-0" />
         <div className="relative">
-          <SectionHeading
-            title="The opportunity has never been bigger"
-            subtitle="India is one of the largest music markets in the world — but talent alone is not enough."
-          />
-          <div className="mt-12 grid gap-8 lg:grid-cols-2">
-            <div className="space-y-4">
-              <p className="text-lg font-medium text-brand-teal-deep">
-                Hundreds of millions of listeners stream music every day. Independent artists can now:
+          <SectionEyebrow>Market context</SectionEyebrow>
+          <SectionHeading title="The Opportunity Has Never Been Bigger" className="mt-3" />
+          <div className="mt-12 grid gap-10 lg:grid-cols-2">
+            <div className="space-y-5 text-brand-teal-deep/85">
+              <p className="text-lg font-semibold text-brand-teal-deep">
+                India is one of the largest music markets in the world.
               </p>
+              <p>Hundreds of millions of listeners stream music every day.</p>
+              <p>Independent artists can now:</p>
               <div className="grid gap-3 sm:grid-cols-2">
                 {opportunityBullets.map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-start gap-3 rounded-xl border border-brand-teal-deep/10 bg-white p-4 shadow-sm"
-                  >
+                  <SurfaceCard key={item} hover className="flex items-start gap-3 p-4">
                     <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-pumpkin" />
-                    <span className="text-brand-teal-deep/80">{item}</span>
-                  </div>
+                    <span>{item}</span>
+                  </SurfaceCard>
                 ))}
               </div>
-              <p className="text-brand-teal-deep/70">
-                Yet most artists never realize their potential — not because they lack talent, but because they
-                lack the full picture.
-              </p>
+              <p>Yet most artists never realize their potential.</p>
+              <p>Not because they lack talent.</p>
+              <p className="font-semibold text-brand-teal-deep">Because talent alone is not enough.</p>
+              <p>The artists who build careers understand:</p>
             </div>
-            <div className="rounded-2xl border border-brand-teal-deep/10 bg-gradient-to-br from-brand-green-soft to-white p-6 md:p-8">
-              <p className="text-sm font-semibold uppercase tracking-[0.15em] text-brand-green">
-                Career builders understand
-              </p>
-              <div className="mt-6 flex flex-wrap gap-2">
+            <SurfaceCard variant="accent" className="p-6 md:p-8">
+              <SectionEyebrow>Five pillars</SectionEyebrow>
+              <div className="mt-4 flex flex-wrap gap-2">
                 {careerPillars.map((pillar) => (
                   <span
                     key={pillar}
-                    className="rounded-lg border border-brand-teal-deep/10 bg-white px-4 py-2 font-display text-sm font-semibold text-brand-teal-deep shadow-sm"
+                    className="rounded-xl border border-brand-teal-deep/10 bg-white px-4 py-2 font-display text-sm font-bold text-brand-teal-deep shadow-sm"
                   >
                     {pillar}
                   </span>
                 ))}
               </div>
-              <p className="mt-6 font-display text-xl font-bold text-brand-teal-deep">
-                The Artist Path helps you develop all five.
+              <p className="mt-8 font-display text-xl font-bold text-brand-teal-deep">
+                The Artist Path exists to help artists develop all five.
               </p>
-            </div>
+            </SurfaceCard>
           </div>
         </div>
       </section>
@@ -177,113 +166,92 @@ export function LandingPage() {
       <SectionDivider />
 
       {/* What is */}
-      <section className="mx-auto max-w-6xl px-4 py-16 md:py-20">
+      <section className="mx-auto max-w-6xl px-4 py-16 md:py-24">
+        <SectionEyebrow>Program overview</SectionEyebrow>
         <SectionHeading
-          title="What is The Artist Path?"
-          subtitle="A 9-month accelerator for independent artists serious about building a professional music career."
+          className="mt-3"
+          title="What Is The Artist Path?"
+          subtitle="The Artist Path is a 9-month artist accelerator designed for independent artists who are serious about building a professional music career."
         />
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
+        <div className="mt-12 grid gap-4 md:grid-cols-3">
           {notThisProgram.map((line) => (
-            <div
-              key={line}
-              className="rounded-xl border border-brand-rust/20 bg-brand-rust/5 p-5 text-center text-brand-teal-deep/80"
-            >
-              <span className="mb-2 block text-2xl text-brand-rust" aria-hidden>×</span>
+            <SurfaceCard key={line} className="flex flex-col items-center p-6 text-center text-brand-teal-deep/80">
+              <X className="mb-3 h-6 w-6 text-brand-burgundy" aria-hidden />
               {line}
-            </div>
+            </SurfaceCard>
           ))}
         </div>
-        <div className="mt-10 rounded-2xl border border-brand-teal-deep/10 bg-white p-6 shadow-sm md:p-8">
+        <SurfaceCard className="mt-8 p-6 md:p-8">
           <p className="font-semibold text-brand-teal-deep">It is a structured pathway that helps artists:</p>
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {pathwayOutcomes.map((outcome) => (
               <div
                 key={outcome}
-                className="flex items-center gap-3 rounded-lg bg-brand-cream-muted/60 px-4 py-3 text-brand-teal-deep/85"
+                className="flex items-center gap-3 rounded-xl bg-brand-cream-muted/70 px-4 py-3 text-brand-teal-deep/90"
               >
                 <Headphones className="h-4 w-4 shrink-0 text-brand-green" aria-hidden />
                 {outcome}
               </div>
             ))}
           </div>
-        </div>
+        </SurfaceCard>
       </section>
 
       {/* Why */}
-      <section className="relative overflow-hidden bg-brand-teal-deep py-16 text-brand-cream md:py-20">
-        <BrandPattern variant="hero" className="pointer-events-none absolute inset-0 opacity-40" />
+      <section className="relative overflow-hidden bg-brand-red-oxide bg-gradient-to-br from-brand-red-oxide via-brand-burgundy to-brand-espresso py-16 text-brand-cream md:py-24">
+        <BrandPattern variant="hero" className="pointer-events-none absolute inset-0 opacity-35" />
         <div className="relative mx-auto max-w-6xl px-4">
-          <SectionHeading
-            title="Why we built this"
-            light
-            subtitle="27 years of working across labels, films, artists and talent ecosystems — one pattern kept repeating."
-          />
-          <div className="mt-10 grid gap-8 md:grid-cols-2">
-            <blockquote className="rounded-2xl border border-brand-cream/15 bg-brand-teal-mid/30 p-6 font-display text-2xl font-semibold leading-snug md:text-3xl">
-              Many talented artists never reach their potential — not because they lack skill, but because they lack
-              guidance, structure and the right opportunities.
-            </blockquote>
-            <div className="space-y-4 text-brand-cream/80">
+          <SectionEyebrow light>Origin story</SectionEyebrow>
+          <SectionHeading className="mt-3" title="Why We Built This" light />
+          <div className="mt-10 grid gap-8 lg:grid-cols-2">
+            <SurfaceCard variant="glass-dark" className="p-6 md:p-8">
+              <p className="font-display text-2xl font-bold leading-snug md:text-3xl">
+                Many talented artists never reach their potential.
+              </p>
+              <p className="mt-4 text-brand-cream/85">
+                Not because they lack skill. Because they lack guidance, structure, industry understanding and the
+                right opportunities at the right time.
+              </p>
+            </SurfaceCard>
+            <div className="space-y-5 text-brand-cream/85 leading-relaxed">
               <p>
                 Over the past 27 years, Rohith Sobti has worked across music labels, films, artists, IPs and talent
                 ecosystems.
               </p>
-              <p className="text-lg font-semibold text-brand-cream">The Artist Path was created to solve that.</p>
+              <p>
+                He has worked with artists at different stages of their careers and has seen one recurring pattern:
+              </p>
+              <p className="font-display text-xl font-bold text-white">
+                The Artist Path was created to solve that problem.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Framework journey */}
-      <section className="mx-auto max-w-6xl px-4 py-16 md:py-20">
+      {/* Framework */}
+      <section className="mx-auto max-w-6xl px-4 py-16 md:py-24">
+        <SectionEyebrow>The model</SectionEyebrow>
         <SectionHeading
-          title="The framework"
-          subtitle="Five pillars — one journey from self-discovery to sustainable career."
+          className="mt-3"
+          title="The Framework"
+          subtitle="This journey is at the heart of The Artist Path."
           align="center"
         />
-        <div className="mt-14 hidden md:block">
-          <div className="relative flex items-stretch justify-between gap-2">
-            <div
-              className="absolute left-[10%] right-[10%] top-8 h-0.5 bg-gradient-to-r from-brand-green via-brand-pumpkin to-brand-teal-mid"
-              aria-hidden
-            />
-            {frameworkPillars.map((pillar, index) => {
-              const Icon = frameworkIcons[index] ?? Sparkles;
-              return (
-                <div key={pillar.label} className="relative flex-1 text-center">
-                  <div
-                    className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-brand-teal-deep/10 bg-white shadow-md"
-                  >
-                    <Icon className="h-7 w-7 text-brand-pumpkin" aria-hidden />
-                  </div>
-                  <p className="mt-4 text-xs font-bold uppercase tracking-widest text-brand-pumpkin">
-                    {String(index + 1).padStart(2, '0')}
-                  </p>
-                  <h3 className="mt-1 font-display text-lg font-bold text-brand-teal-deep">{pillar.label}</h3>
-                  <p className="mt-1 text-sm text-brand-teal-deep/65">{pillar.description}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 md:hidden">
+        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {frameworkPillars.map((pillar, index) => {
             const Icon = frameworkIcons[index] ?? Sparkles;
             return (
-              <div
-                key={pillar.label}
-                className="flex gap-4 rounded-xl border border-brand-teal-deep/10 bg-white p-5 shadow-sm"
-              >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-green-soft">
+              <SurfaceCard key={pillar.label} hover className="group p-6">
+                <p className="text-xs font-bold uppercase tracking-widest text-brand-pumpkin">
+                  {String(index + 1).padStart(2, '0')}
+                </p>
+                <div className="mt-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-green-soft transition-colors duration-200 group-hover:bg-brand-green/15">
                   <Icon className="h-6 w-6 text-brand-green" aria-hidden />
                 </div>
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-brand-pumpkin">
-                    {String(index + 1).padStart(2, '0')} · {pillar.label}
-                  </p>
-                  <p className="mt-1 text-sm text-brand-teal-deep/70">{pillar.description}</p>
-                </div>
-              </div>
+                <h3 className="mt-4 font-display text-xl font-bold text-brand-teal-deep">{pillar.label}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-brand-teal-deep/70">{pillar.description}</p>
+              </SurfaceCard>
             );
           })}
         </div>
@@ -291,56 +259,52 @@ export function LandingPage() {
 
       <SectionDivider />
 
-      {/* Work phases timeline */}
-      <section className="bg-brand-cream-muted/40 py-16 md:py-20">
+      {/* Work phases */}
+      <section className="bg-brand-cream-muted/50 py-16 md:py-24">
         <div className="mx-auto max-w-6xl px-4">
-          <SectionHeading title="What you will work on" subtitle="Six phases from clarity to growth." />
-          <div className="mt-12 space-y-0">
+          <SectionEyebrow>Curriculum</SectionEyebrow>
+          <SectionHeading className="mt-3" title="What You Will Work On" />
+          <div className="mt-12 space-y-6">
             {workPhases.map((phase, index) => {
               const Icon = phaseIcons[index] ?? Target;
               return (
-                <div key={phase.id} className="relative flex gap-6 pb-10 last:pb-0">
+                <div key={phase.id} className="relative flex gap-5 md:gap-6">
                   {index < workPhases.length - 1 ? (
                     <div
-                      className="absolute left-[23px] top-12 bottom-0 w-0.5 bg-brand-teal-deep/15 md:left-[27px]"
+                      className="absolute left-6 top-14 bottom-0 w-px bg-brand-teal-deep/15 md:left-7"
                       aria-hidden
                     />
                   ) : null}
                   <div
-                    className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-brand-pumpkin bg-white shadow-sm md:h-14 md:w-14"
+                    className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-brand-pumpkin bg-white shadow-soft md:h-14 md:w-14"
                   >
                     <Icon className="h-5 w-5 text-brand-pumpkin md:h-6 md:w-6" aria-hidden />
                   </div>
-                  <div className="flex-1 rounded-2xl border border-brand-teal-deep/10 bg-white p-6 shadow-sm md:p-8">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="rounded-full bg-brand-teal-deep px-3 py-0.5 text-xs font-bold uppercase tracking-wide text-brand-cream">
-                        Phase {index + 1}
-                      </span>
-                      <h3 className="font-display text-2xl font-bold text-brand-teal-deep">{phase.title}</h3>
-                    </div>
-                    <p className="mt-3 text-brand-teal-deep/70">{phase.intro}</p>
+                  <SurfaceCard className="flex-1 p-6 md:p-8">
+                    <h3 className="font-display text-2xl font-bold text-brand-teal-deep">{phase.title}</h3>
+                    <p className="mt-3 text-brand-teal-deep/75">{phase.intro}</p>
                     <div className="mt-6 grid gap-6 md:grid-cols-2">
                       <ul className="space-y-2">
                         {phase.bullets.map((b) => (
-                          <li key={b} className="flex gap-2 text-brand-teal-deep/80">
-                            <span className="text-brand-green">→</span>
+                          <li key={b} className="flex gap-2 text-brand-teal-deep/85">
+                            <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" aria-hidden />
                             {b}
                           </li>
                         ))}
                       </ul>
-                      <div className="rounded-xl bg-brand-green-soft/50 p-4">
+                      <div className="rounded-xl bg-brand-green-soft/60 p-4">
                         <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Outputs</p>
                         <ul className="mt-3 space-y-2">
                           {phase.outputs.map((o) => (
-                            <li key={o} className="flex gap-2 text-sm text-brand-teal-deep/85">
-                              <span className="text-brand-pumpkin">✓</span>
+                            <li key={o} className="flex gap-2 text-sm text-brand-teal-deep/90">
+                              <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-pumpkin" aria-hidden />
                               {o}
                             </li>
                           ))}
                         </ul>
                       </div>
                     </div>
-                  </div>
+                  </SurfaceCard>
                 </div>
               );
             })}
@@ -348,22 +312,17 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Benefits */}
-      <section className="mx-auto max-w-6xl px-4 py-16 md:py-20">
-        <SectionHeading
-          title="What artists receive"
-          subtitle="Every selected artist gets hands-on support across learning, mentoring and industry access."
-        />
+      {/* Benefits bento */}
+      <section className="mx-auto max-w-6xl px-4 py-16 md:py-24">
+        <SectionEyebrow>Included</SectionEyebrow>
+        <SectionHeading className="mt-3" title="What Artists Receive" subtitle="Every selected artist receives:" />
         <ul className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {artistBenefits.map((item) => (
-            <li
-              key={item}
-              className="flex items-start gap-3 rounded-xl border border-brand-teal-deep/10 bg-white px-4 py-3.5 shadow-sm transition-shadow hover:shadow-md"
-            >
-              <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-pumpkin/15 text-xs text-brand-pumpkin">
-                ✓
-              </span>
-              <span className="text-brand-teal-deep/85">{item}</span>
+            <li key={item}>
+              <SurfaceCard hover className="flex items-start gap-3 px-4 py-3.5">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-pumpkin" aria-hidden />
+                <span className="text-brand-teal-deep/90">{item}</span>
+              </SurfaceCard>
             </li>
           ))}
         </ul>
@@ -372,35 +331,35 @@ export function LandingPage() {
       <SectionDivider />
 
       {/* Industry + Business */}
-      <section className="mx-auto max-w-6xl px-4 py-16 md:py-20">
-        <div className="grid gap-10 lg:grid-cols-2">
-          <div className="rounded-2xl border border-brand-teal-deep/10 bg-white p-6 shadow-sm md:p-8">
-            <SectionHeading title="Industry exposure" />
-            <p className="mt-4 text-brand-teal-deep/70">
-              Throughout the program, artists interact with professionals across the ecosystem:
+      <section className="mx-auto max-w-6xl px-4 py-16 md:py-24">
+        <div className="grid gap-8 lg:grid-cols-2">
+          <SurfaceCard className="p-6 md:p-8">
+            <SectionHeading title="Industry Exposure" />
+            <p className="mt-4 text-brand-teal-deep/75">
+              Throughout the program, artists interact with professionals across the ecosystem including:
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
               {industryExposure.map((role) => (
                 <span
                   key={role}
-                  className="rounded-lg border border-brand-teal-deep/10 bg-brand-cream-muted/50 px-3 py-1.5 text-sm text-brand-teal-deep/80"
+                  className="rounded-lg border border-brand-teal-deep/10 bg-brand-cream-muted/60 px-3 py-1.5 text-sm text-brand-teal-deep/85"
                 >
                   {role}
                 </span>
               ))}
             </div>
-            <p className="mt-6 text-sm text-brand-teal-deep/60">
-              Building a career requires understanding more than music alone.
+            <p className="mt-6 text-sm text-brand-teal-deep/65">
+              Because building a music career requires understanding more than music.
             </p>
-          </div>
-          <div className="rounded-2xl border border-brand-pumpkin/20 bg-gradient-to-br from-brand-pumpkin-soft to-white p-6 shadow-sm md:p-8">
-            <SectionHeading title="Understanding the business" />
-            <p className="mt-4 text-brand-teal-deep/70">Practical understanding of how money flows through music:</p>
+          </SurfaceCard>
+          <SurfaceCard variant="accent" className="p-6 md:p-8">
+            <SectionHeading title="Understanding The Business" />
+            <p className="mt-4 text-brand-teal-deep/75">Artists will gain practical understanding of:</p>
             <div className="mt-6 flex flex-wrap gap-2">
               {businessTopics.map((topic) => (
                 <span
                   key={topic}
-                  className="rounded-lg bg-brand-teal-deep px-3 py-1.5 text-sm font-medium text-brand-cream"
+                  className="rounded-lg bg-brand-peacock px-3 py-1.5 text-sm font-medium text-brand-cream"
                 >
                   {topic}
                 </span>
@@ -409,74 +368,67 @@ export function LandingPage() {
             <p className="mt-6 font-semibold text-brand-teal-deep">
               Every artist should understand how money flows through music.
             </p>
-          </div>
+          </SurfaceCard>
         </div>
       </section>
 
-      {/* Program structure */}
-      <section className="relative overflow-hidden bg-brand-teal-deep py-16 md:py-20">
+      {/* Program structure bento */}
+      <section className="relative overflow-hidden bg-brand-red-oxide bg-gradient-to-br from-brand-red-oxide via-brand-burgundy to-brand-espresso py-16 text-brand-cream md:py-24">
         <BrandPattern variant="hero" className="pointer-events-none absolute inset-0 opacity-30" />
         <div className="relative mx-auto max-w-6xl px-4">
-          <SectionHeading title="Program structure" light align="center" />
+          <SectionEyebrow light>At a glance</SectionEyebrow>
+          <SectionHeading className="mt-3" title="Program Structure" light align="center" />
           <dl className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              { label: 'Duration', value: siteConfig.program.duration },
-              { label: 'Start date', value: siteConfig.program.startDate },
-              { label: 'Format', value: siteConfig.program.format },
-              { label: 'Artists selected', value: String(siteConfig.program.artistsSelected) },
-              { label: 'Scholarship seats', value: siteConfig.program.scholarshipSeats },
-              { label: 'Development grant', value: siteConfig.program.developmentGrant },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="rounded-xl border border-brand-cream/15 bg-brand-teal-mid/30 p-6 text-center backdrop-blur-sm"
-              >
-                <dt className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-cream/55">
-                  {item.label}
-                </dt>
-                <dd className="mt-2 font-display text-2xl font-bold text-brand-cream">{item.value}</dd>
-              </div>
+            {programHighlightRows.map((item) => (
+              <SurfaceCard key={item.label} variant="glass-dark" className="p-6 text-center">
+                <dt className="text-xs font-bold uppercase tracking-[0.15em] text-brand-cream/60">{item.label}</dt>
+                <dd className="mt-2 font-display text-2xl font-bold text-white">{item.value}</dd>
+              </SurfaceCard>
             ))}
           </dl>
         </div>
       </section>
 
       {/* Who + Selection */}
-      <section className="mx-auto max-w-6xl px-4 py-16 md:py-20">
+      <section className="mx-auto max-w-6xl px-4 py-16 md:py-24">
         <div className="grid gap-12 lg:grid-cols-2">
           <div>
-            <SectionHeading title="Who should apply?" subtitle="Designed for artists already creating original music." />
+            <SectionEyebrow>Fit</SectionEyebrow>
+            <SectionHeading
+              className="mt-3"
+              title="Who Should Apply?"
+              subtitle="This program is designed for:"
+            />
             <ul className="mt-8 space-y-3">
               {whoShouldApply.map((item) => (
-                <li
-                  key={item}
-                  className="flex items-center gap-3 rounded-lg border border-brand-teal-deep/10 bg-white px-4 py-3 shadow-sm"
-                >
+                <SurfaceCard key={item} className="flex items-center gap-3 px-4 py-3">
                   <Mic2 className="h-4 w-4 shrink-0 text-brand-green" aria-hidden />
-                  <span className="text-brand-teal-deep/85">{item}</span>
-                </li>
+                  <span className="text-brand-teal-deep/90">{item}</span>
+                </SurfaceCard>
               ))}
             </ul>
           </div>
           <div>
-            <SectionHeading title="Selection process" />
+            <SectionEyebrow>How it works</SectionEyebrow>
+            <SectionHeading className="mt-3" title="Selection Process" />
             <ol className="mt-8 space-y-4">
               {selectionSteps.map((step, index) => (
                 <li key={step} className="flex items-center gap-4">
                   <span
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-pumpkin font-display text-sm font-bold text-white shadow-md shadow-brand-pumpkin/30"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-pumpkin font-display text-sm font-bold text-white shadow-soft"
                   >
                     {index + 1}
                   </span>
-                  <span className="text-brand-teal-deep/85">{step}</span>
+                  <span className="text-brand-teal-deep/90">{step}</span>
                 </li>
               ))}
             </ol>
-            <div className="mt-8 rounded-xl border border-brand-pumpkin/30 bg-brand-pumpkin-soft p-5">
+            <SurfaceCard variant="accent" className="mt-8 p-5">
               <p className="font-display text-xl font-bold text-brand-teal-deep">
-                Only {siteConfig.program.artistsSelected} artists will be selected.
+                Only {siteConfig.program.artistsSelected} artists will be selected. Apply by{' '}
+                {siteConfig.program.registrationDeadline} — program starts {siteConfig.program.startDate}.
               </p>
-            </div>
+            </SurfaceCard>
           </div>
         </div>
       </section>
@@ -484,9 +436,10 @@ export function LandingPage() {
       <SectionDivider />
 
       {/* FAQ */}
-      <section className="mx-auto max-w-6xl px-4 py-16 md:py-20">
-        <SectionHeading title="Frequently asked questions" align="center" />
-        <div className="mt-10 mx-auto max-w-3xl space-y-3">
+      <section className="mx-auto max-w-6xl px-4 py-16 md:py-24">
+        <SectionEyebrow>Support</SectionEyebrow>
+        <SectionHeading className="mt-3" title="Frequently Asked Questions" align="center" />
+        <div className="mx-auto mt-10 max-w-3xl space-y-3">
           {faqs.map((faq) => (
             <FaqItem key={faq.question} question={faq.question} answer={faq.answer} />
           ))}
@@ -495,16 +448,18 @@ export function LandingPage() {
 
       <FinalCtaSection />
 
-      {/* Footer */}
-      <footer className="relative border-t border-brand-teal-deep/10 bg-brand-cream-muted">
+      <footer className="relative border-t border-brand-peacock/10 bg-brand-cream-muted">
         <BrandPattern variant="footer" className="pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-10 text-sm text-brand-teal-deep/60 md:flex-row">
-          <p>© {new Date().getFullYear()} {siteConfig.name}</p>
+        <div className="relative mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-4 py-10 text-sm text-brand-teal-deep/65 md:flex-row">
+          <div className="flex flex-col items-center gap-3 md:items-start">
+            <ArtistPathLogo variant="lockup" className="h-10" />
+            <p>© {new Date().getFullYear()} {siteConfig.name}</p>
+          </div>
           <p>
             A program by{' '}
             <a
               href={siteConfig.tscWebsiteUrl}
-              className="font-medium text-brand-teal-deep underline-offset-4 hover:underline"
+              className="cursor-pointer font-medium text-brand-teal-deep underline-offset-4 transition-colors duration-200 hover:underline"
               target="_blank"
               rel="noopener noreferrer"
             >

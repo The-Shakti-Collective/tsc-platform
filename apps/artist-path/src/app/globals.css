@@ -2,34 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
-/* TSC Brand Book — TSC_BrandBook.pdf */
+/* TSC Brand Book — light theme only */
 @layer base {
   :root {
-    --brand-teal-deep: #083d3a;
-    --brand-green: #126d5e;
-    --brand-teal-mid: #08525f;
-    --brand-cream: #ffecd1;
-    --brand-cream-muted: #f4eee3;
-    --brand-cream-wash: #fcf8f2;
-    --brand-pumpkin: #b74b02;
-    --brand-espresso: #592314;
-    --brand-burgundy: #6d2034;
-    --brand-rust: #88281c;
-    --brand-mustard: #ad6517;
-    --brand-green-soft: #e6f4f1;
-    --brand-pumpkin-soft: #fef7e0;
+    --brand-teal-deep-rgb: 8 61 58;
+    --brand-green-rgb: 18 109 94;
+    --brand-teal-mid-rgb: 8 82 95;
+    --brand-peacock-rgb: 8 82 95;
+    --brand-cream-rgb: 255 236 209;
+    --brand-cream-muted-rgb: 244 238 227;
+    --brand-cream-wash-rgb: 252 248 242;
+    --brand-pumpkin-rgb: 183 75 2;
+    --brand-pumpkin-soft-rgb: 254 247 224;
+    --brand-green-soft-rgb: 230 244 241;
+    --brand-espresso-rgb: 89 35 20;
+    --brand-burgundy-rgb: 109 32 52;
+    --brand-rust-rgb: 136 40 28;
+    --brand-red-oxide-rgb: 136 40 28;
+    --brand-mustard-rgb: 173 101 23;
+    --brand-peacock-soft-rgb: 232 243 245;
+    --brand-red-oxide-soft-rgb: 249 235 233;
 
     --background: 40 33% 98%;
     --foreground: 174 77% 14%;
-    --card: 40 33% 99%;
+    --card: 0 0% 100%;
     --card-foreground: 174 77% 14%;
-    --primary: 25 98% 36%;
+    --primary: 8 66% 32%;
     --primary-foreground: 40 33% 98%;
+    --secondary: 188 84% 20%;
+    --secondary-foreground: 40 33% 98%;
     --muted: 38 25% 94%;
-    --muted-foreground: 174 30% 35%;
-    --accent: 168 40% 92%;
+    --muted-foreground: 174 30% 32%;
+    --accent: 188 40% 92%;
     --accent-foreground: 174 77% 14%;
-    --border: 174 20% 85%;
+    --border: 188 20% 85%;
     --radius: 0.75rem;
   }
 
@@ -42,7 +48,6 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans), system-ui, sans-serif;
   }
 
@@ -56,52 +61,21 @@
     text-wrap: balance;
   }
 
-  .bg-brand-teal-deep {
-    background-color: var(--brand-teal-deep);
+  .shadow-soft {
+    box-shadow: 0 4px 24px -8px rgb(var(--brand-red-oxide-rgb) / 0.15);
   }
-  .bg-brand-green {
-    background-color: var(--brand-green);
+
+  .shadow-soft-lg {
+    box-shadow: 0 12px 40px -12px rgb(var(--brand-red-oxide-rgb) / 0.22);
   }
-  .bg-brand-teal-mid {
-    background-color: var(--brand-teal-mid);
-  }
-  .bg-brand-cream {
-    background-color: var(--brand-cream);
-  }
-  .bg-brand-cream-wash {
-    background-color: var(--brand-cream-wash);
-  }
-  .bg-brand-cream-muted {
-    background-color: var(--brand-cream-muted);
-  }
-  .bg-brand-green-soft {
-    background-color: var(--brand-green-soft);
-  }
-  .bg-brand-pumpkin {
-    background-color: var(--brand-pumpkin);
-  }
-  .bg-brand-pumpkin-soft {
-    background-color: var(--brand-pumpkin-soft);
-  }
-  .text-brand-teal-deep {
-    color: var(--brand-teal-deep);
-  }
-  .text-brand-green {
-    color: var(--brand-green);
-  }
-  .text-brand-cream {
-    color: var(--brand-cream);
-  }
-  .text-brand-pumpkin {
-    color: var(--brand-pumpkin);
-  }
-  .border-brand-teal-deep\/10 {
-    border-color: rgb(8 61 58 / 0.1);
-  }
-  .border-brand-teal-deep\/15 {
-    border-color: rgb(8 61 58 / 0.15);
-  }
-  .border-brand-cream\/20 {
-    border-color: rgb(255 236 209 / 0.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

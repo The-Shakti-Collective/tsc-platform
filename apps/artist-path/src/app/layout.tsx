@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { DM_Sans, Signika } from 'next/font/google';
+import { DM_Sans, Space_Grotesk } from 'next/font/google';
 import { siteConfig } from '@/lib/config';
 import './globals.css';
 
@@ -9,7 +9,7 @@ const sans = DM_Sans({
   display: 'swap',
 });
 
-const display = Signika({
+const display = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-display',
   display: 'swap',
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${sans.variable} ${display.variable}`}>
-      <body className="min-h-screen bg-brand-cream-wash">{children}</body>
+      <body className="min-h-screen bg-brand-cream-wash text-brand-teal-deep antialiased">{children}</body>
     </html>
   );
 }
